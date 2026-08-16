@@ -409,6 +409,16 @@ export interface Database {
         };
         Returns: string | null;
       };
+      update_own_contact_info: {
+        Args: {
+          p_phone?: string | null;
+          p_email?: string | null;
+          p_address_line?: string | null;
+          p_city?: string | null;
+          p_preferred_name?: string | null;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       app_role: AppRole;

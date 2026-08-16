@@ -59,12 +59,15 @@ create policy prayer_requests_insert_own on prayer_requests
     )
   );
 
+-- Nota: is_anonymous solo oculta la identidad del autor frente a otros
+-- (staff no autorizado, etc.); el propio autor siempre puede ver sus
+-- peticiones enviadas, sean anónimas o no.
 create policy prayer_requests_select on prayer_requests
   for select
   using (
     has_any_role(array['intercesor', 'pastor', 'administrador']::app_role[])
     or assigned_to = auth.uid()
-    or (not is_anonymous and submitted_by_user_id = auth.uid())
+    or submitted_by_user_id = auth.uid()
   );
 
 create policy prayer_requests_update on prayer_requests
