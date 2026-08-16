@@ -82,7 +82,27 @@ autorizados pueden invocarla con éxito).
 - `QR_CHECKIN_SECRET` y `RESEND_API_KEY` nunca se exponen a
   `NEXT_PUBLIC_*`.
 
-## 8. Datos de menores
+## 8. Auditoría realizada (2026-08-16)
+
+- **RLS**: confirmado programáticamente que las 24 tablas creadas en
+  `supabase/migrations/` tienen `enable row level security` (coinciden
+  1:1 con las tablas creadas).
+- **Guards de autorización**: confirmado que cada función exportada en
+  cada archivo `"use server"` del área autenticada invoca
+  `requireRole`/`requireAuth` antes de operar.
+- **Inyección de filtros PostgREST**: se encontró y corrigió
+  interpolación sin sanitizar de entradas de usuario (búsqueda del
+  directorio, matching de duplicados de importación) en filtros
+  `.or()`/`.ilike()`. RLS ya acotaba el impacto real — un filtro
+  manipulado no puede saltarse RLS, Postgres la sigue aplicando
+  siempre — pero se corrigió con `src/lib/supabase/filter-utils.ts`
+  para evitar romper consultas o alterar de forma inesperada qué filas
+  ya visibles para el usuario se listan.
+- **No verificado todavía** (requiere una base de datos real): las
+  políticas RLS no se han probado en la práctica contra Postgres — ver
+  `docs/progress.md` para el estado y qué falta.
+
+## 9. Datos de menores
 
 Por ahora el modelo solo guarda `people.is_minor` (derivado de
 `birth_date`) como dato informativo. No se implementa manejo especial de
@@ -92,6 +112,6 @@ pendiente en `docs/assumptions.md` hasta recibir requisitos explícitos
 del usuario (regla explícita: "no implementes información detallada de
 menores sin requisitos explícitos").
 
-## 9. Checklist de revisión de seguridad antes de producción
+## 10. Checklist de revisión de seguridad antes de producción
 
 Ver la sección correspondiente en `docs/deployment.md`.

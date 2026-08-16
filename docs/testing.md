@@ -50,6 +50,12 @@ un error, no un dato parcial.
 
 ## 5. Estado actual
 
-Ver `docs/progress.md` para qué pruebas existen realmente hoy en
-`tests/e2e/` versus qué queda pendiente. Esta sección describe el
-objetivo, no necesariamente el 100% ya implementado.
+Implementado: `tests/e2e/auth.spec.ts` — smoke tests que **no** requieren
+base de datos (renderizado de páginas públicas, protección de rutas).
+Corren con `npm run test:e2e` contra `npm run dev`.
+
+Pendiente (bloqueado por no tener un proyecto Supabase real disponible,
+ver `docs/progress.md`): toda la lista de la sección 3 que requiere
+datos/sesión reales. Cuando haya credenciales, sembrar con
+`npm run seed` (crea cuentas de prueba, una por rol, contraseña
+`Iglesia2026!Dev` — ver `scripts/seed.ts`) y escribir esas pruebas.
