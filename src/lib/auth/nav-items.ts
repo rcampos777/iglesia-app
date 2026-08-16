@@ -43,6 +43,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["seguimiento", "coordinador_ministerio", "pastor", "administrador"],
   },
   { href: "/portal", label: "Mi portal" },
+  { href: "/encuestas", label: "Encuestas" },
   {
     href: "/reportes",
     label: "Reportes",

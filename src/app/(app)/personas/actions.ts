@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole, AuthError } from "@/lib/auth/require-role";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
 import { personSchema } from "@/lib/validations/people";
-import { findDuplicateCandidates, type DuplicateCandidate } from "@/lib/data/people";
+import { findDuplicateCandidates, getPerson, type DuplicateCandidate } from "@/lib/data/people";
+import { sendEmail } from "@/lib/email/send";
 import type { PersonInsert } from "@/types/database";
 
 const PEOPLE_WRITE_ROLES = [
@@ -135,5 +136,42 @@ export async function updatePersonAction(
 
   revalidatePath("/personas");
   revalidatePath(`/personas/${personId}`);
+  return actionOk(undefined);
+}
+
+export async function sendPersonEmailAction(
+  personId: string,
+  formData: FormData,
+): Promise<ActionResult> {
+  const user = await (async () => {
+    try {
+      return await requireRole([...PEOPLE_WRITE_ROLES]);
+    } catch (err) {
+      if (err instanceof AuthError) return null;
+      throw err;
+    }
+  })();
+  if (!user) return actionError("No tienes permiso para enviar emails.");
+
+  const subject = formData.get("subject");
+  const message = formData.get("message");
+  if (typeof subject !== "string" || !subject.trim()) return actionError("Escribe un asunto.");
+  if (typeof message !== "string" || !message.trim()) return actionError("Escribe un mensaje.");
+
+  const person = await getPerson(personId);
+  if (!person?.email) return actionError("Esta persona no tiene email registrado.");
+
+  const result = await sendEmail({
+    to: person.email,
+    subject,
+    html: `<p>${message.replace(/\n/g, "<br>")}</p>`,
+    recipientPersonId: personId,
+    relatedEntityType: "people",
+    relatedEntityId: personId,
+    createdBy: user.userId,
+  });
+
+  if (!result.ok) return actionError(`No se pudo enviar el email: ${result.error}`);
+
   return actionOk(undefined);
 }

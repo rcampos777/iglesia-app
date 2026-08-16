@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { PersonForm } from "@/components/people/person-form";
+import { SendEmailForm } from "@/components/people/send-email-form";
 import { updatePersonAction } from "../actions";
 import { getPerson } from "@/lib/data/people";
 import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { membershipStatusLabels } from "@/lib/labels";
 
 const WRITE_ROLES = ["administrador", "pastor", "coordinador_ministerio", "seguimiento"] as const;
@@ -43,6 +45,17 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
         <p className="text-muted-foreground">
           No tienes permiso para editar este registro. Contacta a un coordinador o administrador.
         </p>
+      )}
+
+      {canWrite && person.email && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Enviar email</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SendEmailForm personId={person.id} />
+          </CardContent>
+        </Card>
       )}
     </div>
   );
