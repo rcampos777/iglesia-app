@@ -27,8 +27,8 @@ export function StatusSelector({
       defaultValue={currentStatus}
       disabled={isPending}
       onValueChange={(value) => {
-        startTransition(() => {
-          updateFollowUpStatusAction(followUpId, value as FollowupStatus);
+        startTransition(async () => {
+          await updateFollowUpStatusAction(followUpId, value as FollowupStatus);
         });
       }}
     >
