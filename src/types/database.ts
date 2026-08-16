@@ -419,6 +419,15 @@ export interface Database {
         };
         Returns: undefined;
       };
+      list_users_with_roles: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          email: string | null;
+          created_at: string;
+          roles: AppRole[];
+        }[];
+      };
     };
     Enums: {
       app_role: AppRole;
