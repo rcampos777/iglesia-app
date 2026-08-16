@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Iglesia App
 
-## Getting Started
+Aplicación web para la administración integral de una iglesia local:
+personas y visitantes, cursos y clases, matrícula/asistencia/progreso,
+importación de datos, seguimiento de visitantes, portal del miembro,
+check-in por QR, peticiones de oración confidenciales, notificaciones y
+encuestas, y reportes.
 
-First, run the development server:
+Interfaz en español. Ver [`CLAUDE.md`](CLAUDE.md) para las reglas e
+instrucciones permanentes del proyecto, y [`docs/`](docs/) para toda la
+documentación (requisitos, arquitectura, modelo de datos, seguridad,
+etc). El estado actual y lo que falta está en
+[`docs/progress.md`](docs/progress.md).
+
+## Stack
+
+Next.js (App Router) · TypeScript estricto · Supabase (Postgres + Auth +
+Row Level Security) · Tailwind CSS + shadcn/ui · Zod · React Hook Form ·
+Playwright · Resend.
+
+## Empezar
 
 ```bash
+npm install
+cp .env.example .env.local   # completa con las credenciales de tu proyecto Supabase
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Base de datos
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx supabase link --project-ref TU_PROJECT_ID
+npx supabase db push          # aplica supabase/migrations/
+npm run seed                  # datos sintéticos de desarrollo (nunca en producción)
+```
 
-## Learn More
+Ver [`docs/deployment.md`](docs/deployment.md) para el detalle completo,
+incluyendo cómo otorgar el primer rol de `administrador`.
 
-To learn more about Next.js, take a look at the following resources:
+## Comandos
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run dev            # servidor de desarrollo
+npm run build          # build de producción
+npm run lint            # ESLint
+npm run typecheck        # TypeScript
+npm run format             # Prettier
+npm run check                # lint + typecheck + format:check
+npm run test:e2e               # Playwright
+npm run seed                     # datos sintéticos
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Documentación
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Documento                                                        | Contenido                                       |
+| ---------------------------------------------------------------- | ----------------------------------------------- |
+| [`CLAUDE.md`](CLAUDE.md)                                         | Reglas e instrucciones permanentes del proyecto |
+| [`docs/product-requirements.md`](docs/product-requirements.md)   | Alcance y prioridades                           |
+| [`docs/architecture.md`](docs/architecture.md)                   | Arquitectura técnica                            |
+| [`docs/data-model.md`](docs/data-model.md)                       | Modelo de datos                                 |
+| [`docs/roles-and-permissions.md`](docs/roles-and-permissions.md) | Matriz de permisos                              |
+| [`docs/security.md`](docs/security.md)                           | RLS, amenazas, mitigaciones                     |
+| [`docs/import-process.md`](docs/import-process.md)               | Importación y deduplicación                     |
+| [`docs/testing.md`](docs/testing.md)                             | Estrategia de pruebas                           |
+| [`docs/deployment.md`](docs/deployment.md)                       | Despliegue                                      |
+| [`docs/assumptions.md`](docs/assumptions.md)                     | Supuestos tomados                               |
+| [`docs/decisions.md`](docs/decisions.md)                         | Registro de decisiones técnicas                 |
+| [`docs/progress.md`](docs/progress.md)                           | Estado actual y próxima tarea                   |
