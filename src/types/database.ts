@@ -68,10 +68,19 @@ export type PersonRow = {
   updated_by: string | null;
 };
 
-export type PersonInsert = Omit<
-  PersonRow,
-  "id" | "is_minor" | "created_at" | "updated_at" | "created_by" | "updated_by"
-> & { id?: string; created_by?: string | null; updated_by?: string | null };
+export type PersonInsert = Pick<PersonRow, "first_name" | "last_name" | "membership_status"> &
+  Partial<
+    Omit<
+      PersonRow,
+      | "id"
+      | "is_minor"
+      | "created_at"
+      | "updated_at"
+      | "first_name"
+      | "last_name"
+      | "membership_status"
+    >
+  >;
 
 export type PersonUpdate = Partial<PersonInsert>;
 
