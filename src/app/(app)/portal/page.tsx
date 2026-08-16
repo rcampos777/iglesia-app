@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getMyEnrollments, getMyPerson, getMyPrayerRequests } from "@/lib/data/portal";
 import { ContactForm } from "./contact-form";
 import { PrayerRequestForm } from "./prayer-request-form";
+import { MyQrCode } from "./my-qr-code";
 
 const prayerStatusLabels: Record<string, string> = {
   nueva: "Nueva",
@@ -30,6 +31,15 @@ export default async function PortalPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Mi portal</h1>
         <p className="text-muted-foreground">Tu información, tus cursos y tus peticiones.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Mi código de check-in</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MyQrCode />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
