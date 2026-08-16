@@ -223,15 +223,13 @@ async function seedEnrollmentsAndAttendance(offeringIds: string[], peopleIds: st
   for (const offeringId of offeringIds) {
     const students = faker.helpers.arrayElements(peopleIds, Math.min(8, peopleIds.length));
 
-    const { error: enrollError } = await supabase
-      .from("enrollments")
-      .insert(
-        students.map((personId) => ({
-          class_offering_id: offeringId,
-          person_id: personId,
-          status: "en_progreso" as const,
-        })),
-      );
+    const { error: enrollError } = await supabase.from("enrollments").insert(
+      students.map((personId) => ({
+        class_offering_id: offeringId,
+        person_id: personId,
+        status: "en_progreso" as const,
+      })),
+    );
     if (enrollError) throw new Error(enrollError.message);
 
     const { data: sessions } = await supabase
@@ -271,15 +269,13 @@ async function seedServicesAndCheckins(peopleIds: string[]) {
   if (error || !service) throw new Error(error?.message ?? "servicio no creado");
 
   const attendees = faker.helpers.arrayElements(peopleIds, Math.min(15, peopleIds.length));
-  await supabase
-    .from("service_checkins")
-    .insert(
-      attendees.map((personId) => ({
-        service_id: service.id,
-        person_id: personId,
-        method: "manual" as const,
-      })),
-    );
+  await supabase.from("service_checkins").insert(
+    attendees.map((personId) => ({
+      service_id: service.id,
+      person_id: personId,
+      method: "manual" as const,
+    })),
+  );
 
   console.log(`  1 servicio con ${attendees.length} check-ins sintéticos.`);
 }
