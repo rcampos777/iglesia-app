@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeSearchTerm } from "@/lib/supabase/filter-utils";
 import type { MembershipStatus, PersonRow } from "@/types/database";
 
 export interface PeopleListFilters {
@@ -31,7 +32,7 @@ export async function listPeople(filters: PeopleListFilters = {}): Promise<Peopl
   }
 
   if (filters.q) {
-    const term = filters.q.trim();
+    const term = sanitizeSearchTerm(filters.q);
     if (term) {
       query = query.or(
         `first_name.ilike.%${term}%,last_name.ilike.%${term}%,email.ilike.%${term}%,phone.ilike.%${term}%`,
@@ -80,8 +81,8 @@ export async function findDuplicateCandidates(input: {
   const supabase = await createClient();
   const conditions: string[] = [];
 
-  if (input.email) conditions.push(`email.eq.${input.email}`);
-  if (input.phone) conditions.push(`phone.eq.${input.phone}`);
+  if (input.email) conditions.push(`email.eq.${sanitizeSearchTerm(input.email)}`);
+  if (input.phone) conditions.push(`phone.eq.${sanitizeSearchTerm(input.phone)}`);
 
   if (conditions.length === 0) return [];
 

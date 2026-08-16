@@ -1,6 +1,7 @@
 import "server-only";
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeSearchTerm } from "@/lib/supabase/filter-utils";
 import {
   importedPersonSchema,
   normalizeHeader,
@@ -56,11 +57,14 @@ async function findMatchCandidates(
   const supabase = await createClient();
   const conditions: string[] = [];
 
-  if (row.email) conditions.push(`email.eq.${row.email}`);
-  if (row.phone) conditions.push(`phone.eq.${row.phone}`);
+  if (row.email) conditions.push(`email.eq.${sanitizeSearchTerm(row.email)}`);
+  if (row.phone) conditions.push(`phone.eq.${sanitizeSearchTerm(row.phone)}`);
   if (row.birth_date) {
+    const firstName = sanitizeSearchTerm(row.first_name);
+    const lastName = sanitizeSearchTerm(row.last_name);
+    const birthDate = sanitizeSearchTerm(row.birth_date);
     conditions.push(
-      `and(first_name.ilike.${row.first_name},last_name.ilike.${row.last_name},birth_date.eq.${row.birth_date})`,
+      `and(first_name.ilike.${firstName},last_name.ilike.${lastName},birth_date.eq.${birthDate})`,
     );
   }
 
