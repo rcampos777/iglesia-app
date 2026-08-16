@@ -71,7 +71,7 @@ export type PersonRow = {
 export type PersonInsert = Omit<
   PersonRow,
   "id" | "is_minor" | "created_at" | "updated_at" | "created_by" | "updated_by"
-> & { id?: string };
+> & { id?: string; created_by?: string | null; updated_by?: string | null };
 
 export type PersonUpdate = Partial<PersonInsert>;
 
