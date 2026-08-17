@@ -40,7 +40,14 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+
+  const next = formData.get("next");
+  // Solo redirigir a rutas internas relativas — nunca a una URL externa.
+  const safeNext =
+    typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
+      ? next
+      : "/dashboard";
+  redirect(safeNext);
 }
 
 export async function registerAction(formData: FormData): Promise<ActionResult> {

@@ -31,6 +31,7 @@ alcance adicional — ver "Fase 16" abajo.
 ## Verificación end-to-end realizada (con datos reales, rol por rol)
 
 Como **administrador** (`admin@iglesia.test`):
+
 - Login real, dashboard con conteos reales (47 personas, 4 visitantes en
   seguimiento, 3 clases activas, 4 peticiones abiertas).
 - Directorio de personas: listado, búsqueda, detalle/edición.
@@ -58,6 +59,7 @@ Como **administrador** (`admin@iglesia.test`):
 
 Como **miembro** (`miembro@iglesia.test`) — **pruebas negativas de
 seguridad**:
+
 - Nav lateral correctamente oculta Personas/Check-in/Visitantes/
   Oración/Importar/Reportes/Administración (solo muestra Panel, Cursos
   y clases, Mi portal, Encuestas).
@@ -76,24 +78,24 @@ anteriores.
 
 ## Fases (orden de prioridad del producto)
 
-| #   | Fase                               | Estado                                                          |
-| --- | ----------------------------------- | ---------------------------------------------------------------- |
-| 1   | Base del proyecto y documentación   | ✅ Hecho                                                          |
-| 2   | Modelo de datos                     | ✅ 16 migraciones aplicadas y verificadas contra Postgres real   |
-| 3   | Autenticación                       | ✅ Verificado end-to-end (login/logout real, multi-rol)          |
-| 4   | Roles y permisos                    | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin)  |
-| 5   | Directorio central de personas      | ✅ Verificado end-to-end                                         |
-| 6   | Cursos y clases                     | ✅ Verificado end-to-end                                         |
-| 7   | Matrícula, asistencia y progreso    | ✅ Verificado end-to-end                                         |
-| 8   | Importación y deduplicación         | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)      |
-| 9   | Visitantes y seguimiento            | ✅ Verificado end-to-end                                         |
-| 10  | Portal del miembro                  | ✅ Verificado end-to-end                                         |
-| 11  | Check-in QR                         | ✅ Check-in manual verificado; escaneo QR verificado por código  |
-| 12  | Peticiones de oración                | ✅ Verificado end-to-end, incluida auditoría de acceso          |
-| 13  | Emails y encuestas                  | 🔶 Encuestas verificadas; emails sin probar (falta Resend real)  |
-| 14  | Paneles y reportes                  | ✅ Verificado end-to-end                                         |
-| 15  | Revisión de seguridad               | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo    |
-| 16  | Preparación para producción         | 🔶 Ver checklist en `docs/deployment.md` §5                      |
+| #   | Fase                              | Estado                                                          |
+| --- | --------------------------------- | --------------------------------------------------------------- |
+| 1   | Base del proyecto y documentación | ✅ Hecho                                                        |
+| 2   | Modelo de datos                   | ✅ 16 migraciones aplicadas y verificadas contra Postgres real  |
+| 3   | Autenticación                     | ✅ Verificado end-to-end (login/logout real, multi-rol)         |
+| 4   | Roles y permisos                  | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin) |
+| 5   | Directorio central de personas    | ✅ Verificado end-to-end                                        |
+| 6   | Cursos y clases                   | ✅ Verificado end-to-end                                        |
+| 7   | Matrícula, asistencia y progreso  | ✅ Verificado end-to-end                                        |
+| 8   | Importación y deduplicación       | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)     |
+| 9   | Visitantes y seguimiento          | ✅ Verificado end-to-end                                        |
+| 10  | Portal del miembro                | ✅ Verificado end-to-end                                        |
+| 11  | Check-in QR                       | ✅ Check-in manual verificado; escaneo QR verificado por código |
+| 12  | Peticiones de oración             | ✅ Verificado end-to-end, incluida auditoría de acceso          |
+| 13  | Emails y encuestas                | 🔶 Encuestas verificadas; emails sin probar (falta Resend real) |
+| 14  | Paneles y reportes                | ✅ Verificado end-to-end                                        |
+| 15  | Revisión de seguridad             | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo   |
+| 16  | Preparación para producción       | 🔶 Ver checklist en `docs/deployment.md` §5                     |
 
 ## Fase 16 — qué falta para producción
 
@@ -129,16 +131,66 @@ en personas, "Encuesta de prueba" en encuestas) — inofensivos y
 claramente sintéticos, se pueden borrar sin problema si se quiere un
 dataset más limpio.
 
+## Despliegue
+
+- **Repositorio**: [github.com/rcampos777/iglesia-app](https://github.com/rcampos777/iglesia-app)
+  (rama `main`, push directo del usuario vía terminal con un PAT —
+  las integraciones de GitHub App vía MCP para Claude y para Vercel
+  tenían permisos insuficientes para escribir/crear proyecto por API;
+  se resolvió manualmente).
+- **App en vivo (vista previa, no "producción" formal)**:
+  https://iglesia-app-teal.vercel.app — conectada a GitHub, cada
+  `git push` a `main` redespliega automáticamente. Sigue usando el
+  proyecto Supabase de **desarrollo** (`jlmabwnbtwjrtqaxfafx`, datos
+  sintéticos), no uno de producción separado.
+- `RESEND_API_KEY`/`RESEND_FROM_EMAIL` son placeholders en Vercel — los
+  emails no funcionan todavía ahí.
+- Verificado en el dominio público real: login, dashboard con datos
+  reales, y el flujo nuevo de auto check-in (ver bitácora de abajo) — 0
+  errores de consola.
+
 ## Próxima tarea
 
-Con el MVP funcionando de punta a punta, las prioridades son: (a)
-credenciales de Resend para probar emails reales, (b) ampliar
-Playwright con el proyecto de desarrollo ya disponible, (c) parser de
-Excel real para importación, (d) cuando el usuario lo autorice
-explícitamente, preparar el proyecto Supabase de producción separado
-del de desarrollo.
+Con el MVP funcionando de punta a punta y desplegado, las prioridades
+son: (a) credenciales de Resend reales, (b) ampliar Playwright, (c)
+parser de Excel real para importación, (d) cuando el usuario lo
+autorice explícitamente, preparar un proyecto Supabase de producción
+separado del de desarrollo y publicar ahí formalmente.
 
 ## Bitácora
+
+### 2026-08-17 — Despliegue a Vercel + auto check-in con QR fijo
+
+- App desplegada en Vercel (ver "Despliegue" arriba), conectada a
+  GitHub para CI/CD automático.
+- **Nuevo flujo de check-in** (a pedido del usuario, más simple que el
+  QR-por-persona original): la iglesia imprime **un solo QR fijo**
+  (apunta a `/check-in/publico`, nunca cambia) para pegar en la
+  entrada. Cada persona lo escanea con su propio celular, inicia
+  sesión si hace falta, y confirma su propia asistencia a cualquier
+  servicio abierto (`is_checkin_open`). Staff controla qué servicio
+  está "abierto" con un switch en `/check-in`. El flujo original
+  (QR personal + operador escaneando) se mantiene como alternativa
+  para niños/visitantes sin cuenta — ver `docs/architecture.md` §5 y
+  `docs/decisions.md`.
+- Migración `0017_self_checkin.sql`: política RLS
+  `service_checkins_insert_self` (persona puede insertar su propio
+  check-in solo si el servicio está abierto) — aplicada contra la base
+  real.
+- Se agregó soporte de `?next=` en login (con validación de que sea
+  una ruta interna, nunca una URL externa) para que, al escanear el QR
+  sin sesión iniciada, tras loguearse se regrese automáticamente a la
+  página de check-in en vez de al dashboard.
+- **Verificado en vivo (navegador real, ambos roles)**: como
+  `coordinador@iglesia.test`, el servicio "Culto dominical" aparece
+  abierto y el QR fijo se genera correctamente; como
+  `miembro@iglesia.test`, se confirmó asistencia exitosamente, se
+  verificó que persiste tras recargar (confirma escritura real en DB,
+  no solo estado optimista de UI), y se verificó el flujo completo de
+  `/check-in/publico` sin sesión → redirect a `/login?next=...` →
+  login → regreso automático a `/check-in/publico`. 0 errores de
+  consola en todo el flujo.
+- `npm run typecheck`, `lint`, `format`, `build` limpios (26 rutas).
 
 ### 2026-08-16 — sesión de construcción del MVP completo
 
@@ -160,29 +212,29 @@ sesión continua, siguiendo el orden de prioridad del producto:
    otorgar/revocar roles (auditado).
 5. **Directorio de personas**: CRUD con detección de posibles
    duplicados (nunca por nombre) que exige confirmación humana.
-6–7. **Cursos, clases, matrícula, asistencia**: categorías
+   6–7. **Cursos, clases, matrícula, asistencia**: categorías
    configurables, clases/cohortes, sesiones, matrícula, toma de
    asistencia, % de progreso.
-8. **Importación**: CSV → staging → revisión humana → promoción
+6. **Importación**: CSV → staging → revisión humana → promoción
    (aprobar nuevo / fusionar / rechazar), sin fusión automática, sin
    notificaciones automáticas. Captura manual reutiliza el mismo
    pipeline.
-9. **Visitantes y seguimiento**: seguimiento con bitácora de contactos.
-10. **Portal del miembro**: contacto propio (vía RPC restringida a
-    columnas específicas), cursos propios con progreso, peticiones de
-    oración propias, código QR de check-in.
-11. **Check-in QR**: token HMAC firmado de corta vigencia (nunca el
-    person_id en crudo), escaneo compatible con lectores QR/barras
-    (input de texto), check-in manual.
-12. **Peticiones de oración**: bandeja restringida a
+7. **Visitantes y seguimiento**: seguimiento con bitácora de contactos.
+8. **Portal del miembro**: contacto propio (vía RPC restringida a
+   columnas específicas), cursos propios con progreso, peticiones de
+   oración propias, código QR de check-in.
+9. **Check-in QR**: token HMAC firmado de corta vigencia (nunca el
+   person_id en crudo), escaneo compatible con lectores QR/barras
+   (input de texto), check-in manual.
+10. **Peticiones de oración**: bandeja restringida a
     intercesor/pastor/administrador, contenido solo visible en detalle
     (auditado), listado sin contenido.
-13. **Emails y encuestas**: envío vía Resend con registro en
+11. **Emails y encuestas**: envío vía Resend con registro en
     `notification_log`, encuestas con preguntas de texto/opción única.
-14. **Reportes**: paneles agregados por rol (personas, matrícula,
+12. **Reportes**: paneles agregados por rol (personas, matrícula,
     asistencia, seguimiento, oración) con `StatBarList` (barras de un
     solo color, sin librería externa).
-15. **Seguridad**: auditoría de RLS (24/24 tablas), auditoría de
+13. **Seguridad**: auditoría de RLS (24/24 tablas), auditoría de
     guards de autorización (1:1 en cada Server Action), sanitización de
     filtros PostgREST, fix de accesibilidad en `CardTitle`.
 

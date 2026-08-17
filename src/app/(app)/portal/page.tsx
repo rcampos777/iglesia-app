@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getMyEnrollments, getMyPerson, getMyPrayerRequests } from "@/lib/data/portal";
 import { ContactForm } from "./contact-form";
@@ -34,10 +36,18 @@ export default async function PortalPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Mi código de check-in</CardTitle>
+          <CardTitle>Check-in</CardTitle>
         </CardHeader>
-        <CardContent>
-          <MyQrCode />
+        <CardContent className="space-y-4">
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/check-in/publico">Confirmar mi asistencia a un servicio abierto</Link>
+          </Button>
+          <div className="border-t pt-4">
+            <p className="text-muted-foreground mb-2 text-sm">
+              O muestra este código para que alguien del equipo te registre:
+            </p>
+            <MyQrCode />
+          </div>
         </CardContent>
       </Card>
 

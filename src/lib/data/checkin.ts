@@ -20,6 +20,29 @@ export async function getService(id: string): Promise<ServiceRow | null> {
   return data;
 }
 
+/** Servicios abiertos para auto check-in en este momento (staff los abre/cierra). */
+export async function listOpenServices(): Promise<ServiceRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("services")
+    .select("*")
+    .eq("is_checkin_open", true)
+    .order("service_date", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function hasCheckedIn(serviceId: string, personId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("service_checkins")
+    .select("id")
+    .eq("service_id", serviceId)
+    .eq("person_id", personId)
+    .maybeSingle();
+  return !!data;
+}
+
 export interface CheckinWithPerson {
   id: string;
   checkedInAt: string;

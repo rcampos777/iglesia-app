@@ -40,11 +40,11 @@ supabase db push --db-url "postgresql://postgres.<ref>:<password>@aws-0-<region>
 - Después de aplicar, verificar en el dashboard de Supabase que **todas**
   las tablas nuevas tengan RLS habilitado (checklist en
   `docs/security.md`).
-- Sembrar datos: en producción **nunca** se corre `scripts/seed.ts**
-(datos sintéticos). Producción arranca vacía; los primeros
-`administrador` se otorgan manualmente (ver sección 4) — o, si se usó
-`npm run seed` en un proyecto de desarrollo, el usuario `admin@iglesia.test`
-ya queda con rol `administrador` automáticamente.
+- Sembrar datos: en producción **nunca** se corre `scripts/seed.ts`
+  (datos sintéticos). Producción arranca vacía; el primer
+  `administrador` se otorga manualmente (ver sección 4) — o, si se usó
+  `npm run seed` en un proyecto de desarrollo, el usuario
+  `admin@iglesia.test` ya queda con rol `administrador` automáticamente.
 
 ## 3. Aplicación (Vercel)
 

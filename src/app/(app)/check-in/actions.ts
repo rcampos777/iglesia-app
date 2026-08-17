@@ -127,3 +127,49 @@ export async function getMyCheckinTokenAction(): Promise<ActionResult<{ token: s
 
   return actionOk({ token: createCheckinToken(user.personId) });
 }
+
+/**
+ * Auto check-in: la propia persona confirma su asistencia (QR fijo en la
+ * entrada, sin token). RLS (service_checkins_insert_self) exige que
+ * person_id = current_person_id() y que el servicio esté abierto para
+ * check-in — la autorización real vive en la base de datos, esto es la
+ * primera barrera.
+ */
+export async function selfCheckinAction(serviceId: string): Promise<ActionResult> {
+  const user = await (async () => {
+    try {
+      return await requireAuth();
+    } catch (err) {
+      if (err instanceof AuthError) return null;
+      throw err;
+    }
+  })();
+
+  if (!user?.personId) return actionError("No tienes un perfil de persona asociado.");
+
+  return insertCheckin(serviceId, user.personId, "qr");
+}
+
+export async function toggleCheckinOpenAction(
+  serviceId: string,
+  isOpen: boolean,
+): Promise<ActionResult> {
+  try {
+    await requireRole([...CHECKIN_ROLES]);
+  } catch (err) {
+    if (err instanceof AuthError) return actionError(err.message);
+    throw err;
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("services")
+    .update({ is_checkin_open: isOpen })
+    .eq("id", serviceId);
+
+  if (error) return actionError(`No se pudo actualizar: ${error.message}`);
+
+  revalidatePath("/check-in");
+  revalidatePath(`/check-in/${serviceId}`);
+  return actionOk(undefined);
+}

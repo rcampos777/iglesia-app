@@ -2,6 +2,32 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-08-17 — Check-in: QR fijo de entrada (auto check-in) además del QR personal
+
+**Decisión**: agregar un segundo flujo de check-in, más simple, como
+mecanismo principal: un único QR estático impreso en la entrada
+(`/check-in/publico`) que cualquier persona escanea con su propio
+celular para confirmar su propia asistencia. El flujo original (QR
+personal por persona, escaneado por un operador) se conserva como
+alternativa para casos donde la persona no puede/no debe autoservirse
+(niños, visitantes sin cuenta).
+
+**Contexto**: pedido explícito del usuario tras ver el flujo original
+en producción — en la práctica, para un culto dominical normal, pedirle
+a un operador que escanee el QR de cada persona es más lento y requiere
+más personal que dejar que cada quien escanee un QR fijo y se confirme
+a sí mismo.
+
+**Consecuencias**: nueva política RLS (`service_checkins_insert_self`,
+migración `0017`) que permite a cualquier persona insertar su propio
+`service_checkin` — pero solo el suyo (`person_id = current_person_id()`)
+y solo si el servicio tiene `is_checkin_open = true`. Staff gana un
+control adicional (switch abrir/cerrar check-in por servicio) que antes
+no se exponía en la UI aunque la columna ya existía. Se agregó soporte
+de `?next=` en el login para regresar al usuario a la página que
+intentaba ver antes de autenticarse (necesario para que escanear el QR
+sin sesión activa no lo deje varado en el dashboard).
+
 ## 2026-08-16 — Stack base
 
 **Decisión**: Next.js App Router + TypeScript estricto + Supabase

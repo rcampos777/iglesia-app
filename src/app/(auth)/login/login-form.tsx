@@ -12,7 +12,7 @@ import type { ActionResult } from "@/lib/action-result";
 
 const initialState: ActionResult = { ok: true, data: undefined };
 
-export function LoginForm({ resetOk }: { resetOk: boolean }) {
+export function LoginForm({ resetOk, next }: { resetOk: boolean; next?: string }) {
   const [state, formAction, isPending] = useActionState(
     async (_prev: ActionResult, formData: FormData) => loginAction(formData),
     initialState,
@@ -35,6 +35,7 @@ export function LoginForm({ resetOk }: { resetOk: boolean }) {
           </Alert>
         )}
         <form action={formAction} className="space-y-4">
+          {next && <input type="hidden" name="next" value={next} />}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" type="email" autoComplete="email" required />

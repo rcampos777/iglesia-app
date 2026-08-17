@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Plus, QrCode } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { listServices } from "@/lib/data/checkin";
 import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
 import { NewServiceForm } from "./new-service-form";
+import { CheckinToggle } from "./checkin-toggle";
+import { EntranceQr } from "./entrance-qr";
 
 const CHECKIN_ROLES = ["administrador", "pastor", "coordinador_ministerio", "seguimiento"] as const;
 
@@ -27,8 +29,23 @@ export default async function CheckinPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Check-in de servicios</h1>
-        <p className="text-muted-foreground">Escanea el QR del miembro o busca manualmente.</p>
+        <p className="text-muted-foreground">
+          La gente escanea el QR fijo de la entrada y confirma su propia asistencia. También puedes
+          escanear el QR personal de alguien o buscarlo manualmente.
+        </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <QrCode className="size-5" />
+            QR fijo para la entrada
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EntranceQr />
+        </CardContent>
+      </Card>
 
       <details className="rounded-md border p-4">
         <summary className="cursor-pointer font-medium">
@@ -46,20 +63,21 @@ export default async function CheckinPage() {
           <p className="text-muted-foreground">No hay servicios creados.</p>
         )}
         {services.map((s) => (
-          <Link key={s.id} href={`/check-in/${s.id}`}>
-            <Card className="transition-shadow hover:shadow-md">
-              <CardContent className="flex items-center justify-between py-4">
-                <div>
-                  <p className="font-medium">{s.name}</p>
-                  <p className="text-muted-foreground text-sm">
-                    {new Date(s.service_date + "T00:00:00").toLocaleDateString("es")}
-                    {s.start_time ? ` · ${s.start_time}` : ""}
-                  </p>
-                </div>
+          <Card key={s.id} className="transition-shadow hover:shadow-md">
+            <CardContent className="flex items-center justify-between gap-3 py-4">
+              <Link href={`/check-in/${s.id}`} className="min-w-0 flex-1">
+                <p className="font-medium">{s.name}</p>
+                <p className="text-muted-foreground text-sm">
+                  {new Date(s.service_date + "T00:00:00").toLocaleDateString("es")}
+                  {s.start_time ? ` · ${s.start_time}` : ""}
+                </p>
+              </Link>
+              <div className="flex shrink-0 items-center gap-3">
                 <Badge variant="outline">{typeLabels[s.service_type]}</Badge>
-              </CardContent>
-            </Card>
-          </Link>
+                <CheckinToggle serviceId={s.id} isOpen={s.is_checkin_open} />
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
