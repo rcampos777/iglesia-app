@@ -51,7 +51,6 @@ export type PersonRow = {
   last_name: string;
   preferred_name: string | null;
   birth_date: string | null;
-  is_minor: boolean;
   gender: GenderType | null;
   email: string | null;
   phone: string | null;
@@ -72,13 +71,7 @@ export type PersonInsert = Pick<PersonRow, "first_name" | "last_name" | "members
   Partial<
     Omit<
       PersonRow,
-      | "id"
-      | "is_minor"
-      | "created_at"
-      | "updated_at"
-      | "first_name"
-      | "last_name"
-      | "membership_status"
+      "id" | "created_at" | "updated_at" | "first_name" | "last_name" | "membership_status"
     >
   >;
 

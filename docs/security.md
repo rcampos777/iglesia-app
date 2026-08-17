@@ -104,8 +104,8 @@ autorizados pueden invocarla con éxito).
 
 ## 9. Datos de menores
 
-Por ahora el modelo solo guarda `people.is_minor` (derivado de
-`birth_date`) como dato informativo. No se implementa manejo especial de
+Por ahora el modelo solo ofrece la función `is_minor(birth_date)`
+(calculada al vuelo) como dato informativo. No se implementa manejo especial de
 consentimiento parental, contactos de emergencia, ni restricciones
 adicionales de visualización de menores — se documenta como decisión
 pendiente en `docs/assumptions.md` hasta recibir requisitos explícitos

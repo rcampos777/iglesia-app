@@ -20,9 +20,6 @@ create table people (
   preferred_name text,
 
   birth_date date,
-  is_minor boolean generated always as (
-    birth_date is not null and birth_date > (current_date - interval '18 years')
-  ) stored,
   gender gender_type,
 
   email citext,
@@ -46,9 +43,21 @@ create table people (
 comment on table people is
   'Registro único por persona (miembro, visitante o de otra índole). '
   'No usar nombres como identificador: usar people.id (uuid).';
-comment on column people.is_minor is
-  'Derivado de birth_date. Informativo solamente; no se recopilan datos '
-  'sensibles adicionales de menores en este MVP (ver docs/assumptions.md).';
+
+-- is_minor NO se guarda como columna: "menor de edad" es una función del
+-- tiempo (current_date), no un hecho fijo de la fila, así que una columna
+-- generada quedaría desactualizada entre updates (y Postgres además
+-- rechaza current_date en expresiones generadas por no ser inmutable).
+-- Se calcula al vuelo con esta función, informativa solamente — no se
+-- recopilan datos sensibles adicionales de menores en este MVP (ver
+-- docs/assumptions.md).
+create or replace function is_minor(p_birth_date date)
+returns boolean
+language sql
+stable
+as $$
+  select p_birth_date is not null and p_birth_date > (current_date - interval '18 years');
+$$;
 
 create index people_last_name_idx on people (last_name, first_name);
 create index people_membership_status_idx on people (membership_status);
@@ -63,16 +72,11 @@ alter table people enable row level security;
 
 -- Lectura: cualquier rol de staff puede leer todas las personas.
 -- Un usuario sin rol de staff (solo 'miembro') solo puede leer su propio
--- registro, vía la vinculación profiles.person_id.
+-- registro — ver política `people_select_self` en 0004_profiles.sql
+-- (depende de la tabla `profiles`, creada después que `people`).
 create policy people_select_staff on people
   for select
   using (is_staff());
-
-create policy people_select_self on people
-  for select
-  using (
-    id in (select person_id from profiles where profiles.id = auth.uid())
-  );
 
 -- Escritura: roles con responsabilidad sobre el directorio.
 create policy people_insert_staff on people

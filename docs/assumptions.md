@@ -11,8 +11,8 @@ iglesia.
 2. **Idioma**: interfaz 100% en español. No se planeó internacionalización
    (i18n) en el MVP; si se necesita inglés u otro idioma, se puede
    introducir `next-intl` más adelante sin rediseñar el modelo de datos.
-3. **Menores de edad**: solo se guarda `people.is_minor` (derivado de
-   fecha de nacimiento) como dato informativo. No se implementó
+3. **Menores de edad**: solo existe la función `is_minor(birth_date)`
+   (calculada al vuelo, no guardada) como dato informativo. No se implementó
    consentimiento parental, contacto de emergencia obligatorio, ni
    restricciones especiales de visualización — pendiente de requisitos
    explícitos (regla del usuario: no implementar esto sin pedirlo).

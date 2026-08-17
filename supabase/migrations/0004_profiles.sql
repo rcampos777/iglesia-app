@@ -42,6 +42,12 @@ as $$
   select person_id from profiles where id = auth.uid();
 $$;
 
+-- Completa la política de lectura de `people` (ver 0003_people.sql):
+-- un usuario sin rol de staff solo puede leer su propio registro.
+create policy people_select_self on people
+  for select
+  using (id = current_person_id());
+
 -- Al crearse un usuario en auth.users, se crea automáticamente su
 -- registro en people (si no fue creado manualmente antes, p. ej. al
 -- invitar a un miembro ya existente) y su profile.

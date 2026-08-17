@@ -40,9 +40,11 @@ erDiagram
 ### `people`
 
 Registro único por persona. **No** usa nombre como identificador — `id`
-(uuid) es la clave. `is_minor` es una columna generada a partir de
-`birth_date`. `membership_status`: `visitante | asistente_habitual |
-miembro | inactivo`.
+(uuid) es la clave. `membership_status`: `visitante | asistente_habitual
+| miembro | inactivo`. Si es menor de edad se calcula al vuelo con la
+función `is_minor(birth_date)` — no se guarda como columna, porque
+"menor de edad" es una función del tiempo, no un hecho fijo de la fila
+(y Postgres no permite `current_date` en columnas generadas).
 
 ### `profiles`
 
