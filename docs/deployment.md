@@ -23,6 +23,18 @@ supabase link --project-ref TU_PROJECT_ID
 supabase db push
 ```
 
+**Nota — conexión directa vs. pooler**: los proyectos nuevos de Supabase
+solo exponen el host directo (`db.<ref>.supabase.co`) por **IPv6**. Si
+`supabase db push` falla con un error de resolución/conexión (típico en
+entornos sin salida IPv6 completa a puertos TCP no estándar, incluyendo
+este entorno de agente), usar el **connection string del pooler**
+(Project Settings → Database → Connection string → "Session pooler"),
+que sí tiene IPv4:
+
+```bash
+supabase db push --db-url "postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres"
+```
+
 - Las migraciones son **aditivas y ordenadas** (`0001_...` en adelante).
   No editar una migración ya aplicada en producción: crear una nueva.
 - Después de aplicar, verificar en el dashboard de Supabase que **todas**
@@ -30,7 +42,9 @@ supabase db push
   `docs/security.md`).
 - Sembrar datos: en producción **nunca** se corre `scripts/seed.ts**
 (datos sintéticos). Producción arranca vacía; los primeros
-`administrador` se otorgan manualmente (ver sección 4).
+`administrador` se otorgan manualmente (ver sección 4) — o, si se usó
+`npm run seed` en un proyecto de desarrollo, el usuario `admin@iglesia.test`
+ya queda con rol `administrador` automáticamente.
 
 ## 3. Aplicación (Vercel)
 
@@ -71,9 +85,10 @@ auto-elevación de roles). Pasos:
 
 ## 6. Estado real de este proyecto
 
-Ver `docs/progress.md` — a la fecha de esta iteración, el entorno de
-ejecución no tiene Docker ni Supabase CLI disponibles para levantar una
-base local, por lo que el despliegue real (local o cloud) está pendiente
-de que el usuario provea credenciales de un proyecto Supabase (y
-opcionalmente instale Docker para desarrollo local). El código y las
-migraciones están listos para ese momento.
+Ver `docs/progress.md`. Las 16 migraciones se aplicaron y verificaron
+exitosamente contra un proyecto Supabase Cloud de **desarrollo**
+(`jlmabwnbtwjrtqaxfafx`), incluyendo `npm run seed` y verificación
+manual en navegador con múltiples roles (login real, RLS positivo y
+negativo, mutaciones vía Server Actions). Sigue pendiente: repetir este
+proceso contra el proyecto de **producción** cuando exista, y todo lo
+listado en el checklist de la sección 5.

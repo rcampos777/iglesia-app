@@ -69,3 +69,62 @@ bloqueos de infraestructura local, sino documentar y continuar.
 contra una base Postgres real antes de considerar el módulo de datos
 "terminado" en el sentido estricto de `CLAUDE.md`. Ver
 `docs/progress.md` para el plan de verificación pendiente.
+
+**Actualización 2026-08-16 (misma fecha, más tarde)**: el usuario
+proveyó credenciales de un proyecto Supabase Cloud de desarrollo. Se
+desbloqueó por completo — ver la siguiente entrada.
+
+## 2026-08-16 — Conexión directa a Postgres bloqueada en este entorno; se usa el pooler
+
+**Decisión**: para aplicar migraciones (`supabase db push`) desde este
+entorno de agente, usar el **connection string del pooler de Supabase**
+(`aws-0-<region>.pooler.supabase.com:5432`, usuario
+`postgres.<project-ref>`) en vez del host directo
+(`db.<project-ref>.supabase.co:5432`).
+
+**Contexto**: los proyectos nuevos de Supabase solo exponen el host
+directo por IPv6. Este entorno de agente resuelve el registro AAAA
+correctamente con `dig`/`host`, pero la conexión TCP real al puerto 5432
+falla (`getaddrinfo ENOTFOUND` / conexión rechazada) — aparentemente el
+sandbox no permite conexiones TCP salientes a hosts IPv6-only en puertos
+no estándar, aunque sí permite HTTPS (443) normalmente. El pooler expone
+una dirección IPv4, que sí funcionó (confirmado con `nc -zv`).
+
+**Consecuencias**: documentado en `docs/deployment.md` §2 para que
+cualquier sesión futura (de este agente o de un desarrollador en un
+entorno con la misma limitación) no pierda tiempo con el mismo
+diagnóstico. No afecta el runtime de la aplicación en sí (Next.js habla
+con Supabase por HTTPS vía `@supabase/supabase-js`/`@supabase/ssr`, no
+por el protocolo Postgres directo), ni a Vercel en producción (tiene
+salida de red normal).
+
+## 2026-08-16 — Bugs reales encontrados al aplicar las migraciones contra Postgres real
+
+**Decisión**: se corrigieron dos bugs que solo se manifestaron al
+ejecutar las migraciones contra una base de datos real (no detectables
+por `lint`/`typecheck`, ya que son errores de SQL/Postgres):
+
+1. `people.is_minor` como columna `generated always as (...) stored`
+   usaba `current_date`, que Postgres rechaza en expresiones generadas
+   por no ser inmutable (`SQLSTATE 42P17`). Además el diseño era
+   incorrecto de fondo: "menor de edad" cambia con el tiempo, así que
+   una columna generada/almacenada quedaría desactualizada entre
+   updates. Se reemplazó por la función `is_minor(birth_date)`,
+   calculada al vuelo (`stable`, no generada).
+2. La política RLS `people_select_self` (en `0003_people.sql`)
+   referenciaba la tabla `profiles`, creada recién en la migración
+   siguiente (`0004_profiles.sql`) — error de orden de dependencias
+   (`relation "profiles" does not exist`). Se movió la política a
+   `0004_profiles.sql`, usando `current_person_id()` en vez del
+   subquery inline.
+
+**Contexto**: validan exactamente la preocupación registrada en la
+decisión anterior ("Sin Docker/Supabase CLI...") — el código pasaba
+`lint`/`typecheck`/`build` pero tenía bugs reales de SQL solo visibles
+al ejecutarlo contra Postgres.
+
+**Consecuencias**: las 16 migraciones se aplicaron exitosamente después
+de estas correcciones, y se verificó manualmente en navegador con datos
+reales (`npm run seed` + login con cada rol de prueba + pruebas
+positivas y negativas de RLS) sin errores. Ver `docs/progress.md` para
+el detalle completo de la verificación.

@@ -98,9 +98,17 @@ autorizados pueden invocarla con éxito).
   siempre — pero se corrigió con `src/lib/supabase/filter-utils.ts`
   para evitar romper consultas o alterar de forma inesperada qué filas
   ya visibles para el usuario se listan.
-- **No verificado todavía** (requiere una base de datos real): las
-  políticas RLS no se han probado en la práctica contra Postgres — ver
-  `docs/progress.md` para el estado y qué falta.
+- **Verificado en la práctica contra Postgres real** (misma sesión, más
+  tarde, con credenciales de un proyecto Supabase de desarrollo): login
+  real con cada rol de prueba; como `miembro`, navegación **directa** a
+  `/personas` (bypaseando el nav oculto) quedó correctamente acotada por
+  RLS a un solo registro (el propio); `/admin` y `/oracion` redirigieron
+  correctamente. Otorgar/revocar un rol vía `/admin` quedó auditado
+  correctamente en `audit_log`. Ver `docs/progress.md` para el detalle
+  completo de la verificación end-to-end.
+- **Pendiente**: pruebas de carga, límites de tasa, y el checklist de
+  producción completo (`docs/deployment.md` §5) contra un proyecto
+  Supabase separado para producción.
 
 ## 9. Datos de menores
 
