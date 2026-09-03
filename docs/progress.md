@@ -158,11 +158,50 @@ dataset más limpio.
 
 ## Próxima tarea
 
-Con el MVP funcionando de punta a punta y desplegado, las prioridades
-son: (a) credenciales de Resend reales, (b) ampliar Playwright, (c)
-parser de Excel real para importación, (d) cuando el usuario lo
-autorice explícitamente, preparar un proyecto Supabase de producción
-separado del de desarrollo y publicar ahí formalmente.
+Estado al cierre del 2026-09-02: todo lo construido está aplicado contra
+el Supabase de desarrollo y desplegado en
+https://iglesia-app-teal.vercel.app. Repositorio limpio, sin cambios
+pendientes de publicar.
+
+**Bloqueado esperando al usuario:**
+
+1. **Archivo del logo real.** El logo actual es un monograma "CA"
+   provisional construido en código. Hace falta el SVG (o PNG ≥1000 px
+   con fondo transparente), una versión clara para el menú en carbón, y
+   un icono cuadrado. Pasos exactos en `docs/design.md` §4.
+2. **La lista de requisitos de la reunión con la Pastora Didi.** Nunca
+   llegó. Todo lo construido salió del objetivo principal y de las
+   correcciones del usuario sobre la marcha. El usuario confirmó que la
+   trayectoria de la persona era parte de esa lista, así que
+   probablemente haya más puntos sin cubrir.
+3. **Decisión sobre un rol `apostol`.** El usuario mencionó que los
+   pastores de la iglesia como tal son apóstoles y son el rango más
+   alto. Hoy la cima es `administrador`, que es un rol _técnico_ (gestiona
+   el sistema), no eclesial. Falta decidir si se crea un rol eclesial con
+   visión completa pero sin la parte de administración de sistema.
+
+**Deuda técnica anterior, sigue vigente:**
+
+- Credenciales reales de Resend (los emails no funcionan todavía).
+- Parser real de `.xlsx` para importación (hoy solo CSV).
+- Ampliar Playwright más allá de los smoke tests: hoy hay 12 pruebas,
+  todas de protección de rutas. Los flujos completos (crear ministerio,
+  inscribir en actividad, pasar lista, autorización por ámbito) están
+  verificados **manualmente** contra la base real, pero no automatizados.
+- Proyecto Supabase **separado** para producción (hoy la app en vivo usa
+  el de desarrollo, con datos sintéticos) y `QR_CHECKIN_SECRET` propio.
+
+**Dato personal real pendiente de decisión**: hay un registro real en la
+base de desarrollo (`dididbg@gmail.com`, creado 2026-09-01), contra la
+regla 7 de `CLAUDE.md`. El usuario confirmó que es real y fue una prueba
+suya. Su cuenta quedó confirmada y puede iniciar sesión normalmente. No
+se ha borrado nada, a la espera de que el usuario decida.
+
+**Por revisar en el dashboard de Supabase** (no accesible desde el
+agente): Authentication → URL Configuration, confirmar que _Site URL_
+apunte a `https://iglesia-app-teal.vercel.app` y no a `localhost:3000`.
+Es la causa más probable del error que vio una usuaria real al confirmar
+su email.
 
 ## Bitácora
 
