@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Plus, Users, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
+import { activityTone } from "@/lib/status-tones";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
@@ -115,9 +116,9 @@ export default async function ActivitiesPage({
                     </span>
                   </div>
                 </div>
-                <Badge variant="outline" className="shrink-0">
+                <StatusBadge tone={activityTone[a.status]}>
                   {activityStatusLabels[a.status]}
-                </Badge>
+                </StatusBadge>
               </CardContent>
             </Card>
           </Link>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -68,7 +68,7 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
             {ministry.leaderName ? ` · Líder: ${ministry.leaderName}` : ""}
           </p>
         </div>
-        {!ministry.is_active && <Badge variant="outline">Inactivo</Badge>}
+        {!ministry.is_active && <StatusBadge tone="idle">Inactivo</StatusBadge>}
       </div>
 
       {(ministry.description || ministry.meeting_schedule_text || ministry.location) && (

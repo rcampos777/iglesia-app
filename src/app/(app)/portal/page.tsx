@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
+import { activityTone } from "@/lib/status-tones";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getMyEnrollments, getMyPerson, getMyPrayerRequests } from "@/lib/data/portal";
@@ -103,9 +105,9 @@ export default async function PortalPage() {
                   {a.activityLocation ? ` · ${a.activityLocation}` : ""}
                 </p>
               </div>
-              <Badge variant="outline">
+              <StatusBadge tone={a.attended ? "active" : activityTone[a.activityStatus]}>
                 {a.attended ? "Asististe" : activityStatusLabels[a.activityStatus]}
-              </Badge>
+              </StatusBadge>
             </div>
           ))}
         </CardContent>

@@ -7,7 +7,8 @@ import { getPersonJourney } from "@/lib/data/journey";
 import { PersonJourneyCard } from "@/components/people/person-journey";
 import { redirect } from "next/navigation";
 import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
+import { membershipTone } from "@/lib/status-tones";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { membershipStatusLabels } from "@/lib/labels";
 
@@ -42,7 +43,9 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
             Registrado el {new Date(person.created_at).toLocaleDateString("es")}
           </p>
         </div>
-        <Badge variant="outline">{membershipStatusLabels[person.membership_status]}</Badge>
+        <StatusBadge tone={membershipTone[person.membership_status]}>
+          {membershipStatusLabels[person.membership_status]}
+        </StatusBadge>
       </div>
 
       {canWrite ? (

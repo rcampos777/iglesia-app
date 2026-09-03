@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Iglesia App",
-  description: "Administración de la congregación: personas, cursos, asistencia y más.",
+  title: "Ciudad de Avivamiento",
+  description: "Administración de la congregación: personas, ministerios, cursos y actividades.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

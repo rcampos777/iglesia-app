@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { listMinistries } from "@/lib/data/ministries";
 import { redirect } from "next/navigation";
@@ -74,7 +74,7 @@ export default async function MinistriesPage({
               <CardContent className="space-y-2 py-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium">{m.name}</p>
-                  {!m.is_active && <Badge variant="outline">Inactivo</Badge>}
+                  {!m.is_active && <StatusBadge tone="idle">Inactivo</StatusBadge>}
                 </div>
                 {m.description && (
                   <p className="text-muted-foreground line-clamp-2 text-sm">{m.description}</p>

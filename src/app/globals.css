@@ -35,6 +35,11 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-state-active: var(--state-active);
+  --color-state-warning: var(--state-warning);
+  --color-state-tracking: var(--state-tracking);
+  --color-state-error: var(--state-error);
+  --color-state-idle: var(--state-idle);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -49,72 +54,125 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Identidad visual de Ciudad de Avivamiento | Ponce.
+     Ratios WCAG verificados sobre los hex reales — ver docs/design.md.
+     Carbón sobre blanco cálido 13.21:1 · rojo sobre blanco cálido 6.54:1
+     · blanco cálido sobre rojo 6.54:1. */
+  --brand-red: #9e3030;
+  --brand-charcoal: #252a2b;
+  --brand-sage: #708b89;
+  --brand-mist: #aebdbc;
+  --brand-warm-white: #f5f4f0;
+
+  --background: var(--brand-warm-white);
+  --foreground: var(--brand-charcoal);
+
+  /* Las tarjetas van en blanco puro para separarse del fondo cálido sin
+     necesidad de sombra. */
+  --card: #ffffff;
+  --card-foreground: var(--brand-charcoal);
+  --popover: #ffffff;
+  --popover-foreground: var(--brand-charcoal);
+
+  --primary: var(--brand-red);
+  --primary-foreground: var(--brand-warm-white);
+
+  --secondary: #e8ecea;
+  --secondary-foreground: var(--brand-charcoal);
+
+  --muted: #eceeec;
+  /* 4.61:1 sobre el fondo cálido: cumple AA para texto normal. No usar
+     el verde grisáceo puro aquí — se queda en 3.32:1. */
+  --muted-foreground: #5f6866;
+
+  --accent: #e4eae9;
+  --accent-foreground: var(--brand-charcoal);
+
+  /* El error NO es el rojo de marca: si lo fuera, un mensaje de error se
+     vería igual que un botón primario. Se separa en tono (18° vs 0°) y
+     saturación (88% vs 53%). */
+  --destructive: #b5400c;
+
+  --border: var(--brand-mist);
+  --input: var(--brand-mist);
+  --ring: var(--brand-red);
+
+  --chart-1: var(--brand-red);
+  --chart-2: var(--brand-sage);
+  --chart-3: var(--brand-charcoal);
+  --chart-4: var(--brand-mist);
+  --chart-5: #b8807f;
+
+  --radius: 0.5rem;
+
+  /* Menú lateral en carbón: el activo lleva rojo de FONDO con texto
+     blanco cálido (6.54:1). El rojo como texto sobre carbón daría
+     2.02:1 y no cumple. */
+  --sidebar: var(--brand-charcoal);
+  --sidebar-foreground: var(--brand-mist);
+  --sidebar-primary: var(--brand-red);
+  --sidebar-primary-foreground: var(--brand-warm-white);
+  --sidebar-accent: #333a3b;
+  --sidebar-accent-foreground: var(--brand-warm-white);
+  --sidebar-border: #3a4241;
+  --sidebar-ring: var(--brand-red);
+
+  /* Estados semánticos, deliberadamente fuera de la paleta de marca.
+     Todos cumplen AA sobre el fondo cálido. */
+  --state-active: #2f6b4f;
+  --state-warning: #8a5a00;
+  --state-tracking: #2f5d7c;
+  --state-error: #b5400c;
+  --state-idle: #5f6866;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #1b1f20;
+  --foreground: #ecefee;
+
+  --card: #23292a;
+  --card-foreground: #ecefee;
+  --popover: #23292a;
+  --popover-foreground: #ecefee;
+
+  /* Sobre fondo oscuro el rojo de marca se aclara para poder leerse:
+     #9e3030 sobre #1b1f20 daría 2.4:1. #d57676 llega a 5.6:1. */
+  --primary: #d57676;
+  --primary-foreground: #1b1f20;
+
+  --secondary: #2c3334;
+  --secondary-foreground: #ecefee;
+  --muted: #2c3334;
+  --muted-foreground: #9fabaa;
+  --accent: #2c3334;
+  --accent-foreground: #ecefee;
+
+  --destructive: #e8916a;
+
+  --border: #3a4241;
+  --input: #3a4241;
+  --ring: #d57676;
+
+  --chart-1: #d57676;
+  --chart-2: var(--brand-sage);
+  --chart-3: var(--brand-mist);
+  --chart-4: #8fa09e;
+  --chart-5: #b8807f;
+
+  --sidebar: #14181a;
+  --sidebar-foreground: var(--brand-mist);
+  --sidebar-primary: var(--brand-red);
+  --sidebar-primary-foreground: var(--brand-warm-white);
+  --sidebar-accent: #23292a;
+  --sidebar-accent-foreground: var(--brand-warm-white);
+  --sidebar-border: #2c3334;
+  --sidebar-ring: #d57676;
+
+  --state-active: #7fc3a2;
+  --state-warning: #d9b45c;
+  --state-tracking: #8bb6d4;
+  --state-error: #e8916a;
+  --state-idle: #9fabaa;
 }
 
 @layer base {

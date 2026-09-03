@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
+import { followupTone } from "@/lib/status-tones";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
@@ -86,7 +87,9 @@ export default async function VisitorsPage({
                     {f.personPhone || f.personEmail || "sin contacto"}
                   </p>
                 </div>
-                <Badge variant="outline">{followupStatusLabels[f.status]}</Badge>
+                <StatusBadge tone={followupTone[f.status]}>
+                  {followupStatusLabels[f.status]}
+                </StatusBadge>
               </CardContent>
             </Card>
           </Link>

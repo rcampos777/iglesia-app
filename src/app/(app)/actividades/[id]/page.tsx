@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
+import { activityTone } from "@/lib/status-tones";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -64,9 +65,9 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
             {activity.location ? ` · ${activity.location}` : ""}
           </p>
         </div>
-        <Badge variant="outline" className="shrink-0">
+        <StatusBadge tone={activityTone[activity.status]}>
           {activityStatusLabels[activity.status]}
-        </Badge>
+        </StatusBadge>
       </div>
 
       <Card>

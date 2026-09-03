@@ -6,7 +6,8 @@ import {
   HeartHandshake,
   CalendarCheck,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
+import { enrollmentTone } from "@/lib/status-tones";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   membershipStatusLabels,
@@ -141,7 +142,9 @@ export function PersonJourneyCard({ journey }: { journey: PersonJourney }) {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium">{f.courseName}</p>
-                      <Badge variant="outline">{ENROLLMENT_LABELS[f.status] ?? f.status}</Badge>
+                      <StatusBadge tone={enrollmentTone[f.status]}>
+                        {ENROLLMENT_LABELS[f.status] ?? f.status}
+                      </StatusBadge>
                     </div>
                     <p className="text-muted-foreground text-sm">
                       {f.categoryName} · {f.classLabel} · {f.attendancePercent}% de asistencia

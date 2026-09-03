@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#9E3030"/>
+  <text x="16" y="16" text-anchor="middle" dominant-baseline="central"
+        fill="#F5F4F0" font-size="14" font-weight="700"
+        font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">CA</text>
+</svg>
