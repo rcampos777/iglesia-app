@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
-import { listPeople } from "@/lib/data/people";
+import { listPeopleForMinistryPicker } from "@/lib/data/ministries";
 import { MinistryForm } from "../ministry-form";
 
 const MINISTRY_ADMIN_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
@@ -9,7 +9,7 @@ export default async function NewMinistryPage() {
   const user = await getCurrentUser();
   if (!hasAnyRole(user, [...MINISTRY_ADMIN_ROLES])) redirect("/ministerios");
 
-  const { people } = await listPeople({ limit: 500 });
+  const people = await listPeopleForMinistryPicker();
 
   return (
     <div className="max-w-lg space-y-6">

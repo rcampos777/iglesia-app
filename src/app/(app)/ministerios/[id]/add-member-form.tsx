@@ -16,11 +16,17 @@ import { addMinistryMemberAction } from "../actions";
 import { ministryMemberRoleLabels } from "@/lib/labels";
 import { ministryMemberRoleValues } from "@/lib/validations/ministries";
 import type { ActionResult } from "@/lib/action-result";
-import type { PersonRow } from "@/types/database";
+import type { PersonPickerOption } from "@/lib/data/ministries";
 
 const initialState: ActionResult = { ok: true, data: undefined };
 
-export function AddMemberForm({ ministryId, people }: { ministryId: string; people: PersonRow[] }) {
+export function AddMemberForm({
+  ministryId,
+  people,
+}: {
+  ministryId: string;
+  people: PersonPickerOption[];
+}) {
   const [state, formAction, isPending] = useActionState(
     async (_prev: ActionResult, formData: FormData) =>
       addMinistryMemberAction(ministryId, formData),

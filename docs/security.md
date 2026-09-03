@@ -132,6 +132,22 @@ security`.
   No hay recursión porque la función es `SECURITY DEFINER` y corre como
   dueño de la tabla (mismo patrón que `has_role()` / `current_person_id()`).
 
+### Acceso del líder de ministerio a `people` (0019)
+
+Al probar `0018` en vivo se detectó que un líder sin rol de staff no
+podía ver los nombres de su propio equipo (RLS de `people` lo limita a su
+registro). Se resolvió **sin** ensanchar el acceso al directorio:
+
+- `people_select_ministry_leader`: lectura del registro completo **solo**
+  de las personas que pertenecen (o pertenecieron) a un ministerio que
+  esa persona lidera. Verificado en vivo: un líder no-staff ve 4 personas
+  en `/personas` (él mismo + su equipo), no las 49 del directorio.
+- `list_people_for_ministry_picker()`: para el selector de "agregar
+  persona" devuelve **solo `id`, `first_name`, `last_name`** — nunca
+  email, teléfono, dirección ni notas. `security definer` con `revoke all
+from public` + `grant execute to authenticated`, y comprobación interna
+  de que quien llama es staff o lidera algún ministerio.
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

@@ -2,6 +2,27 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-09-02 — Bug real de RLS encontrado en vivo: el líder no veía a su equipo
+
+**Decisión**: dar al líder de ministerio lectura de `people` acotada a su
+propio equipo (política `people_select_ministry_leader`) y un RPC de
+columnas mínimas (`list_people_for_ministry_picker()`, solo id + nombre)
+para el selector de alta, en vez de (a) darle lectura del directorio
+completo o (b) dejar que solo el staff pueda agregar gente.
+
+**Contexto**: `0018` autorizaba correctamente la escritura sobre
+`ministry_memberships`, pero se pasó por alto que leer la membresía no
+implica poder leer las `people` referenciadas. En vivo, un líder sin rol
+de staff veía su equipo como "? ?" y no podía agregar a nadie. No lo
+detectaron `lint`, `typecheck`, `build` ni las pruebas E2E sin sesión —
+solo apareció al iniciar sesión con ese rol exacto contra la base real.
+
+**Consecuencias**: refuerza que las pruebas de autorización tienen que
+correrse **con el rol menos privilegiado que se supone que puede hacer la
+tarea**, no solo con un administrador. Un flujo puede estar "autorizado"
+y aun así ser inservible porque una tabla vecina lo bloquea. Se agregó a
+la bitácora de `docs/progress.md` como caso de referencia.
+
 ## 2026-09-02 — Ministerios: autorización por ámbito, no solo por rol
 
 **Decisión**: `ministry_memberships` se autoriza con `rol global OR

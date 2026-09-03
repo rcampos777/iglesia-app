@@ -5,8 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { getMinistryDetail } from "@/lib/data/ministries";
-import { listPeople } from "@/lib/data/people";
+import { getMinistryDetail, listPeopleForMinistryPicker } from "@/lib/data/ministries";
 import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
 import { ministryMemberRoleLabels } from "@/lib/labels";
 import { MinistryForm } from "../ministry-form";
@@ -34,7 +33,7 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
     );
   const canManageMembers = isAdmin || isLeader;
 
-  const { people } = canManageMembers ? await listPeople({ limit: 500 }) : { people: [] };
+  const people = canManageMembers ? await listPeopleForMinistryPicker() : [];
   const alreadyServing = new Set(activeMembers.map((m) => m.person_id));
   const availablePeople = people.filter((p) => !alreadyServing.has(p.id));
 

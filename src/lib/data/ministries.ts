@@ -157,3 +157,24 @@ export async function listMinistriesForPerson(personId: string): Promise<PersonM
 
   return memberships.map((m) => ({ ...m, ministryName: nameById.get(m.ministry_id) ?? "—" }));
 }
+
+/** Opción mínima para los selectores de persona del módulo. */
+export interface PersonPickerOption {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
+/**
+ * Personas elegibles para asignar a un ministerio. Va por RPC en vez de
+ * leer `people` directamente porque un líder de ministerio sin rol de
+ * staff no tiene acceso de lectura al directorio completo (RLS), pero sí
+ * necesita poder elegir a quién agregar a su equipo. La función devuelve
+ * solo id + nombre — ver 0019_ministry_leader_people_access.sql.
+ */
+export async function listPeopleForMinistryPicker(): Promise<PersonPickerOption[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("list_people_for_ministry_picker");
+  if (error) throw new Error(`No se pudieron cargar las personas: ${error.message}`);
+  return data ?? [];
+}

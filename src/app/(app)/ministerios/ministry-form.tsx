@@ -16,7 +16,8 @@ import {
 import { createMinistryAction, updateMinistryAction } from "./actions";
 import { NO_LEADER_VALUE } from "@/lib/validations/ministries";
 import type { ActionResult } from "@/lib/action-result";
-import type { MinistryRow, PersonRow } from "@/types/database";
+import type { PersonPickerOption } from "@/lib/data/ministries";
+import type { MinistryRow } from "@/types/database";
 
 const initialState: ActionResult<string | undefined> = { ok: true, data: undefined };
 
@@ -24,7 +25,7 @@ export function MinistryForm({
   people,
   ministry,
 }: {
-  people: PersonRow[];
+  people: PersonPickerOption[];
   /** Si viene, el formulario edita; si no, crea. */
   ministry?: MinistryRow;
 }) {

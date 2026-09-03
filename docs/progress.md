@@ -78,25 +78,25 @@ anteriores.
 
 ## Fases (orden de prioridad del producto)
 
-| #   | Fase                              | Estado                                                              |
-| --- | --------------------------------- | ------------------------------------------------------------------- |
-| 1   | Base del proyecto y documentación | ✅ Hecho                                                            |
-| 2   | Modelo de datos                   | ✅ 16 migraciones aplicadas y verificadas contra Postgres real      |
-| 3   | Autenticación                     | ✅ Verificado end-to-end (login/logout real, multi-rol)             |
-| 4   | Roles y permisos                  | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin)     |
-| 5   | Directorio central de personas    | ✅ Verificado end-to-end                                            |
-| 6   | Cursos y clases                   | ✅ Verificado end-to-end                                            |
-| 7   | Matrícula, asistencia y progreso  | ✅ Verificado end-to-end                                            |
-| 8   | Importación y deduplicación       | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)         |
-| 9   | Visitantes y seguimiento          | ✅ Verificado end-to-end                                            |
-| 10  | Portal del miembro                | ✅ Verificado end-to-end                                            |
-| 11  | Check-in QR                       | ✅ Check-in manual verificado; escaneo QR verificado por código     |
-| 12  | Peticiones de oración             | ✅ Verificado end-to-end, incluida auditoría de acceso              |
-| 13  | Emails y encuestas                | 🔶 Encuestas verificadas; emails sin probar (falta Resend real)     |
-| 14  | Paneles y reportes                | ✅ Verificado end-to-end                                            |
-| 15  | Revisión de seguridad             | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo       |
-| 16  | Preparación para producción       | 🔶 Ver checklist en `docs/deployment.md` §5                         |
-| 17  | **Ministerios**                   | 🔶 Código completo y verificado local; falta aplicar `0018` en vivo |
+| #   | Fase                              | Estado                                                                     |
+| --- | --------------------------------- | -------------------------------------------------------------------------- |
+| 1   | Base del proyecto y documentación | ✅ Hecho                                                                   |
+| 2   | Modelo de datos                   | ✅ 16 migraciones aplicadas y verificadas contra Postgres real             |
+| 3   | Autenticación                     | ✅ Verificado end-to-end (login/logout real, multi-rol)                    |
+| 4   | Roles y permisos                  | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin)            |
+| 5   | Directorio central de personas    | ✅ Verificado end-to-end                                                   |
+| 6   | Cursos y clases                   | ✅ Verificado end-to-end                                                   |
+| 7   | Matrícula, asistencia y progreso  | ✅ Verificado end-to-end                                                   |
+| 8   | Importación y deduplicación       | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)                |
+| 9   | Visitantes y seguimiento          | ✅ Verificado end-to-end                                                   |
+| 10  | Portal del miembro                | ✅ Verificado end-to-end                                                   |
+| 11  | Check-in QR                       | ✅ Check-in manual verificado; escaneo QR verificado por código            |
+| 12  | Peticiones de oración             | ✅ Verificado end-to-end, incluida auditoría de acceso                     |
+| 13  | Emails y encuestas                | 🔶 Encuestas verificadas; emails sin probar (falta Resend real)            |
+| 14  | Paneles y reportes                | ✅ Verificado end-to-end                                                   |
+| 15  | Revisión de seguridad             | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo              |
+| 16  | Preparación para producción       | 🔶 Ver checklist en `docs/deployment.md` §5                                |
+| 17  | **Ministerios**                   | ✅ Verificado end-to-end contra Supabase real, incluidas pruebas negativas |
 
 ## Fase 16 — qué falta para producción
 
@@ -150,23 +150,6 @@ dataset más limpio.
   reales, y el flujo nuevo de auto check-in (ver bitácora de abajo) — 0
   errores de consola.
 
-## Bloqueo actual — credencial para aplicar `0018_ministries.sql`
-
-El módulo de ministerios está **completo en código** (migración, tipos,
-validación, capa de datos, UI, RLS, guards, seed, pruebas, docs) y pasa
-`typecheck`, `lint`, `format:check`, `build` y las 9 pruebas de
-Playwright. **Falta un paso**: aplicar la migración `0018` contra el
-proyecto Supabase de desarrollo, que requiere una credencial que no está
-(correctamente) en el repositorio. Sirve cualquiera de las dos:
-
-- la **contraseña de la base de datos** del proyecto
-  (`supabase db push` vía el pooler — ver `docs/deployment.md` §2), o
-- un **personal access token** de Supabase (Management API).
-
-Hasta aplicarla, `/ministerios` fallará en el entorno en vivo porque las
-tablas todavía no existen ahí. No se hizo push a `main` por esa razón:
-desplegar antes de la migración rompería la ruta nueva en producción.
-
 ## Próxima tarea
 
 Con el MVP funcionando de punta a punta y desplegado, las prioridades
@@ -176,6 +159,58 @@ autorice explícitamente, preparar un proyecto Supabase de producción
 separado del de desarrollo y publicar ahí formalmente.
 
 ## Bitácora
+
+### 2026-09-02 — Ministerios verificado en vivo + bug real corregido (0019)
+
+El usuario proveyó la contraseña de base de datos (tras resetearla en el
+dashboard; no afecta a la app, que habla por HTTPS con las llaves API).
+Se aplicaron `0018` y `0019` contra el proyecto de desarrollo
+(`jlmabwnbtwjrtqaxfafx`, pooler `aws-0-us-east-1`).
+
+**Bug real encontrado al probar en vivo, no detectable por lint/typecheck
+ni por pruebas sin sesión** — corregido en `0019`:
+
+`0018` le daba al líder de un ministerio acceso a `ministry_memberships`
+de su ministerio, pero la RLS de `people` sigue limitando a un no-staff a
+su propio registro. Al iniciar sesión como líder sin rol de staff, su
+equipo aparecía como **"? ?" / "sin contacto"** y el selector para
+agregar gente salía vacío ("todas las personas ya sirven aquí"): la
+función de líder quedaba inservible. `0019` lo resuelve con el mínimo
+acceso necesario, en dos piezas:
+
+1. Política `people_select_ministry_leader`: el líder lee el registro de
+   las personas **de su ministerio** (incluidas las que ya salieron, para
+   que el histórico muestre nombres).
+2. RPC `list_people_for_ministry_picker()`: devuelve **solo id + nombre**
+   (nunca email, teléfono, dirección ni notas) para poder elegir a quién
+   agregar, sin dar lectura del directorio completo.
+
+**Verificación en navegador con sesiones reales:**
+
+- Como `coordinador@iglesia.test`: catálogo con los 5 ministerios y
+  conteos correctos, detalle de Alabanza con su equipo, formulario de
+  alta, edición, tarjeta "Personas sirviendo por ministerio" en reportes
+  (29 = 28 sembradas + 1 de prueba) y "Ministerios activos: 5" en el
+  panel.
+- Como `miembro@iglesia.test` (**rol único `miembro`, sin staff**),
+  hecha líder de Ujieres a propósito para probar la autorización por
+  ámbito:
+  - ✅ Ve y gestiona **su** ministerio (nombres y contactos correctos
+    tras `0019`; selector con 44 personas, excluyendo a las 4 que ya
+    sirven).
+  - ✅ **No** ve la tarjeta "Editar ministerio" (solo admins).
+  - ✅ Prueba negativa: en Medios (que no lidera) ve 0 miembros, sin
+    controles de gestión — RLS bloquea.
+  - ✅ Prueba negativa clave: `/personas` le muestra **4 personas**
+    (ella + su equipo), no las 49 del directorio — la política nueva
+    concede exactamente el ámbito previsto, ni una fila más.
+  - ✅ Portal muestra "Donde sirvo: Ujieres — Líder".
+- Prueba de RLS por API: con `service_role` se ven los 5 ministerios;
+  con la llave `anon` sin sesión, `ministries` y `ministry_memberships`
+  devuelven `[]`.
+- Vista móvil (375px) verificada. 0 errores de consola reales (hubo uno
+  transitorio de caché de esquema de PostgREST justo tras crear la
+  función, ya resuelto y comprobado por API).
 
 ### 2026-09-02 — Módulo de Ministerios
 
@@ -208,7 +243,9 @@ actividades sigue pendiente (hoy solo existen `services` para check-in).
   reportes, conteos en el panel (staff y miembro).
 - **Seed**: 5 ministerios sintéticos con equipos; el coordinador de
   prueba lidera el primero, para poder verificar en vivo la
-  autorización por ámbito.
+  autorización por ámbito. En la base de desarrollo ya poblada se sembró
+  con un script puntual (no `npm run seed` completo, que habría
+  duplicado 40 personas, clases y seguimientos).
 - **Pruebas**: 3 nuevas de Playwright (9/9 pasan). Nota: los binarios de
   navegador de Playwright no estaban instalados en esta máquina; se
   resolvió con `npx playwright install chromium`.

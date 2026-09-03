@@ -412,6 +412,10 @@ export interface Database {
       is_admin: { Args: Record<string, never>; Returns: boolean };
       current_person_id: { Args: Record<string, never>; Returns: string | null };
       is_ministry_leader: { Args: { p_ministry_id: string }; Returns: boolean };
+      list_people_for_ministry_picker: {
+        Args: Record<string, never>;
+        Returns: { id: string; first_name: string; last_name: string }[];
+      };
       log_prayer_request_access: {
         Args: { request_id: string; access_action?: string };
         Returns: undefined;
