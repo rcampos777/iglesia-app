@@ -21,7 +21,8 @@ import {
 import { listPeople } from "@/lib/data/people";
 import { membershipStatusLabels } from "@/lib/labels";
 import { membershipStatusValues } from "@/lib/validations/people";
-import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
+import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 import type { MembershipStatus } from "@/types/database";
 
 const WRITE_ROLES = ["administrador", "pastor", "coordinador_ministerio", "seguimiento"] as const;
@@ -34,10 +35,13 @@ export default async function PeoplePage({
   const params = await searchParams;
   const status = (params.status as MembershipStatus | "todos" | undefined) ?? "todos";
 
-  const [user, { people, total }] = await Promise.all([
-    getCurrentUser(),
-    listPeople({ q: params.q, status }),
-  ]);
+  const user = await getCurrentUser();
+  // El directorio es para staff. Un miembro ve su propia información en
+  // /portal; RLS además ya limitaba los datos, pero la página no debe
+  // siquiera cargar para él.
+  if (!isStaff(user)) redirect("/portal");
+
+  const { people, total } = await listPeople({ q: params.q, status });
 
   const canWrite = hasAnyRole(user, [...WRITE_ROLES]);
 

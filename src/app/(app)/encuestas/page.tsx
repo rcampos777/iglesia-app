@@ -4,12 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { listSurveys } from "@/lib/data/surveys";
-import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
+import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 
 const SURVEY_MANAGE_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
 
 export default async function SurveysPage() {
-  const [user, surveys] = await Promise.all([getCurrentUser(), listSurveys()]);
+  const user = await getCurrentUser();
+  if (!isStaff(user)) redirect("/portal");
+
+  const surveys = await listSurveys();
   const canManage = hasAnyRole(user, [...SURVEY_MANAGE_ROLES]);
 
   return (

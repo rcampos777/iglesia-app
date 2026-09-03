@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listClassOfferings } from "@/lib/data/courses";
-import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
+import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 
 const MANAGE_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
 
@@ -16,7 +17,11 @@ const statusLabels: Record<string, string> = {
 };
 
 export default async function CoursesPage() {
-  const [user, offerings] = await Promise.all([getCurrentUser(), listClassOfferings()]);
+  const user = await getCurrentUser();
+  // Un miembro ve SUS clases en /portal, no el catálogo completo.
+  if (!isStaff(user)) redirect("/portal");
+
+  const offerings = await listClassOfferings();
   const canManage = hasAnyRole(user, [...MANAGE_ROLES]);
 
   const byCategory = new Map<string, typeof offerings>();

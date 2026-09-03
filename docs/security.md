@@ -148,6 +148,33 @@ registro). Se resolvió **sin** ensanchar el acceso al directorio:
 from public` + `grant execute to authenticated`, y comprobación interna
   de que quien llama es staff o lidera algún ministerio.
 
+## 8.c Cierre de páginas sin guard (2026-09-02)
+
+Auditoría a raíz de un reporte del usuario: una cuenta con solo el rol
+`miembro` podía **entrar por URL directa** a páginas que el menú le
+ocultaba. RLS ya limitaba los _datos_ (por ejemplo `/personas` le mostraba
+solo su propio registro), pero la página cargaba igual y exponía
+catálogos completos de cursos, ministerios y encuestas.
+
+Se encontraron **8 páginas sin redirección** y se cerraron:
+`/personas`, `/personas/[id]`, `/personas/nueva`, `/cursos`,
+`/cursos/clases/[id]`, `/ministerios`, `/ministerios/[id]` y
+`/encuestas`. Todas redirigen ahora a `/portal` para quien no es staff.
+
+Excepciones deliberadas, documentadas para que nadie las "corrija" por
+error:
+
+- `/encuestas/[id]` sigue accesible a cualquier autenticado: es donde un
+  miembro **responde** una encuesta. Los resultados agregados sí están
+  limitados a roles de gestión dentro de la misma página.
+- `/check-in/publico` sigue accesible a cualquier autenticado: es el
+  auto check-in por QR fijo (ver `docs/architecture.md` §5).
+- `/ministerios/[id]` admite además al **líder de ese ministerio** aunque
+  no sea staff, para no romper la autorización por ámbito de `0018`.
+
+Verificado en vivo con una sesión de rol único `miembro`: las 11 rutas
+restringidas redirigen, y el menú queda en "Panel | Mi portal".
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

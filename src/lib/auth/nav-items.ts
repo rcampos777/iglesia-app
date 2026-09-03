@@ -7,6 +7,13 @@ export interface NavItem {
   roles?: AppRole[];
 }
 
+/**
+ * Un usuario con solo el rol `miembro` ve únicamente "Mi portal" (y el
+ * panel): sus cursos, los ministerios donde sirve y sus peticiones de
+ * oración están todos ahí. Los catálogos completos (personas, cursos,
+ * ministerios, encuestas) son de staff. Ocultar el enlace NO es la
+ * barrera: cada página redirige y además hay RLS (docs/security.md).
+ */
 export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Panel" },
   {
@@ -21,8 +28,30 @@ export const NAV_ITEMS: NavItem[] = [
       "administrador",
     ],
   },
-  { href: "/cursos", label: "Cursos y clases" },
-  { href: "/ministerios", label: "Ministerios" },
+  {
+    href: "/cursos",
+    label: "Cursos y clases",
+    roles: [
+      "maestro",
+      "seguimiento",
+      "intercesor",
+      "coordinador_ministerio",
+      "pastor",
+      "administrador",
+    ],
+  },
+  {
+    href: "/ministerios",
+    label: "Ministerios",
+    roles: [
+      "maestro",
+      "seguimiento",
+      "intercesor",
+      "coordinador_ministerio",
+      "pastor",
+      "administrador",
+    ],
+  },
   {
     href: "/check-in",
     label: "Check-in",
@@ -44,7 +73,18 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["seguimiento", "coordinador_ministerio", "pastor", "administrador"],
   },
   { href: "/portal", label: "Mi portal" },
-  { href: "/encuestas", label: "Encuestas" },
+  {
+    href: "/encuestas",
+    label: "Encuestas",
+    roles: [
+      "maestro",
+      "seguimiento",
+      "intercesor",
+      "coordinador_ministerio",
+      "pastor",
+      "administrador",
+    ],
+  },
   {
     href: "/reportes",
     label: "Reportes",

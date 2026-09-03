@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getMinistryDetail, listPeopleForMinistryPicker } from "@/lib/data/ministries";
-import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
+import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 import { ministryMemberRoleLabels } from "@/lib/labels";
 import { MinistryForm } from "../ministry-form";
 import { AddMemberForm } from "./add-member-form";
@@ -32,6 +32,14 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
         (m.role_in_ministry === "lider" || m.role_in_ministry === "colider"),
     );
   const canManageMembers = isAdmin || isLeader;
+
+  // Staff puede ver cualquier ministerio. Alguien sin rol de staff solo
+  // entra si lidera ESTE ministerio (autorización por ámbito, 0018).
+  if (!isStaff(user) && !isLeader) redirect("/portal");
+
+  // Abrir la ficha de una persona es privilegio de staff: un líder ve a
+  // su equipo aquí mismo, pero /personas/[id] no es para él.
+  const canOpenPerson = isStaff(user);
 
   const people = canManageMembers ? await listPeopleForMinistryPicker() : [];
   const alreadyServing = new Set(activeMembers.map((m) => m.person_id));
@@ -92,6 +100,7 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
                 ministryId={ministry.id}
                 member={m}
                 canManage={canManageMembers}
+                canOpenPerson={canOpenPerson}
               />
             ))}
           </div>

@@ -68,22 +68,14 @@ export default async function PortalPage() {
         <CardContent className="space-y-3">
           {ministries.length === 0 && (
             <p className="text-muted-foreground">
-              Todavía no sirves en ningún ministerio.{" "}
-              <Link href="/ministerios" className="underline">
-                Mira las áreas de servicio
-              </Link>
-              .
+              Todavía no sirves en ningún ministerio. Si te interesa servir, habla con un
+              coordinador o con tu pastor.
             </p>
           )}
           {ministries.map((m) => (
             <div key={m.id} className="flex items-center justify-between border-b pb-2">
               <div>
-                <Link
-                  href={`/ministerios/${m.ministry_id}`}
-                  className="font-medium hover:underline"
-                >
-                  {m.ministryName}
-                </Link>
+                <p className="font-medium">{m.ministryName}</p>
                 <p className="text-muted-foreground text-sm">Desde {m.joined_at}</p>
               </div>
               <Badge variant="outline">{ministryMemberRoleLabels[m.role_in_ministry]}</Badge>

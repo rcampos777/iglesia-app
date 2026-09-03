@@ -165,6 +165,16 @@ separado del de desarrollo y publicar ahí formalmente.
 
 ## Bitácora
 
+### 2026-09-02 — Cierre de alcance para el rol `miembro`
+
+El usuario creó una cuenta normal y reportó que veía cosas que no
+debería. Auditoría: **8 páginas no redirigían** — el menú las ocultaba,
+pero la URL directa funcionaba. RLS limitaba los datos, no el acceso a la
+página. Corregido: todas redirigen a `/portal` para quien no es staff.
+Ver `docs/security.md` §8.c para el detalle y las excepciones
+deliberadas. Verificado en vivo con rol único `miembro`: 11/11 rutas
+redirigen y el menú queda en "Panel | Mi portal".
+
 ### 2026-09-02 — Desplegado en vivo + bug del enlace de confirmación
 
 - **Push y despliegue**: 3 commits a `main`; Vercel redesplegó y se

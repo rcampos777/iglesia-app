@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { getClassOfferingDetail } from "@/lib/data/courses";
 import { listPeople } from "@/lib/data/people";
-import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
+import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 import { EnrollForm } from "./enroll-form";
 import { AttendancePanel } from "./attendance-panel";
 import { AddSessionForm } from "./add-session-form";
@@ -27,7 +27,10 @@ const ENROLL_ROLES = [
 
 export default async function ClassOfferingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [user, detail] = await Promise.all([getCurrentUser(), getClassOfferingDetail(id)]);
+  const user = await getCurrentUser();
+  if (!isStaff(user)) redirect("/portal");
+
+  const detail = await getClassOfferingDetail(id);
 
   if (!detail) notFound();
 

@@ -5,6 +5,10 @@ import { getSurveyWithQuestions, getMyResponseId, getSurveyResults } from "@/lib
 import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
 import { ResponseForm } from "./response-form";
 
+// Esta página queda accesible a cualquier autenticado A PROPÓSITO: es
+// donde un miembro RESPONDE una encuesta (normalmente llegando por un
+// link). Los resultados agregados sí están limitados a SURVEY_MANAGE_ROLES
+// más abajo. El catálogo /encuestas sí es solo de staff.
 const SURVEY_MANAGE_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
 
 export default async function SurveyDetailPage({ params }: { params: Promise<{ id: string }> }) {

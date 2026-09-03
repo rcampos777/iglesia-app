@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { listMinistries } from "@/lib/data/ministries";
-import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
+import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 
 const MINISTRY_ADMIN_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
 
@@ -14,6 +15,10 @@ export default async function MinistriesPage({
   searchParams: Promise<{ inactivos?: string }>;
 }) {
   const user = await getCurrentUser();
+  // El catálogo completo es para staff. Un miembro ve en /portal los
+  // ministerios donde sirve.
+  if (!isStaff(user)) redirect("/portal");
+
   const canManage = hasAnyRole(user, [...MINISTRY_ADMIN_ROLES]);
 
   const params = await searchParams;

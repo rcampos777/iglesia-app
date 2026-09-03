@@ -31,10 +31,13 @@ export function MemberRow({
   ministryId,
   member,
   canManage,
+  canOpenPerson,
 }: {
   ministryId: string;
   member: MinistryMemberWithPerson;
   canManage: boolean;
+  /** Solo staff puede abrir la ficha completa de la persona. */
+  canOpenPerson: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -58,9 +61,13 @@ export function MemberRow({
   return (
     <div className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <Link href={`/personas/${member.person_id}`} className="font-medium hover:underline">
-          {fullName}
-        </Link>
+        {canOpenPerson ? (
+          <Link href={`/personas/${member.person_id}`} className="font-medium hover:underline">
+            {fullName}
+          </Link>
+        ) : (
+          <p className="font-medium">{fullName}</p>
+        )}
         <p className="text-muted-foreground truncate text-sm">
           {member.personPhone || member.personEmail || "sin contacto"} · desde {member.joined_at}
         </p>

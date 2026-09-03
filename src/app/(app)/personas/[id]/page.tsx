@@ -4,7 +4,8 @@ import { SendEmailForm } from "@/components/people/send-email-form";
 import { updatePersonAction } from "../actions";
 import { getPerson } from "@/lib/data/people";
 import { listMinistriesForPerson } from "@/lib/data/ministries";
-import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
+import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { membershipStatusLabels, ministryMemberRoleLabels } from "@/lib/labels";
@@ -14,11 +15,10 @@ const WRITE_ROLES = ["administrador", "pastor", "coordinador_ministerio", "segui
 
 export default async function PersonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [user, person, ministries] = await Promise.all([
-    getCurrentUser(),
-    getPerson(id),
-    listMinistriesForPerson(id),
-  ]);
+  const user = await getCurrentUser();
+  if (!isStaff(user)) redirect("/portal");
+
+  const [person, ministries] = await Promise.all([getPerson(id), listMinistriesForPerson(id)]);
 
   if (!person) {
     notFound();

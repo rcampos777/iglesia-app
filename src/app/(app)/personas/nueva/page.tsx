@@ -8,7 +8,7 @@ const WRITE_ROLES = ["administrador", "pastor", "coordinador_ministerio", "segui
 export default async function NewPersonPage() {
   const user = await getCurrentUser();
   if (!hasAnyRole(user, [...WRITE_ROLES])) {
-    redirect("/personas");
+    redirect("/portal");
   }
 
   return (
