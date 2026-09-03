@@ -12,7 +12,16 @@ import type { ActionResult } from "@/lib/action-result";
 
 const initialState: ActionResult = { ok: true, data: undefined };
 
-export function LoginForm({ resetOk, next }: { resetOk: boolean; next?: string }) {
+export function LoginForm({
+  resetOk,
+  next,
+  authError,
+}: {
+  resetOk: boolean;
+  next?: string;
+  /** Motivo con el que el callback de auth nos devolvió aquí. */
+  authError?: string;
+}) {
   const [state, formAction, isPending] = useActionState(
     async (_prev: ActionResult, formData: FormData) => loginAction(formData),
     initialState,
@@ -24,6 +33,20 @@ export function LoginForm({ resetOk, next }: { resetOk: boolean; next?: string }
         <CardTitle>Iniciar sesión</CardTitle>
       </CardHeader>
       <CardContent>
+        {authError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>
+              No pudimos validar el enlace del email. Puede que ya lo hayas usado, que haya
+              expirado, o que lo hayas abierto en un navegador distinto al que usaste para
+              registrarte. Si tu cuenta ya quedó confirmada, inicia sesión aquí normalmente; si no,
+              pide un enlace nuevo desde{" "}
+              <Link href="/recuperar" className="underline">
+                recuperar contraseña
+              </Link>
+              .
+            </AlertDescription>
+          </Alert>
+        )}
         {resetOk && (
           <Alert className="mb-4">
             <AlertDescription>Contraseña actualizada. Ya puedes iniciar sesión.</AlertDescription>
