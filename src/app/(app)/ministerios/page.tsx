@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { listMinistries } from "@/lib/data/ministries";
 import { redirect } from "next/navigation";
-import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
+import { getCurrentUser, hasAnyRole, hasRole, isStaff } from "@/lib/auth/session";
 
 const MINISTRY_ADMIN_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
 
@@ -23,7 +23,13 @@ export default async function MinistriesPage({
 
   const params = await searchParams;
   const includeInactive = params.inactivos === "1";
-  const ministries = await listMinistries({ includeInactive });
+  // El pastor ve solo los ministerios que lidera.
+  const scopedToOwn = hasRole(user, "pastor") && !hasRole(user, "administrador");
+  const ministries = scopedToOwn
+    ? user?.personId
+      ? await listMinistries({ includeInactive, ledByPersonId: user.personId })
+      : []
+    : await listMinistries({ includeInactive });
 
   return (
     <div className="space-y-6">
@@ -32,6 +38,7 @@ export default async function MinistriesPage({
           <h1 className="text-2xl font-semibold tracking-tight">Ministerios</h1>
           <p className="text-muted-foreground">
             {ministries.length} {ministries.length === 1 ? "ministerio" : "ministerios"}
+            {scopedToOwn ? " que lideras" : ""}
             {includeInactive ? " (incluye inactivos)." : " activos."}
           </p>
         </div>
@@ -54,8 +61,11 @@ export default async function MinistriesPage({
       <div className="grid gap-3 sm:grid-cols-2">
         {ministries.length === 0 && (
           <p className="text-muted-foreground">
-            Todavía no hay ministerios registrados
-            {canManage ? ". Crea el primero con el botón de arriba." : "."}
+            {scopedToOwn
+              ? "No lideras ningún ministerio todavía. Aquí verás solo los ministerios que lideras."
+              : canManage
+                ? "Todavía no hay ministerios registrados. Crea el primero con el botón de arriba."
+                : "Todavía no hay ministerios registrados."}
           </p>
         )}
         {ministries.map((m) => (

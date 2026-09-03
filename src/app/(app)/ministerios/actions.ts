@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth, requireRole, AuthError } from "@/lib/auth/require-role";
-import { hasAnyRole } from "@/lib/auth/session";
+import { hasAnyRole, hasRole } from "@/lib/auth/session";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
 import {
   ministrySchema,
@@ -13,8 +13,15 @@ import {
 } from "@/lib/validations/ministries";
 import type { MinistryMemberRole } from "@/types/database";
 
-/** Quién puede crear/editar el catálogo de ministerios. */
-const MINISTRY_ADMIN_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
+/**
+ * Quién puede gestionar CUALQUIER ministerio. `pastor` ya no está aquí:
+ * desde la decisión del 2026-09-02 solo gestiona los que él lidera (ver
+ * docs/roles-and-permissions.md).
+ */
+const MINISTRY_GLOBAL_ROLES = ["administrador", "coordinador_ministerio"] as const;
+
+/** Quién puede crear un ministerio nuevo. */
+const MINISTRY_CREATE_ROLES = ["administrador", "coordinador_ministerio", "pastor"] as const;
 
 function leaderPersonIdFrom(formData: FormData): string {
   const raw = formData.get("leaderPersonId");
@@ -40,7 +47,7 @@ function zodFieldErrors(error: {
  */
 async function requireMinistryManager(ministryId: string) {
   const user = await requireAuth();
-  if (hasAnyRole(user, [...MINISTRY_ADMIN_ROLES])) return user;
+  if (hasAnyRole(user, [...MINISTRY_GLOBAL_ROLES])) return user;
 
   const supabase = await createClient();
   const { data: isLeader } = await supabase.rpc("is_ministry_leader", {
@@ -52,9 +59,29 @@ async function requireMinistryManager(ministryId: string) {
   return user;
 }
 
+/**
+ * Editar el REGISTRO del ministerio (nombre, líder, horario) es más que
+ * gestionar su membresía: lo hacen los roles globales, y el pastor solo
+ * sobre los ministerios que lidera.
+ */
+async function requireMinistryEditor(ministryId: string) {
+  const user = await requireAuth();
+  if (hasAnyRole(user, [...MINISTRY_GLOBAL_ROLES])) return user;
+
+  if (hasRole(user, "pastor")) {
+    const supabase = await createClient();
+    const { data: isLeader } = await supabase.rpc("is_ministry_leader", {
+      p_ministry_id: ministryId,
+    });
+    if (isLeader) return user;
+  }
+
+  throw new AuthError("No tienes permiso para editar este ministerio.");
+}
+
 export async function createMinistryAction(formData: FormData): Promise<ActionResult> {
   try {
-    await requireRole([...MINISTRY_ADMIN_ROLES]);
+    await requireRole([...MINISTRY_CREATE_ROLES]);
   } catch (err) {
     if (err instanceof AuthError) return actionError(err.message);
     throw err;
@@ -67,6 +94,7 @@ export async function createMinistryAction(formData: FormData): Promise<ActionRe
     meetingScheduleText: formData.get("meetingScheduleText"),
     location: formData.get("location"),
     isActive: formData.get("isActive") ?? "true",
+    grantsPrayerAccess: formData.get("grantsPrayerAccess") ?? "false",
   });
   if (!parsed.success) return actionError("Revisa los datos.", zodFieldErrors(parsed.error));
 
@@ -84,6 +112,8 @@ export async function createMinistryAction(formData: FormData): Promise<ActionRe
       meeting_schedule_text: parsed.data.meetingScheduleText || null,
       location: parsed.data.location || null,
       is_active: parsed.data.isActive === "true",
+      // `grants_prayer_access` no se escribe aquí: el privilegio está
+      // revocado en la base (0021) y se designa al editar, vía RPC.
       created_by: user?.id ?? null,
     })
     .select("id")
@@ -91,7 +121,9 @@ export async function createMinistryAction(formData: FormData): Promise<ActionRe
 
   if (error || !data) {
     if (error?.code === "23505") {
-      return actionError("Ya existe un ministerio con ese nombre.");
+      return actionError(
+        "Ya existe un ministerio con ese nombre, o ya hay otro marcado como ministerio de intercesión.",
+      );
     }
     return actionError(`No se pudo crear el ministerio: ${error?.message}`);
   }
@@ -104,8 +136,9 @@ export async function updateMinistryAction(
   ministryId: string,
   formData: FormData,
 ): Promise<ActionResult<string | undefined>> {
+  let actor;
   try {
-    await requireRole([...MINISTRY_ADMIN_ROLES]);
+    actor = await requireMinistryEditor(ministryId);
   } catch (err) {
     if (err instanceof AuthError) return actionError(err.message);
     throw err;
@@ -118,6 +151,7 @@ export async function updateMinistryAction(
     meetingScheduleText: formData.get("meetingScheduleText"),
     location: formData.get("location"),
     isActive: formData.get("isActive") ?? "true",
+    grantsPrayerAccess: formData.get("grantsPrayerAccess") ?? "false",
   });
   if (!parsed.success) return actionError("Revisa los datos.", zodFieldErrors(parsed.error));
 
@@ -135,12 +169,30 @@ export async function updateMinistryAction(
     .eq("id", ministryId);
 
   if (error) {
-    if (error.code === "23505") return actionError("Ya existe un ministerio con ese nombre.");
+    if (error.code === "23505") {
+      return actionError(
+        "Ya existe un ministerio con ese nombre, o ya hay otro marcado como ministerio de intercesión.",
+      );
+    }
     return actionError(`No se pudo actualizar: ${error.message}`);
+  }
+
+  // La marca de "ministerio de intercesión" va por una vía aparte: el
+  // privilegio sobre la columna está revocado en la base y el RPC exige
+  // rol administrador y deja registro en audit_log (0021).
+  if (hasRole(actor, "administrador")) {
+    const { error: prayerError } = await supabase.rpc("set_prayer_ministry", {
+      p_ministry_id: ministryId,
+      p_enabled: parsed.data.grantsPrayerAccess === "true",
+    });
+    if (prayerError) {
+      return actionError(`No se pudo actualizar el acceso a oración: ${prayerError.message}`);
+    }
   }
 
   revalidatePath("/ministerios");
   revalidatePath(`/ministerios/${ministryId}`);
+  revalidatePath("/oracion");
   return actionOk("guardado");
 }
 

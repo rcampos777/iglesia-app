@@ -60,8 +60,14 @@ sin una decisión explícita registrada en `docs/decisions.md`:
     (defensa en profundidad). Nunca confiar solo en ocultar UI en el
     cliente.
 11. **Las peticiones de oración tienen acceso restringido y auditado.**
-    Solo roles Intercesor/Pastor/Administrador (o el autor) pueden leerlas.
-    Todo acceso de lectura queda registrado en `prayer_request_access_log`.
+    Solo el rol Intercesor, el Administrador, y el **líder del ministerio
+    de intercesión** (o el autor) pueden leerlas. El rol `pastor` por sí
+    solo **no** da acceso — ver decisión del 2026-09-02 en
+    `docs/decisions.md`. El ministerio de intercesión se designa con el
+    flag `ministries.grants_prayer_access`, que solo un administrador
+    puede cambiar (RPC `set_prayer_ministry`, protegido además por
+    trigger). Todo acceso de lectura queda registrado en
+    `prayer_request_access_log`.
 12. **Los emails sobre peticiones de oración nunca incluyen el texto
     completo de la petición** — solo un aviso genérico con link a la app.
 13. **No se implementa información detallada de menores de edad** sin
@@ -76,6 +82,12 @@ sin una decisión explícita registrada en `docs/decisions.md`:
 `pastor`, `administrador`.
 
 - Un usuario puede tener **múltiples roles** simultáneamente.
+- **`pastor` NO equivale a administrador.** En esta iglesia hay muchos
+  pastores de áreas distintas, y varios son pastores de título sin nada a
+  su cargo; el rango más alto son los apóstoles. Por eso `pastor` es un
+  rol **acotado**: ve y gestiona las clases que imparte y los ministerios
+  que lidera, no la administración del sistema. Solo `administrador`
+  otorga roles y ve todo.
 - Aplica siempre el **mínimo acceso necesario** (principio de menor
   privilegio) al diseñar una política RLS o un chequeo de permisos.
 - Ver `docs/roles-and-permissions.md` para la matriz completa de permisos

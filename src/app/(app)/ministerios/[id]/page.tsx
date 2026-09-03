@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getMinistryDetail, listPeopleForMinistryPicker } from "@/lib/data/ministries";
-import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
+import { getCurrentUser, hasAnyRole, hasRole, isStaff } from "@/lib/auth/session";
 import { ministryMemberRoleLabels } from "@/lib/labels";
 import { MinistryForm } from "../ministry-form";
 import { AddMemberForm } from "./add-member-form";
@@ -36,6 +36,11 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
   // Staff puede ver cualquier ministerio. Alguien sin rol de staff solo
   // entra si lidera ESTE ministerio (autorización por ámbito, 0018).
   if (!isStaff(user) && !isLeader) redirect("/portal");
+
+  // El pastor, además, solo abre los ministerios que lidera.
+  if (hasRole(user, "pastor") && !hasRole(user, "administrador") && !isLeader) {
+    redirect("/ministerios");
+  }
 
   // Abrir la ficha de una persona es privilegio de staff: un líder ve a
   // su equipo aquí mismo, pero /personas/[id] no es para él.
@@ -139,7 +144,11 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
           </CardHeader>
           <CardContent>
             <div className="max-w-lg">
-              <MinistryForm people={people} ministry={ministry} />
+              <MinistryForm
+                people={people}
+                ministry={ministry}
+                canDesignatePrayerMinistry={hasRole(user, "administrador")}
+              />
             </div>
           </CardContent>
         </Card>

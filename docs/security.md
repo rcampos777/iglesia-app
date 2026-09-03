@@ -175,6 +175,43 @@ error:
 Verificado en vivo con una sesión de rol único `miembro`: las 11 rutas
 restringidas redirigen, y el menú queda en "Panel | Mi portal".
 
+## 8.d Escalada de privilegios en `grants_prayer_access` (2026-09-02)
+
+Al introducir el flag que designa el ministerio de intercesión (0020) se
+probó la escalada **con un token de sesión real** de
+`coordinador_ministerio`, y la prueba encontró un fallo en la primera
+versión del blindaje:
+
+- `0021` usaba `revoke update (grants_prayer_access) on ministries from
+authenticated`. **No funciona**: en Postgres el privilegio `UPDATE` a
+  nivel de tabla implica todas las columnas, y revocar una columna suelta
+  no lo quita. El intento del coordinador no fue rechazado por permisos,
+  sino que llegó hasta el índice único (`23505`) — señal de que sí tenía
+  permiso de escribir la columna. Solo el hecho de que ya hubiera un
+  ministerio marcado evitó la escalada.
+- `0022` lo resuelve con un **trigger** `before insert or update` que
+  rechaza cualquier cambio del flag hecho por quien no sea
+  `administrador`, venga por donde venga (app, API directa, SQL).
+
+Pruebas negativas re-ejecutadas contra la base real, todas bloqueadas
+con `42501`:
+
+| Intento                              | Rol         | Resultado            |
+| ------------------------------------ | ----------- | -------------------- |
+| `PATCH` marcando su ministerio       | coordinador | ❌ bloqueado         |
+| `INSERT` de un ministerio ya marcado | coordinador | ❌ bloqueado         |
+| RPC `set_prayer_ministry`            | coordinador | ❌ bloqueado         |
+| Leer `prayer_requests`               | coordinador | ❌ 0 filas           |
+| Otorgarse rol `administrador`        | pastor      | ❌ bloqueado por RLS |
+| Leer `audit_log`                     | pastor      | ❌ 0 filas           |
+
+Camino legítimo verificado: el administrador mueve la designación por
+RPC y queda registrado en `audit_log`.
+
+**Lección**: para restringir UNA columna, el privilegio por columna no
+sirve si el rol ya tiene `UPDATE` de tabla. Usar trigger (o revocar la
+tabla y conceder columna por columna).
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

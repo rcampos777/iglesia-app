@@ -6,7 +6,7 @@ import { requireRole, AuthError } from "@/lib/auth/require-role";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
 import type { AppRole } from "@/types/database";
 
-const ADMIN_ROLES = ["administrador", "pastor"] as const;
+const ADMIN_ROLES = ["administrador"] as const;
 
 export async function grantRoleAction(targetUserId: string, role: AppRole): Promise<ActionResult> {
   const actor = await (async () => {

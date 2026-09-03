@@ -2,10 +2,15 @@ import { notFound, redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getPrayerRequestDetail } from "@/lib/data/prayer";
-import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 import { StatusControls } from "./status-controls";
 
-const PRAYER_ROLES = ["intercesor", "pastor", "administrador"] as const;
+/**
+ * Quién lee peticiones de oración ya NO es una lista fija de roles: es
+ * `is_prayer_reader()` en la base (rol intercesor, administrador, o
+ * líder del ministerio de intercesión). Ver 0020_prayer_access_scope.sql.
+ */
 
 export default async function PrayerRequestDetailPage({
   params,
@@ -14,7 +19,10 @@ export default async function PrayerRequestDetailPage({
 }) {
   const { id } = await params;
   const user = await getCurrentUser();
-  if (!hasAnyRole(user, [...PRAYER_ROLES])) redirect("/dashboard");
+  if (!user) redirect("/login");
+  const prayerDb = await createClient();
+  const { data: canRead } = await prayerDb.rpc("is_prayer_reader");
+  if (!canRead) redirect("/dashboard");
 
   const request = await getPrayerRequestDetail(id);
   if (!request) notFound();

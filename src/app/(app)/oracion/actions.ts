@@ -2,16 +2,20 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { requireRole, AuthError } from "@/lib/auth/require-role";
+import { requirePrayerReader, AuthError } from "@/lib/auth/require-role";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
 import type { PrayerStatus } from "@/types/database";
 
-const PRAYER_ROLES = ["intercesor", "pastor", "administrador"] as const;
+/**
+ * Quién lee peticiones de oración ya NO es una lista fija de roles: es
+ * `is_prayer_reader()` en la base (rol intercesor, administrador, o
+ * líder del ministerio de intercesión). Ver 0020_prayer_access_scope.sql.
+ */
 
 export async function assignToMeAction(requestId: string): Promise<ActionResult> {
   const user = await (async () => {
     try {
-      return await requireRole([...PRAYER_ROLES]);
+      return await requirePrayerReader();
     } catch (err) {
       if (err instanceof AuthError) return null;
       throw err;
@@ -37,7 +41,7 @@ export async function updatePrayerStatusAction(
   status: PrayerStatus,
 ): Promise<ActionResult> {
   try {
-    await requireRole([...PRAYER_ROLES]);
+    await requirePrayerReader();
   } catch (err) {
     if (err instanceof AuthError) return actionError(err.message);
     throw err;

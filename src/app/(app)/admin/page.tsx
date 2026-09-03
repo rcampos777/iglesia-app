@@ -11,7 +11,7 @@ import { listUsersWithRoles } from "@/lib/data/admin";
 import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
 import { RoleToggles } from "./role-toggles";
 
-const ADMIN_ROLES = ["administrador", "pastor"] as const;
+const ADMIN_ROLES = ["administrador"] as const;
 
 export default async function AdminPage() {
   const user = await getCurrentUser();

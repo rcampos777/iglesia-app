@@ -65,7 +65,10 @@ export const NAV_ITEMS: NavItem[] = [
   {
     href: "/oracion",
     label: "Peticiones de oración",
-    roles: ["intercesor", "pastor", "administrador"],
+    // `pastor` ya no entra por rol: además de estos, lo ve el líder del
+    // ministerio de intercesión — que no es una condición de rol, así que
+    // se añade en `visibleNavItems` con el flag `isPrayerReader`.
+    roles: ["intercesor", "administrador"],
   },
   {
     href: "/importar",
@@ -97,9 +100,15 @@ export const NAV_ITEMS: NavItem[] = [
       "administrador",
     ],
   },
-  { href: "/admin", label: "Administración", roles: ["administrador", "pastor"] },
+  { href: "/admin", label: "Administración", roles: ["administrador"] },
 ];
 
-export function visibleNavItems(userRoles: AppRole[]): NavItem[] {
-  return NAV_ITEMS.filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)));
+export function visibleNavItems(
+  userRoles: AppRole[],
+  extras: { isPrayerReader?: boolean } = {},
+): NavItem[] {
+  return NAV_ITEMS.filter((item) => {
+    if (item.href === "/oracion" && extras.isPrayerReader) return true;
+    return !item.roles || item.roles.some((r) => userRoles.includes(r));
+  });
 }

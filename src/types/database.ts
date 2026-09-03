@@ -323,6 +323,7 @@ export type MinistryRow = {
   id: string;
   name: string;
   description: string | null;
+  grants_prayer_access: boolean;
   leader_person_id: string | null;
   meeting_schedule_text: string | null;
   location: string | null;
@@ -412,6 +413,11 @@ export interface Database {
       is_admin: { Args: Record<string, never>; Returns: boolean };
       current_person_id: { Args: Record<string, never>; Returns: string | null };
       is_ministry_leader: { Args: { p_ministry_id: string }; Returns: boolean };
+      is_prayer_reader: { Args: Record<string, never>; Returns: boolean };
+      set_prayer_ministry: {
+        Args: { p_ministry_id: string; p_enabled: boolean };
+        Returns: undefined;
+      };
       list_people_for_ministry_picker: {
         Args: Record<string, never>;
         Returns: { id: string; first_name: string; last_name: string }[];

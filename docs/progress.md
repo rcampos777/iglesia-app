@@ -165,6 +165,22 @@ separado del de desarrollo y publicar ahí formalmente.
 
 ## Bitácora
 
+### 2026-09-02 — El rol `pastor` deja de ser administrador
+
+A raíz de que el usuario probó una cuenta normal y luego explicó su
+realidad organizacional (muchos pastores de área, varios de título sin
+nada a su cargo; el rango más alto son los apóstoles), se acotó el rol
+`pastor`. Migraciones `0020`–`0023`. Ver `docs/decisions.md` y
+`docs/security.md` §8.d.
+
+**Un bug de seguridad encontrado por una prueba negativa**: el primer
+blindaje del flag `grants_prayer_access` (`0021`) usaba `revoke update
+(columna)`, que en Postgres **no hace nada** si el rol ya tiene `UPDATE`
+de tabla. Se descubrió al intentar la escalada con un token real de
+`coordinador_ministerio`: el intento no fue rechazado por permisos, sino
+que llegó al índice único. Corregido en `0022` con un trigger. Las 6
+pruebas negativas se re-ejecutaron y todas quedan bloqueadas.
+
 ### 2026-09-02 — Cierre de alcance para el rol `miembro`
 
 El usuario creó una cuenta normal y reportó que veía cosas que no

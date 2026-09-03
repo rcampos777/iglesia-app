@@ -52,7 +52,12 @@ export const STAFF_ROLES: AppRole[] = [
   "administrador",
 ];
 
-export const ADMIN_ROLES: AppRole[] = ["pastor", "administrador"];
+/**
+ * Espeja `is_admin()` en la base (0023): solo `administrador`. El rol
+ * `pastor` quedó acotado a sus clases y ministerios — en esta iglesia hay
+ * muchos pastores de área y varios sin nada a su cargo.
+ */
+export const ADMIN_ROLES: AppRole[] = ["administrador"];
 
 export function isStaff(user: CurrentUser | null): boolean {
   return hasAnyRole(user, STAFF_ROLES);

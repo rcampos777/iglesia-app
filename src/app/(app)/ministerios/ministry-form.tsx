@@ -24,8 +24,11 @@ const initialState: ActionResult<string | undefined> = { ok: true, data: undefin
 export function MinistryForm({
   people,
   ministry,
+  canDesignatePrayerMinistry = false,
 }: {
   people: PersonPickerOption[];
+  /** Solo un administrador puede designar el ministerio de intercesión. */
+  canDesignatePrayerMinistry?: boolean;
   /** Si viene, el formulario edita; si no, crea. */
   ministry?: MinistryRow;
 }) {
@@ -126,6 +129,28 @@ export function MinistryForm({
           </SelectContent>
         </Select>
       </div>
+
+      {canDesignatePrayerMinistry && (
+        <div className="space-y-2">
+          <Label htmlFor="grantsPrayerAccess">Acceso a peticiones de oración</Label>
+          <Select
+            name="grantsPrayerAccess"
+            defaultValue={ministry ? String(ministry.grants_prayer_access) : "false"}
+          >
+            <SelectTrigger id="grantsPrayerAccess" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="false">No</SelectItem>
+              <SelectItem value="true">Sí — este es el ministerio de intercesión</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-muted-foreground text-sm">
+            Si lo marcas, los líderes de este ministerio podrán leer las peticiones de oración
+            aunque no tengan el rol de intercesor. Solo un ministerio puede tener esta marca.
+          </p>
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={isPending}>

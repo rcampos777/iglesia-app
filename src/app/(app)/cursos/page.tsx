@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listClassOfferings } from "@/lib/data/courses";
 import { redirect } from "next/navigation";
-import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
+import { getCurrentUser, hasAnyRole, hasRole, isStaff } from "@/lib/auth/session";
 
 const MANAGE_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
 
@@ -21,7 +21,14 @@ export default async function CoursesPage() {
   // Un miembro ve SUS clases en /portal, no el catálogo completo.
   if (!isStaff(user)) redirect("/portal");
 
-  const offerings = await listClassOfferings();
+  // El pastor ve solo las clases que él imparte; el administrador ve
+  // todas (decisión 2026-09-02, docs/roles-and-permissions.md).
+  const scopedToOwn = hasRole(user, "pastor") && !hasRole(user, "administrador");
+  const offerings = scopedToOwn
+    ? user?.personId
+      ? await listClassOfferings({ teacherPersonId: user.personId })
+      : []
+    : await listClassOfferings();
   const canManage = hasAnyRole(user, [...MANAGE_ROLES]);
 
   const byCategory = new Map<string, typeof offerings>();
@@ -36,7 +43,11 @@ export default async function CoursesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Cursos y clases</h1>
-          <p className="text-muted-foreground">Hombres, mujeres, adoración, liderazgo y más.</p>
+          <p className="text-muted-foreground">
+            {scopedToOwn
+              ? "Las clases que impartes."
+              : "Hombres, mujeres, adoración, liderazgo y más."}
+          </p>
         </div>
         {canManage && (
           <div className="flex gap-2">
@@ -57,7 +68,11 @@ export default async function CoursesPage() {
       </div>
 
       {offerings.length === 0 && (
-        <p className="text-muted-foreground">Todavía no hay clases creadas.</p>
+        <p className="text-muted-foreground">
+          {scopedToOwn
+            ? "No impartes ninguna clase todavía. Aquí verás solo las clases donde eres el maestro."
+            : "Todavía no hay clases creadas."}
+        </p>
       )}
 
       {Array.from(byCategory.entries()).map(([category, categoryOfferings]) => (

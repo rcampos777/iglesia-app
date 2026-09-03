@@ -11,10 +11,15 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { listPrayerRequests } from "@/lib/data/prayer";
-import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 import type { PrayerStatus } from "@/types/database";
 
-const PRAYER_ROLES = ["intercesor", "pastor", "administrador"] as const;
+/**
+ * Quién lee peticiones de oración ya NO es una lista fija de roles: es
+ * `is_prayer_reader()` en la base (rol intercesor, administrador, o
+ * líder del ministerio de intercesión). Ver 0020_prayer_access_scope.sql.
+ */
 
 const statusLabels: Record<string, string> = {
   nueva: "Nueva",
@@ -29,7 +34,10 @@ export default async function PrayerInboxPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const user = await getCurrentUser();
-  if (!hasAnyRole(user, [...PRAYER_ROLES])) redirect("/dashboard");
+  if (!user) redirect("/login");
+  const supabase = await createClient();
+  const { data: canRead } = await supabase.rpc("is_prayer_reader");
+  if (!canRead) redirect("/dashboard");
 
   const params = await searchParams;
   const status = (params.status as PrayerStatus | "todas" | undefined) ?? "todas";

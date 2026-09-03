@@ -8,16 +8,32 @@ export interface MinistryWithSummary extends MinistryRow {
 }
 
 export async function listMinistries(
-  filters: { includeInactive?: boolean } = {},
+  filters: { includeInactive?: boolean; ledByPersonId?: string } = {},
 ): Promise<MinistryWithSummary[]> {
   const supabase = await createClient();
 
   let query = supabase.from("ministries").select("*").order("name");
   if (!filters.includeInactive) query = query.eq("is_active", true);
 
-  const { data: ministries, error } = await query;
+  const { data: allMinistries, error } = await query;
   if (error) throw new Error(`No se pudieron cargar los ministerios: ${error.message}`);
-  if (!ministries || ministries.length === 0) return [];
+  if (!allMinistries || allMinistries.length === 0) return [];
+
+  // Acotar a los ministerios que lidera esta persona: designado en
+  // `leader_person_id` o con membresía activa lider/colider.
+  let ministries = allMinistries;
+  if (filters.ledByPersonId) {
+    const personId = filters.ledByPersonId;
+    const { data: led } = await supabase
+      .from("ministry_memberships")
+      .select("ministry_id")
+      .eq("person_id", personId)
+      .is("left_at", null)
+      .in("role_in_ministry", ["lider", "colider"]);
+    const ledIds = new Set((led ?? []).map((m) => m.ministry_id));
+    ministries = allMinistries.filter((m) => m.leader_person_id === personId || ledIds.has(m.id));
+    if (ministries.length === 0) return [];
+  }
 
   const leaderIds = ministries
     .map((m) => m.leader_person_id)

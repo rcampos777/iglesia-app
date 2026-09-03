@@ -2,15 +2,15 @@
 
 ## 1. Roles mínimos
 
-| Rol (código)             | Descripción                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------ |
-| `miembro`                | Rol por defecto de toda cuenta nueva. Acceso al portal del miembro.                  |
-| `maestro`                | Gestiona sus propias clases (asistencia, matrícula) donde es `teacher_person_id`.    |
-| `seguimiento`            | Da seguimiento a visitantes; puede crear personas/visitantes.                        |
-| `intercesor`             | Atiende peticiones de oración.                                                       |
-| `coordinador_ministerio` | Gestiona personas, cursos, clases y **ministerios** de su(s) área(s).                |
-| `pastor`                 | Acceso administrativo amplio (equivalente a administrador salvo config del sistema). |
-| `administrador`          | Acceso completo, incluida gestión de roles y configuración.                          |
+| Rol (código)             | Descripción                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `miembro`                | Rol por defecto de toda cuenta nueva. Acceso al portal del miembro.                   |
+| `maestro`                | Gestiona sus propias clases (asistencia, matrícula) donde es `teacher_person_id`.     |
+| `seguimiento`            | Da seguimiento a visitantes; puede crear personas/visitantes.                         |
+| `intercesor`             | Atiende peticiones de oración.                                                        |
+| `coordinador_ministerio` | Gestiona personas, cursos, clases y **ministerios** de su(s) área(s).                 |
+| `pastor`                 | **Acotado** (desde 2026-09-02): sus clases y los ministerios que lidera. No es admin. |
+| `administrador`          | Único rol con acceso completo: gestión de roles, configuración y todo lo demás.       |
 
 Un usuario puede tener **varios roles** a la vez (tabla `user_roles`,
 clave compuesta `(user_id, role)`). La UI y las políticas RLS combinan
@@ -27,23 +27,33 @@ revisión posterior.
 Leyenda: **C**rear, **L**eer, **A**ctualizar, **E**liminar. `propio` =
 solo sobre registros propios o asignados a uno.
 
-| Módulo                    | miembro       | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor | administrador |
-| ------------------------- | ------------- | ------------- | ------------ | --------------------- | ----------------- | ------ | ------------- |
-| Directorio de personas    | L propio      | L             | CLA          | CLA                   | CLA               | CLA    | CLAE          |
-| Cursos / categorías       | L             | L             | L            | L                     | CLA               | CLA    | CLA           |
-| Clases (offerings)        | L             | CLA propio    | L            | L                     | CLA               | CLA    | CLA           |
-| Ministerios (catálogo)    | L             | L             | L            | L                     | CLA               | CLA    | CLA           |
-| Membresía de ministerio   | L propia      | L propia      | L            | L                     | CLA               | CLA    | CLA           |
-| Matrícula                 | L propio      | CLA propio    | CLA          | L                     | CLA               | CLA    | CLA           |
-| Asistencia                | L propio      | CLA propio    | L            | L                     | CLA               | CLA    | CLA           |
-| Visitantes / seguimiento  | –             | –             | CLA propio+  | L                     | CLA               | CLA    | CLA           |
-| Check-in servicios        | C propio (QR) | –             | C            | L                     | CLA               | CLA    | CLA           |
-| Peticiones de oración     | C, L propio   | –             | –            | CLA asignadas+bandeja | –                 | CLA    | CLA           |
-| Notificaciones/plantillas | –             | –             | –            | –                     | L                 | CLA    | CLA           |
-| Encuestas                 | responder     | L, responder  | L, responder | L, responder          | CLA               | CLA    | CLA           |
-| Importación de datos      | –             | –             | CLA          | –                     | CLA               | CLA    | CLA           |
-| Roles de usuarios         | L propio      | L propio      | L propio     | L propio              | L propio          | CLA    | CLA           |
-| Reportes/paneles          | propio        | propio+clases | seguimiento  | oración               | su área           | todo   | todo          |
+| Módulo                    | miembro       | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor                     | administrador |
+| ------------------------- | ------------- | ------------- | ------------ | --------------------- | ----------------- | -------------------------- | ------------- |
+| Directorio de personas    | L propio      | L             | CLA          | CLA                   | CLA               | CLA                        | CLAE          |
+| Cursos / categorías       | –             | L             | L            | L                     | CLA               | solo propias               | CLA           |
+| Clases (offerings)        | L             | CLA propio    | L            | L                     | CLA               | CLA                        | CLA           |
+| Ministerios (catálogo)    | –             | L             | L            | L                     | CLA               | solo los que lidera        | CLA           |
+| Membresía de ministerio   | L propia      | L propia      | L            | L                     | CLA               | CLA                        | CLA           |
+| Matrícula                 | L propio      | CLA propio    | CLA          | L                     | CLA               | CLA                        | CLA           |
+| Asistencia                | L propio      | CLA propio    | L            | L                     | CLA               | CLA                        | CLA           |
+| Visitantes / seguimiento  | –             | –             | CLA propio+  | L                     | CLA               | CLA                        | CLA           |
+| Check-in servicios        | C propio (QR) | –             | C            | L                     | CLA               | CLA                        | CLA           |
+| Peticiones de oración     | C, L propio   | –             | –            | CLA asignadas+bandeja | –                 | solo si lidera intercesión | CLA           |
+| Notificaciones/plantillas | –             | –             | –            | –                     | L                 | CLA                        | CLA           |
+| Encuestas                 | responder     | L, responder  | L, responder | L, responder          | CLA               | CLA                        | CLA           |
+| Importación de datos      | –             | –             | CLA          | –                     | CLA               | CLA                        | CLA           |
+| Roles de usuarios         | L propio      | L propio      | L propio     | L propio              | L propio          | L propio                   | CLA           |
+| Reportes/paneles          | propio        | propio+clases | seguimiento  | oración               | su área           | todo                       | todo          |
+
+**El rol `pastor` NO es administrador** (decisión 2026-09-02): en esta
+iglesia hay muchos pastores de áreas distintas y varios sin nada a su
+cargo; el rango más alto son los apóstoles. El pastor ve el directorio y
+los reportes generales, pero en **Cursos** solo las clases que imparte y
+en **Ministerios** solo los que lidera. No otorga roles, no elimina
+personas, no ve la bitácora de auditoría y no lee peticiones de oración
+salvo que lidere el ministerio de intercesión. El flujo previsto es:
+el administrador crea el ministerio, pone al pastor como líder, y ese
+pastor gestiona su propia gente.
 
 **Excepción por ámbito (ministerios)**: además de los roles de la matriz,
 el **líder de un ministerio concreto** (designado en

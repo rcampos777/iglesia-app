@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 import { visibleNavItems } from "@/lib/auth/nav-items";
 import { AppNav } from "@/components/layout/app-nav";
 
@@ -14,7 +15,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     redirect("/login");
   }
 
-  const items = visibleNavItems(user.roles);
+  // El líder del ministerio de intercesión ve la bandeja de oración sin
+  // tener el rol `intercesor` (ver 0020_prayer_access_scope.sql).
+  const supabase = await createClient();
+  const { data: isPrayerReader } = await supabase.rpc("is_prayer_reader");
+
+  const items = visibleNavItems(user.roles, { isPrayerReader: Boolean(isPrayerReader) });
 
   return (
     <div className="min-h-screen md:pl-60">

@@ -16,6 +16,7 @@ export const ministrySchema = z.object({
   meetingScheduleText: z.string().trim().max(150).optional().or(z.literal("")),
   location: z.string().trim().max(150).optional().or(z.literal("")),
   isActive: z.union([z.literal("true"), z.literal("false")]).default("true"),
+  grantsPrayerAccess: z.union([z.literal("true"), z.literal("false")]).default("false"),
 });
 export type MinistryInput = z.infer<typeof ministrySchema>;
 

@@ -42,6 +42,8 @@ export interface ClassOfferingWithNames extends ClassOfferingRow {
 export async function listClassOfferings(
   filters: {
     status?: ClassStatus | "todas";
+    /** Acota a las clases que imparte esta persona (ver docs/roles-and-permissions.md). */
+    teacherPersonId?: string;
   } = {},
 ): Promise<ClassOfferingWithNames[]> {
   const supabase = await createClient();
@@ -52,6 +54,9 @@ export async function listClassOfferings(
     .order("start_date", { ascending: false });
   if (filters.status && filters.status !== "todas") {
     query = query.eq("status", filters.status);
+  }
+  if (filters.teacherPersonId) {
+    query = query.eq("teacher_person_id", filters.teacherPersonId);
   }
 
   const { data: offerings, error } = await query;

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { getClassOfferingDetail } from "@/lib/data/courses";
 import { listPeople } from "@/lib/data/people";
-import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
+import { getCurrentUser, hasAnyRole, hasRole, isStaff } from "@/lib/auth/session";
 import { EnrollForm } from "./enroll-form";
 import { AttendancePanel } from "./attendance-panel";
 import { AddSessionForm } from "./add-session-form";
@@ -31,6 +31,16 @@ export default async function ClassOfferingPage({ params }: { params: Promise<{ 
   if (!isStaff(user)) redirect("/portal");
 
   const detail = await getClassOfferingDetail(id);
+
+  // El pastor solo abre las clases que él imparte.
+  if (
+    detail &&
+    hasRole(user, "pastor") &&
+    !hasRole(user, "administrador") &&
+    detail.offering.teacher_person_id !== user?.personId
+  ) {
+    redirect("/cursos");
+  }
 
   if (!detail) notFound();
 

@@ -32,3 +32,22 @@ export async function requireAuth(): Promise<CurrentUser> {
   }
   return user;
 }
+
+/**
+ * Quién puede leer peticiones de oración. Espeja la función SQL
+ * `is_prayer_reader()` (rol intercesor, administrador, o líder del
+ * ministerio marcado con `grants_prayer_access`) — defensa en
+ * profundidad, no reemplazo de la RLS. Ver 0020_prayer_access_scope.sql.
+ */
+export async function requirePrayerReader(): Promise<CurrentUser> {
+  const user = await requireAuth();
+
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data: canRead } = await supabase.rpc("is_prayer_reader");
+
+  if (!canRead) {
+    throw new AuthError("No tienes permiso para ver las peticiones de oración.");
+  }
+  return user;
+}

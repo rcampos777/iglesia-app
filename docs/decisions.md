@@ -2,6 +2,36 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-09-02 — `pastor` deja de ser administrador; oración se ata al ministerio de intercesión
+
+**Decisión** (dueño del producto, cambia `CLAUDE.md` §3.11 y §4):
+
+1. `is_admin()` pasa a significar **solo `administrador`**. El rol
+   `pastor` pierde: otorgar/revocar roles, eliminar personas, plantillas
+   de notificación y bitácora de auditoría.
+2. `pastor` queda **acotado**: en Cursos ve solo las clases que imparte;
+   en Ministerios, solo los que lidera. Conserva lectura del directorio y
+   reportes generales.
+3. Las peticiones de oración las leen: rol `intercesor`, `administrador`,
+   y el **líder del ministerio de intercesión**. El rol `pastor` por sí
+   solo ya no da acceso.
+
+**Contexto**: en esta iglesia hay muchos pastores de áreas distintas, y
+varios son "pastores de título" que hoy no tienen nada a su cargo. El
+rango más alto son los apóstoles. Tratar `pastor` como equivalente a
+administrador daba acceso amplio a decenas de personas sin
+responsabilidad operativa — justo lo contrario del menor privilegio.
+
+**Cómo se identifica el ministerio de intercesión**: con el flag
+`ministries.grants_prayer_access`, no por nombre (los nombres no son
+identificadores, `CLAUDE.md` §3.3). Lo designa el administrador desde la
+app; hay un índice único parcial para que solo haya uno a la vez.
+
+**Consecuencias**: `pastor` sigue existiendo como rol y es la pieza que
+el administrador usa para delegar: crea el ministerio, pone al pastor
+como líder, y a partir de ahí ese pastor gestiona su propia gente sin
+tocar nada más.
+
 ## 2026-09-02 — Bug real de RLS encontrado en vivo: el líder no veía a su equipo
 
 **Decisión**: dar al líder de ministerio lectura de `people` acotada a su
