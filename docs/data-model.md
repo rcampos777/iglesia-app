@@ -110,6 +110,24 @@ null`: impide duplicar una membresía activa, pero permite que una
   iglesia quiere seguir. Un trigger mantiene `attended_at` coherente con
   `attended`. Único `(activity_id, person_id)` — CLAUDE.md §3.1.
 
+## 3.d Trayectoria de la persona (sin tabla nueva)
+
+`src/lib/data/journey.ts` arma la **trayectoria** de una persona juntando
+lo que ya registran los demás módulos: entrada al directorio, primera
+visita y seguimiento, matrículas y cursos completados, entrada/salida de
+ministerios, actividades e historial de check-ins.
+
+**No hay tabla nueva a propósito**: los datos ya existían, pero repartidos
+en cinco pantallas. El valor es verlos juntos y en orden — por dónde pasó
+la persona y dónde está hoy. Se muestra en `/personas/[id]`, de modo que
+el pastor o maestro que da la clase de nuevos convertidos pueda ver si
+esa persona siguió a la escuela de líderes y si ya entró a servir en
+algún ministerio.
+
+La "ruta de formación" se ordena por fecha de inicio de la clase, así que
+el recorrido natural (nuevos convertidos → liderazgo) se lee de arriba
+abajo sin necesidad de configurar una secuencia.
+
 ## 4. Matrícula, asistencia y progreso
 
 - `enrollments`: relación persona↔class_offering, con `status` (`inscrito

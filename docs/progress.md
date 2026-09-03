@@ -166,6 +166,30 @@ separado del de desarrollo y publicar ahí formalmente.
 
 ## Bitácora
 
+### 2026-09-02 — Trayectoria de la persona (requisito de la Pastora Didi)
+
+En la ficha de una persona, el staff ahora ve **por dónde ha pasado y
+dónde está hoy**: entrada al directorio, primera visita y seguimiento,
+ruta de formación (cursos con estado y % de asistencia), ministerios
+donde sirve o sirvió, actividades y check-ins — todo en una línea de
+tiempo.
+
+**Sin migración**: no hacía falta ninguna tabla nueva. Los datos ya
+existían repartidos en cinco módulos; lo que faltaba era juntarlos. Las
+políticas RLS existentes ya permiten al staff leerlos todos.
+
+Caso verificado en vivo, con sesión real de **pastor**, sobre una persona
+que recorrió la ruta completa: primera visita (5 ene) → directorio →
+Discipulado I / Nuevos convertidos **completado** con 100% de asistencia
+→ Escuela de líderes / Liderazgo **en progreso** con 50% → empezó a
+servir en Ujieres. Es exactamente el "algo tangible de dónde está hoy la
+persona" que pidió el usuario.
+
+Nota sobre los datos de prueba: las fechas sintéticas no son coherentes
+entre sí (`enrolled_at` de agosto con `completed_at` de mayo), así que la
+línea de tiempo de esa persona se ve desordenada. No es un fallo del
+código — ordena bien por fecha; es el dato sembrado.
+
 ### 2026-09-02 — Módulo de Actividades
 
 Eventos puntuales de la iglesia (retiros, campañas, convivencias), con

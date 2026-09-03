@@ -3,13 +3,13 @@ import { PersonForm } from "@/components/people/person-form";
 import { SendEmailForm } from "@/components/people/send-email-form";
 import { updatePersonAction } from "../actions";
 import { getPerson } from "@/lib/data/people";
-import { listMinistriesForPerson } from "@/lib/data/ministries";
+import { getPersonJourney } from "@/lib/data/journey";
+import { PersonJourneyCard } from "@/components/people/person-journey";
 import { redirect } from "next/navigation";
 import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { membershipStatusLabels, ministryMemberRoleLabels } from "@/lib/labels";
-import Link from "next/link";
+import { membershipStatusLabels } from "@/lib/labels";
 
 const WRITE_ROLES = ["administrador", "pastor", "coordinador_ministerio", "seguimiento"] as const;
 
@@ -18,7 +18,7 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
   const user = await getCurrentUser();
   if (!isStaff(user)) redirect("/portal");
 
-  const [person, ministries] = await Promise.all([getPerson(id), listMinistriesForPerson(id)]);
+  const [person, journey] = await Promise.all([getPerson(id), getPersonJourney(id)]);
 
   if (!person) {
     notFound();
@@ -32,7 +32,7 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -53,30 +53,7 @@ export default async function PersonDetailPage({ params }: { params: Promise<{ i
         </p>
       )}
 
-      {ministries.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Sirve en</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              {ministries.map((m) => (
-                <li key={m.id} className="flex items-center justify-between gap-2">
-                  <Link
-                    href={`/ministerios/${m.ministry_id}`}
-                    className="font-medium hover:underline"
-                  >
-                    {m.ministryName}
-                  </Link>
-                  <span className="text-muted-foreground">
-                    {ministryMemberRoleLabels[m.role_in_ministry]} · desde {m.joined_at}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
+      {journey && <PersonJourneyCard journey={journey} />}
 
       {canWrite && person.email && (
         <Card>
