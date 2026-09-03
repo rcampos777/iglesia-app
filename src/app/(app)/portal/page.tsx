@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getMyEnrollments, getMyPerson, getMyPrayerRequests } from "@/lib/data/portal";
+import { listMinistriesForPerson } from "@/lib/data/ministries";
+import { ministryMemberRoleLabels } from "@/lib/labels";
 import { ContactForm } from "./contact-form";
 import { PrayerRequestForm } from "./prayer-request-form";
 import { MyQrCode } from "./my-qr-code";
@@ -21,10 +23,11 @@ export default async function PortalPage() {
   if (!user) redirect("/login");
   if (!user.personId) redirect("/dashboard");
 
-  const [person, enrollments, prayerRequests] = await Promise.all([
+  const [person, enrollments, prayerRequests, ministries] = await Promise.all([
     getMyPerson(user.personId),
     getMyEnrollments(user.personId),
     getMyPrayerRequests(user.userId),
+    listMinistriesForPerson(user.personId),
   ]);
 
   return (
@@ -56,6 +59,37 @@ export default async function PortalPage() {
           <CardTitle>Mi información de contacto</CardTitle>
         </CardHeader>
         <CardContent>{person && <ContactForm person={person} />}</CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Donde sirvo</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {ministries.length === 0 && (
+            <p className="text-muted-foreground">
+              Todavía no sirves en ningún ministerio.{" "}
+              <Link href="/ministerios" className="underline">
+                Mira las áreas de servicio
+              </Link>
+              .
+            </p>
+          )}
+          {ministries.map((m) => (
+            <div key={m.id} className="flex items-center justify-between border-b pb-2">
+              <div>
+                <Link
+                  href={`/ministerios/${m.ministry_id}`}
+                  className="font-medium hover:underline"
+                >
+                  {m.ministryName}
+                </Link>
+                <p className="text-muted-foreground text-sm">Desde {m.joined_at}</p>
+              </div>
+              <Badge variant="outline">{ministryMemberRoleLabels[m.role_in_ministry]}</Badge>
+            </div>
+          ))}
+        </CardContent>
       </Card>
 
       <Card>

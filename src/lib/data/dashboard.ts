@@ -34,6 +34,13 @@ export async function getDashboardCounts(user: CurrentUser | null): Promise<Dash
           .select("id", { count: "exact", head: true })
           .eq("person_id", user.personId ?? ""),
       ),
+      countQuery("Ministerios donde sirvo", () =>
+        supabase
+          .from("ministry_memberships")
+          .select("id", { count: "exact", head: true })
+          .eq("person_id", user.personId ?? "")
+          .is("left_at", null),
+      ),
     ]);
   }
 
@@ -46,6 +53,12 @@ export async function getDashboardCounts(user: CurrentUser | null): Promise<Dash
         .from("visitor_follow_ups")
         .select("id", { count: "exact", head: true })
         .in("status", ["pendiente", "en_progreso"]),
+    ),
+    countQuery("Ministerios activos", () =>
+      supabase
+        .from("ministries")
+        .select("id", { count: "exact", head: true })
+        .eq("is_active", true),
     ),
     countQuery("Clases activas", () =>
       supabase

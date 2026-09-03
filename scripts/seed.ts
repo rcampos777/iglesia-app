@@ -318,6 +318,86 @@ async function seedPrayerRequests(memberUserId: string, memberPersonId: string) 
   console.log(`  ${genericRequests.length} peticiones de oración sintéticas creadas.`);
 }
 
+/**
+ * Ministerios sintéticos con su gente. Los nombres de los ministerios
+ * son genéricos de cualquier iglesia (no datos reales de ninguna), y
+ * las personas asignadas salen del generador sintético.
+ */
+async function seedMinistries(peopleIds: string[], coordinatorPersonId: string) {
+  const definitions = [
+    {
+      name: "Alabanza",
+      description: "Equipo de música y adoración.",
+      schedule: "Jueves 7:00 p.m.",
+    },
+    {
+      name: "Ujieres",
+      description: "Recibimiento y orden en los servicios.",
+      schedule: "Domingos 9:00 a.m.",
+    },
+    {
+      name: "Ministerio de niños",
+      description: "Enseñanza y cuidado de los niños.",
+      schedule: "Domingos 10:00 a.m.",
+    },
+    {
+      name: "Intercesión",
+      description: "Equipo de oración de la iglesia.",
+      schedule: "Martes 6:00 p.m.",
+    },
+    {
+      name: "Medios",
+      description: "Sonido, proyección y transmisión.",
+      schedule: "Domingos 8:30 a.m.",
+    },
+  ];
+
+  const { data: ministries, error } = await supabase
+    .from("ministries")
+    .insert(
+      definitions.map((d, i) => ({
+        name: d.name,
+        description: d.description,
+        meeting_schedule_text: d.schedule,
+        // El coordinador de prueba lidera el primero, para poder
+        // verificar en vivo la autorización por ámbito (líder gestiona
+        // su propio ministerio sin ser administrador).
+        leader_person_id: i === 0 ? coordinatorPersonId : null,
+        is_active: true,
+      })),
+    )
+    .select("id, name");
+
+  if (error) throw error;
+  if (!ministries) return;
+
+  const memberships: {
+    ministry_id: string;
+    person_id: string;
+    role_in_ministry: "lider" | "colider" | "miembro";
+    joined_at: string;
+  }[] = [];
+
+  for (const ministry of ministries) {
+    const team = faker.helpers.arrayElements(peopleIds, faker.number.int({ min: 3, max: 7 }));
+    team.forEach((personId, index) => {
+      memberships.push({
+        ministry_id: ministry.id,
+        person_id: personId,
+        role_in_ministry: index === 0 ? "lider" : index === 1 ? "colider" : "miembro",
+        joined_at: faker.date.past({ years: 2 }).toISOString().slice(0, 10),
+      });
+    });
+  }
+
+  const { error: membershipError } = await supabase
+    .from("ministry_memberships")
+    .insert(memberships);
+  if (membershipError) throw membershipError;
+
+  console.log(`  ${ministries.length} ministerios con ${memberships.length} personas sirviendo.`);
+}
+
 async function main() {
   console.log(`Sembrando datos sintéticos en ${SUPABASE_URL} (ambiente: ${APP_ENV})...`);
   console.log("\n1. Cuentas de prueba por rol:");
@@ -351,6 +431,9 @@ async function main() {
     accountResults["miembro@iglesia.test"]!.userId,
     accountResults["miembro@iglesia.test"]!.personId,
   );
+
+  console.log("\n8. Ministerios:");
+  await seedMinistries(peopleIds, accountResults["coordinador@iglesia.test"]!.personId);
 
   console.log("\nListo. Todos los datos son sintéticos — ninguno corresponde a personas reales.");
 }

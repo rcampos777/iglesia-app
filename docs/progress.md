@@ -1,6 +1,6 @@
 # Progreso del proyecto
 
-Última actualización: 2026-08-16.
+Última actualización: 2026-09-02.
 
 ## Estado general: MVP verificado de punta a punta ✅
 
@@ -78,24 +78,25 @@ anteriores.
 
 ## Fases (orden de prioridad del producto)
 
-| #   | Fase                              | Estado                                                          |
-| --- | --------------------------------- | --------------------------------------------------------------- |
-| 1   | Base del proyecto y documentación | ✅ Hecho                                                        |
-| 2   | Modelo de datos                   | ✅ 16 migraciones aplicadas y verificadas contra Postgres real  |
-| 3   | Autenticación                     | ✅ Verificado end-to-end (login/logout real, multi-rol)         |
-| 4   | Roles y permisos                  | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin) |
-| 5   | Directorio central de personas    | ✅ Verificado end-to-end                                        |
-| 6   | Cursos y clases                   | ✅ Verificado end-to-end                                        |
-| 7   | Matrícula, asistencia y progreso  | ✅ Verificado end-to-end                                        |
-| 8   | Importación y deduplicación       | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)     |
-| 9   | Visitantes y seguimiento          | ✅ Verificado end-to-end                                        |
-| 10  | Portal del miembro                | ✅ Verificado end-to-end                                        |
-| 11  | Check-in QR                       | ✅ Check-in manual verificado; escaneo QR verificado por código |
-| 12  | Peticiones de oración             | ✅ Verificado end-to-end, incluida auditoría de acceso          |
-| 13  | Emails y encuestas                | 🔶 Encuestas verificadas; emails sin probar (falta Resend real) |
-| 14  | Paneles y reportes                | ✅ Verificado end-to-end                                        |
-| 15  | Revisión de seguridad             | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo   |
-| 16  | Preparación para producción       | 🔶 Ver checklist en `docs/deployment.md` §5                     |
+| #   | Fase                              | Estado                                                              |
+| --- | --------------------------------- | ------------------------------------------------------------------- |
+| 1   | Base del proyecto y documentación | ✅ Hecho                                                            |
+| 2   | Modelo de datos                   | ✅ 16 migraciones aplicadas y verificadas contra Postgres real      |
+| 3   | Autenticación                     | ✅ Verificado end-to-end (login/logout real, multi-rol)             |
+| 4   | Roles y permisos                  | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin)     |
+| 5   | Directorio central de personas    | ✅ Verificado end-to-end                                            |
+| 6   | Cursos y clases                   | ✅ Verificado end-to-end                                            |
+| 7   | Matrícula, asistencia y progreso  | ✅ Verificado end-to-end                                            |
+| 8   | Importación y deduplicación       | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)         |
+| 9   | Visitantes y seguimiento          | ✅ Verificado end-to-end                                            |
+| 10  | Portal del miembro                | ✅ Verificado end-to-end                                            |
+| 11  | Check-in QR                       | ✅ Check-in manual verificado; escaneo QR verificado por código     |
+| 12  | Peticiones de oración             | ✅ Verificado end-to-end, incluida auditoría de acceso              |
+| 13  | Emails y encuestas                | 🔶 Encuestas verificadas; emails sin probar (falta Resend real)     |
+| 14  | Paneles y reportes                | ✅ Verificado end-to-end                                            |
+| 15  | Revisión de seguridad             | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo       |
+| 16  | Preparación para producción       | 🔶 Ver checklist en `docs/deployment.md` §5                         |
+| 17  | **Ministerios**                   | 🔶 Código completo y verificado local; falta aplicar `0018` en vivo |
 
 ## Fase 16 — qué falta para producción
 
@@ -149,6 +150,23 @@ dataset más limpio.
   reales, y el flujo nuevo de auto check-in (ver bitácora de abajo) — 0
   errores de consola.
 
+## Bloqueo actual — credencial para aplicar `0018_ministries.sql`
+
+El módulo de ministerios está **completo en código** (migración, tipos,
+validación, capa de datos, UI, RLS, guards, seed, pruebas, docs) y pasa
+`typecheck`, `lint`, `format:check`, `build` y las 9 pruebas de
+Playwright. **Falta un paso**: aplicar la migración `0018` contra el
+proyecto Supabase de desarrollo, que requiere una credencial que no está
+(correctamente) en el repositorio. Sirve cualquiera de las dos:
+
+- la **contraseña de la base de datos** del proyecto
+  (`supabase db push` vía el pooler — ver `docs/deployment.md` §2), o
+- un **personal access token** de Supabase (Management API).
+
+Hasta aplicarla, `/ministerios` fallará en el entorno en vivo porque las
+tablas todavía no existen ahí. No se hizo push a `main` por esa razón:
+desplegar antes de la migración rompería la ruta nueva en producción.
+
 ## Próxima tarea
 
 Con el MVP funcionando de punta a punta y desplegado, las prioridades
@@ -158,6 +176,43 @@ autorice explícitamente, preparar un proyecto Supabase de producción
 separado del de desarrollo y publicar ahí formalmente.
 
 ## Bitácora
+
+### 2026-09-02 — Módulo de Ministerios
+
+Reunión con la Pastora Didi: la plataforma debe ser el sistema central
+para personas, **ministerios**, cursos, clases y actividades. De esos,
+ministerios era el hueco completo (no existía tabla, ruta ni tipo);
+actividades sigue pendiente (hoy solo existen `services` para check-in).
+
+- **Migración `0018_ministries.sql`**: tablas `ministries` y
+  `ministry_memberships` + enum `ministry_member_role`
+  (`lider | colider | miembro`) + función `is_ministry_leader()`. RLS
+  habilitado con políticas explícitas en ambas (26/26 tablas del
+  proyecto tienen RLS).
+- **Autorización por ámbito** (novedad en el proyecto): el líder de un
+  ministerio gestiona su propio equipo sin necesitar rol de staff
+  global. Aplicado en dos capas independientes: política RLS
+  `ministry_memberships_write` y guard de servidor
+  `requireMinistryManager()`. Ver `docs/decisions.md`.
+- **El rol `coordinador_ministerio` por fin tiene ámbito**: existía
+  desde `0002_roles.sql` y aparecía en las políticas RLS de medio
+  proyecto, pero no había ministerios que coordinar.
+- **Histórico preservado**: dar de baja a alguien marca `left_at`, no
+  borra la fila. Índice único parcial para permitir reingresos sin
+  duplicar membresías activas.
+- **UI**: `/ministerios` (catálogo), `/ministerios/nuevo`,
+  `/ministerios/[id]` (equipo, cambio de responsabilidad, baja con
+  confirmación, histórico, edición para admins).
+- **Integraciones**: "Sirve en" en la ficha de persona, "Donde sirvo" en
+  el portal del miembro, tarjeta "Personas sirviendo por ministerio" en
+  reportes, conteos en el panel (staff y miembro).
+- **Seed**: 5 ministerios sintéticos con equipos; el coordinador de
+  prueba lidera el primero, para poder verificar en vivo la
+  autorización por ámbito.
+- **Pruebas**: 3 nuevas de Playwright (9/9 pasan). Nota: los binarios de
+  navegador de Playwright no estaban instalados en esta máquina; se
+  resolvió con `npx playwright install chromium`.
+- `typecheck`, `lint`, `format:check` y `build` limpios (29 rutas).
 
 ### 2026-08-17 — Despliegue a Vercel + auto check-in con QR fijo
 

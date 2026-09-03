@@ -22,6 +22,7 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   { href: "/cursos", label: "Cursos y clases" },
+  { href: "/ministerios", label: "Ministerios" },
   {
     href: "/check-in",
     label: "Check-in",

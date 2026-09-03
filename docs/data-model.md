@@ -14,6 +14,10 @@ erDiagram
   PEOPLE ||--o{ SERVICE_CHECKINS : "hace check-in"
   PEOPLE ||--o{ VISITOR_FOLLOW_UPS : "es seguido"
   PEOPLE ||--o{ PRAYER_REQUESTS : "solicita (si no anónimo)"
+  PEOPLE ||--o{ MINISTRY_MEMBERSHIPS : "sirve en"
+  PEOPLE ||--o{ MINISTRIES : "lidera (opcional)"
+
+  MINISTRIES ||--o{ MINISTRY_MEMBERSHIPS : "tiene equipo"
 
   COURSE_CATEGORIES ||--o{ COURSES : clasifica
   COURSES ||--o{ CLASS_OFFERINGS : "tiene ofertas"
@@ -69,6 +73,22 @@ roles). `role` es el enum `app_role` con los 7 roles mínimos.
   horario, maestro, cupo). Es la unidad a la que se matricula gente.
 - `class_sessions`: fechas de encuentro de una `class_offering`, base
   para tomar asistencia.
+
+## 3.b Ministerios
+
+- `ministries`: las áreas de servicio de la iglesia (alabanza, ujieres,
+  niños, intercesión, medios...). Campos: `name` (único sin distinguir
+  mayúsculas), `description`, `leader_person_id` → `people`,
+  `meeting_schedule_text`, `location`, `is_active`.
+- `ministry_memberships`: quién sirve en qué ministerio, con
+  `role_in_ministry` (`lider | colider | miembro`), `joined_at` y
+  `left_at`.
+  - **Salir no borra la fila**: se marca `left_at`, conservando el
+    histórico de servicio de la persona.
+  - Índice único **parcial** `(ministry_id, person_id) where left_at is
+null`: impide duplicar una membresía activa, pero permite que una
+    persona vuelva a entrar después de haber salido.
+- Una persona puede servir en varios ministerios simultáneamente.
 
 ## 4. Matrícula, asistencia y progreso
 
@@ -130,9 +150,10 @@ roles). `role` es el enum `app_role` con los 7 roles mínimos.
 
 ## 11. Funciones auxiliares reutilizadas en políticas RLS
 
-| Función                                    | Propósito                                           |
-| ------------------------------------------ | --------------------------------------------------- |
-| `has_role(role)` / `has_any_role(roles[])` | ¿el usuario actual tiene ese rol?                   |
-| `is_staff()`                               | ¿tiene algún rol distinto de `miembro`?             |
-| `is_admin()`                               | ¿es `pastor` o `administrador`?                     |
-| `current_person_id()`                      | `person_id` vinculado al usuario autenticado actual |
+| Función                                    | Propósito                                                    |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `has_role(role)` / `has_any_role(roles[])` | ¿el usuario actual tiene ese rol?                            |
+| `is_staff()`                               | ¿tiene algún rol distinto de `miembro`?                      |
+| `is_admin()`                               | ¿es `pastor` o `administrador`?                              |
+| `current_person_id()`                      | `person_id` vinculado al usuario autenticado actual          |
+| `is_ministry_leader(ministry_id)`          | ¿el usuario lidera ESE ministerio? (autorización por ámbito) |

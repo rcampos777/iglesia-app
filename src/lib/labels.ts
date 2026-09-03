@@ -1,4 +1,10 @@
-import type { AppRole, FollowupStatus, GenderType, MembershipStatus } from "@/types/database";
+import type {
+  AppRole,
+  FollowupStatus,
+  GenderType,
+  MembershipStatus,
+  MinistryMemberRole,
+} from "@/types/database";
 
 export const membershipStatusLabels: Record<MembershipStatus, string> = {
   visitante: "Visitante",
@@ -28,4 +34,10 @@ export const followupStatusLabels: Record<FollowupStatus, string> = {
   en_progreso: "En progreso",
   completado: "Completado",
   no_contactable: "No contactable",
+};
+
+export const ministryMemberRoleLabels: Record<MinistryMemberRole, string> = {
+  lider: "Líder",
+  colider: "Colíder",
+  miembro: "Miembro del equipo",
 };

@@ -131,3 +131,44 @@ export async function getRecentServiceAttendance(limit = 8): Promise<ServiceAtte
     }))
     .reverse();
 }
+
+export interface MinistryServingCount {
+  ministryId: string;
+  ministryName: string;
+  activeMembers: number;
+}
+
+/**
+ * Cuántas personas sirven activamente en cada ministerio. Solo cuenta
+ * las filas que RLS deja ver a quien consulta (staff ve todas).
+ */
+export async function getMinistryServingCounts(): Promise<MinistryServingCount[]> {
+  const supabase = await createClient();
+
+  const { data: ministries, error } = await supabase
+    .from("ministries")
+    .select("id, name")
+    .eq("is_active", true)
+    .order("name");
+  if (error) throw new Error(error.message);
+  if (!ministries || ministries.length === 0) return [];
+
+  const { data: memberships, error: membershipsError } = await supabase
+    .from("ministry_memberships")
+    .select("ministry_id")
+    .is("left_at", null);
+  if (membershipsError) throw new Error(membershipsError.message);
+
+  const counts = new Map<string, number>();
+  for (const m of memberships ?? []) {
+    counts.set(m.ministry_id, (counts.get(m.ministry_id) ?? 0) + 1);
+  }
+
+  return ministries
+    .map((m) => ({
+      ministryId: m.id,
+      ministryName: m.name,
+      activeMembers: counts.get(m.id) ?? 0,
+    }))
+    .sort((a, b) => b.activeMembers - a.activeMembers);
+}

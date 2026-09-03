@@ -26,6 +26,8 @@ export type AttendanceStatus = "presente" | "ausente" | "excusado" | "tarde";
 
 export type ServiceType = "culto_general" | "oracion" | "jovenes" | "ninos" | "otro";
 
+export type MinistryMemberRole = "lider" | "colider" | "miembro";
+
 export type CheckinMethod = "qr" | "manual";
 
 export type FollowupStatus = "pendiente" | "en_progreso" | "completado" | "no_contactable";
@@ -317,6 +319,32 @@ export type ImportRowRow = {
   reviewed_at: string | null;
 };
 
+export type MinistryRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  leader_person_id: string | null;
+  meeting_schedule_text: string | null;
+  location: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+};
+
+export type MinistryMembershipRow = {
+  id: string;
+  ministry_id: string;
+  person_id: string;
+  role_in_ministry: MinistryMemberRole;
+  joined_at: string;
+  left_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+};
+
 export type AuditLogRow = {
   id: string;
   actor_user_id: string | null;
@@ -367,6 +395,8 @@ export interface Database {
       survey_answers: TableDef<SurveyAnswerRow>;
       import_batches: TableDef<ImportBatchRow>;
       import_rows: TableDef<ImportRowRow>;
+      ministries: TableDef<MinistryRow>;
+      ministry_memberships: TableDef<MinistryMembershipRow>;
       audit_log: TableDef<AuditLogRow>;
     };
     Views: {
@@ -381,6 +411,7 @@ export interface Database {
       is_staff: { Args: Record<string, never>; Returns: boolean };
       is_admin: { Args: Record<string, never>; Returns: boolean };
       current_person_id: { Args: Record<string, never>; Returns: string | null };
+      is_ministry_leader: { Args: { p_ministry_id: string }; Returns: boolean };
       log_prayer_request_access: {
         Args: { request_id: string; access_action?: string };
         Returns: undefined;

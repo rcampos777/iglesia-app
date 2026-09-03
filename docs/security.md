@@ -110,6 +110,28 @@ autorizados pueden invocarla con éxito).
   producción completo (`docs/deployment.md` §5) contra un proyecto
   Supabase separado para producción.
 
+## 8.b Ministerios (2026-09-02)
+
+- **RLS**: las dos tablas nuevas (`ministries`, `ministry_memberships`)
+  tienen RLS habilitado con políticas explícitas. Re-verificado: 26/26
+  tablas creadas en `supabase/migrations/` tienen `enable row level
+security`.
+- **Autorización por ámbito**: `ministry_memberships` es la primera
+  tabla del proyecto cuya escritura no depende solo del rol global, sino
+  también de _qué_ ministerio se toca (`is_ministry_leader()`). El guard
+  de servidor `requireMinistryManager()` espeja exactamente la política
+  RLS `ministry_memberships_write` — defensa en profundidad, no
+  reemplazo.
+- **Lectura restringida de membresía**: el catálogo de ministerios es
+  legible por cualquier usuario autenticado (la gente necesita saber
+  dónde puede servir), pero _quién sirve_ solo lo ven staff, el líder de
+  ese ministerio, y la propia persona respecto de sí misma. Un usuario
+  con solo rol `miembro` no puede enumerar el equipo de un ministerio.
+- **Recursión RLS**: `is_ministry_leader()` consulta
+  `ministry_memberships`, que a su vez usa la función en su política.
+  No hay recursión porque la función es `SECURITY DEFINER` y corre como
+  dueño de la tabla (mismo patrón que `has_role()` / `current_person_id()`).
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

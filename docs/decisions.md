@@ -2,6 +2,32 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-09-02 — Ministerios: autorización por ámbito, no solo por rol
+
+**Decisión**: `ministry_memberships` se autoriza con `rol global OR
+líder de ESE ministerio` (`is_ministry_leader(ministry_id)`), en vez de
+exigir un rol de staff amplio para tocar cualquier ministerio.
+
+**Contexto**: el rol `coordinador_ministerio` existía desde
+`0002_roles.sql` y aparecía en las políticas RLS de medio proyecto, pero
+no había ninguna tabla de ministerios que coordinar: en la práctica
+funcionaba como "staff amplio" sin ámbito. Al introducir ministerios,
+darle a cada líder de área un rol global de staff para que administrara
+su propio equipo habría violado el principio de menor privilegio
+(CLAUDE.md §4): el líder de alabanza habría obtenido acceso de escritura
+al directorio completo.
+
+**Consecuencias**:
+
+- Un líder de ministerio administra su equipo sin ningún rol de staff.
+- La comprobación vive en **dos** capas independientes: la política RLS
+  `ministry_memberships_write` y el guard de servidor
+  `requireMinistryManager()` en `src/app/(app)/ministerios/actions.ts`.
+- La membresía **no se borra** al salir: se cierra con `left_at`, para
+  conservar el histórico de servicio de cada persona. El índice único es
+  parcial (`where left_at is null`) para permitir reingresos sin
+  duplicar membresías activas.
+
 ## 2026-08-17 — Check-in: QR fijo de entrada (auto check-in) además del QR personal
 
 **Decisión**: agregar un segundo flujo de check-in, más simple, como

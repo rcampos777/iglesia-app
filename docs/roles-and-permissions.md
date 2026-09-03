@@ -8,7 +8,7 @@
 | `maestro`                | Gestiona sus propias clases (asistencia, matrícula) donde es `teacher_person_id`.    |
 | `seguimiento`            | Da seguimiento a visitantes; puede crear personas/visitantes.                        |
 | `intercesor`             | Atiende peticiones de oración.                                                       |
-| `coordinador_ministerio` | Gestiona personas, cursos y clases de su(s) área(s).                                 |
+| `coordinador_ministerio` | Gestiona personas, cursos, clases y **ministerios** de su(s) área(s).                |
 | `pastor`                 | Acceso administrativo amplio (equivalente a administrador salvo config del sistema). |
 | `administrador`          | Acceso completo, incluida gestión de roles y configuración.                          |
 
@@ -32,6 +32,8 @@ solo sobre registros propios o asignados a uno.
 | Directorio de personas    | L propio      | L             | CLA          | CLA                   | CLA               | CLA    | CLAE          |
 | Cursos / categorías       | L             | L             | L            | L                     | CLA               | CLA    | CLA           |
 | Clases (offerings)        | L             | CLA propio    | L            | L                     | CLA               | CLA    | CLA           |
+| Ministerios (catálogo)    | L             | L             | L            | L                     | CLA               | CLA    | CLA           |
+| Membresía de ministerio   | L propia      | L propia      | L            | L                     | CLA               | CLA    | CLA           |
 | Matrícula                 | L propio      | CLA propio    | CLA          | L                     | CLA               | CLA    | CLA           |
 | Asistencia                | L propio      | CLA propio    | L            | L                     | CLA               | CLA    | CLA           |
 | Visitantes / seguimiento  | –             | –             | CLA propio+  | L                     | CLA               | CLA    | CLA           |
@@ -42,6 +44,17 @@ solo sobre registros propios o asignados a uno.
 | Importación de datos      | –             | –             | CLA          | –                     | CLA               | CLA    | CLA           |
 | Roles de usuarios         | L propio      | L propio      | L propio     | L propio              | L propio          | CLA    | CLA           |
 | Reportes/paneles          | propio        | propio+clases | seguimiento  | oración               | su área           | todo   | todo          |
+
+**Excepción por ámbito (ministerios)**: además de los roles de la matriz,
+el **líder de un ministerio concreto** (designado en
+`ministries.leader_person_id`, o con membresía activa `lider`/`colider`)
+puede gestionar la membresía **de ese ministerio y solo de ese**, sin
+necesitar un rol global de staff. Esto es intencional y aplica el
+principio de menor privilegio: un líder de alabanza administra su equipo
+sin obtener acceso al directorio completo ni a otros ministerios. Se
+implementa con la función `is_ministry_leader(ministry_id)`, usada tanto
+en la política RLS `ministry_memberships_write` como en el guard de
+servidor `requireMinistryManager()`.
 
 "seguimiento CLA propio+" = puede gestionar cualquier `visitor_follow_up`,
 no solo las asignadas a sí mismo, dado que su función es precisamente

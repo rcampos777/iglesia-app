@@ -4,6 +4,7 @@ import { StatBarList } from "@/components/dashboard/stat-bar-list";
 import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 import {
   getEnrollmentCountsByClass,
+  getMinistryServingCounts,
   getFollowUpsByStatus,
   getPeopleByStatus,
   getPrayerRequestsByStatus,
@@ -25,14 +26,21 @@ export default async function ReportsPage() {
   const canSeeFollowUps = hasAnyRole(user, [...FOLLOWUP_ROLES]);
   const canSeePrayer = hasAnyRole(user, [...PRAYER_ROLES]);
 
-  const [peopleByStatus, enrollmentCounts, serviceAttendance, followUpsByStatus, prayerByStatus] =
-    await Promise.all([
-      getPeopleByStatus(),
-      getEnrollmentCountsByClass(),
-      getRecentServiceAttendance(),
-      canSeeFollowUps ? getFollowUpsByStatus() : Promise.resolve([]),
-      canSeePrayer ? getPrayerRequestsByStatus() : Promise.resolve([]),
-    ]);
+  const [
+    peopleByStatus,
+    enrollmentCounts,
+    serviceAttendance,
+    followUpsByStatus,
+    prayerByStatus,
+    ministryCounts,
+  ] = await Promise.all([
+    getPeopleByStatus(),
+    getEnrollmentCountsByClass(),
+    getRecentServiceAttendance(),
+    canSeeFollowUps ? getFollowUpsByStatus() : Promise.resolve([]),
+    canSeePrayer ? getPrayerRequestsByStatus() : Promise.resolve([]),
+    getMinistryServingCounts(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -42,6 +50,21 @@ export default async function ReportsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Personas sirviendo por ministerio</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <StatBarList
+              data={ministryCounts.map((m) => ({
+                label: m.ministryName,
+                count: m.activeMembers,
+              }))}
+              emptyMessage="Todavía no hay personas registradas en ministerios."
+            />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Personas por estatus</CardTitle>
