@@ -323,7 +323,10 @@ async function seedPrayerRequests(memberUserId: string, memberPersonId: string) 
  * son genéricos de cualquier iglesia (no datos reales de ninguna), y
  * las personas asignadas salen del generador sintético.
  */
-async function seedMinistries(peopleIds: string[], coordinatorPersonId: string) {
+async function seedMinistries(
+  peopleIds: string[],
+  coordinatorPersonId: string,
+): Promise<Map<string, string>> {
   const definitions = [
     {
       name: "Alabanza",
@@ -369,7 +372,7 @@ async function seedMinistries(peopleIds: string[], coordinatorPersonId: string) 
     .select("id, name");
 
   if (error) throw error;
-  if (!ministries) return;
+  if (!ministries) return new Map();
 
   const memberships: {
     ministry_id: string;
@@ -396,6 +399,88 @@ async function seedMinistries(peopleIds: string[], coordinatorPersonId: string) 
   if (membershipError) throw membershipError;
 
   console.log(`  ${ministries.length} ministerios con ${memberships.length} personas sirviendo.`);
+
+  return new Map(ministries.map((m) => [m.name, m.id]));
+}
+
+/**
+ * Actividades sintéticas: eventos puntuales con inscripción y, para las
+ * ya realizadas, asistencia. Una se cuelga de un ministerio (para poder
+ * verificar que su líder la organiza) y otra es general de la iglesia.
+ */
+async function seedActivities(peopleIds: string[], ministryByName: Map<string, string>) {
+  const definitions = [
+    {
+      name: "Retiro de jóvenes",
+      description: "Fin de semana de retiro espiritual.",
+      activity_date: "2026-10-10",
+      start_time: "08:00",
+      end_time: "18:00",
+      location: "Campamento El Roble",
+      capacity: 30,
+      status: "abierta" as const,
+      ministry: "Ministerio de niños",
+      attendedCount: 0,
+    },
+    {
+      name: "Jornada de limpieza del templo",
+      description: "Mantenimiento general del templo.",
+      activity_date: "2026-08-22",
+      start_time: "09:00",
+      end_time: null,
+      location: "Templo",
+      capacity: null,
+      status: "realizada" as const,
+      ministry: null,
+      attendedCount: 11,
+    },
+    {
+      name: "Noche de alabanza",
+      description: "Velada de adoración abierta a toda la iglesia.",
+      activity_date: "2026-09-20",
+      start_time: "19:00",
+      end_time: null,
+      location: "Salón principal",
+      capacity: 120,
+      status: "abierta" as const,
+      ministry: "Alabanza",
+      attendedCount: 0,
+    },
+  ];
+
+  let participantCount = 0;
+
+  for (const d of definitions) {
+    const { data: activity, error } = await supabase
+      .from("activities")
+      .insert({
+        name: d.name,
+        description: d.description,
+        activity_date: d.activity_date,
+        start_time: d.start_time,
+        end_time: d.end_time,
+        location: d.location,
+        capacity: d.capacity,
+        status: d.status,
+        ministry_id: d.ministry ? (ministryByName.get(d.ministry) ?? null) : null,
+      })
+      .select("id")
+      .single();
+    if (error || !activity) throw error;
+
+    const team = faker.helpers.arrayElements(peopleIds, faker.number.int({ min: 10, max: 20 }));
+    const { error: partError } = await supabase.from("activity_participants").insert(
+      team.map((personId, i) => ({
+        activity_id: activity.id,
+        person_id: personId,
+        attended: i < d.attendedCount,
+      })),
+    );
+    if (partError) throw partError;
+    participantCount += team.length;
+  }
+
+  console.log(`  ${definitions.length} actividades con ${participantCount} inscritos.`);
 }
 
 async function main() {
@@ -433,7 +518,13 @@ async function main() {
   );
 
   console.log("\n8. Ministerios:");
-  await seedMinistries(peopleIds, accountResults["coordinador@iglesia.test"]!.personId);
+  const ministryByName = await seedMinistries(
+    peopleIds,
+    accountResults["coordinador@iglesia.test"]!.personId,
+  );
+
+  console.log("\n9. Actividades:");
+  await seedActivities(peopleIds, ministryByName);
 
   console.log("\nListo. Todos los datos son sintéticos — ninguno corresponde a personas reales.");
 }

@@ -18,6 +18,9 @@ erDiagram
   PEOPLE ||--o{ MINISTRIES : "lidera (opcional)"
 
   MINISTRIES ||--o{ MINISTRY_MEMBERSHIPS : "tiene equipo"
+  MINISTRIES ||--o{ ACTIVITIES : organiza
+  ACTIVITIES ||--o{ ACTIVITY_PARTICIPANTS : "recibe inscripciones"
+  PEOPLE ||--o{ ACTIVITY_PARTICIPANTS : "se inscribe"
 
   COURSE_CATEGORIES ||--o{ COURSES : clasifica
   COURSES ||--o{ CLASS_OFFERINGS : "tiene ofertas"
@@ -90,6 +93,23 @@ null`: impide duplicar una membresía activa, pero permite que una
     persona vuelva a entrar después de haber salido.
 - Una persona puede servir en varios ministerios simultáneamente.
 
+## 3.c Actividades
+
+- `activities`: eventos **puntuales** (retiros, campañas, convivencias,
+  jornadas). Deliberadamente separadas de `services` (§5): un `service`
+  es el culto recurrente con check-in por QR; una actividad tiene fecha
+  propia, inscripción previa y pase de lista posterior.
+  - `ministry_id` (nullable): si pertenece a un ministerio, **su líder
+    puede organizarla** sin rol de staff. Null = actividad general.
+  - `capacity` (nullable = sin límite), `status`
+    (`planificada | abierta | realizada | cancelada`),
+    `responsible_person_id`.
+- `activity_participants`: una fila por persona inscrita, con `attended`
+  y `attended_at`. **Inscripción y asistencia son datos distintos a
+  propósito**: quién dijo que iba vs. quién fue es justo lo que la
+  iglesia quiere seguir. Un trigger mantiene `attended_at` coherente con
+  `attended`. Único `(activity_id, person_id)` — CLAUDE.md §3.1.
+
 ## 4. Matrícula, asistencia y progreso
 
 - `enrollments`: relación persona↔class_offering, con `status` (`inscrito
@@ -150,10 +170,14 @@ null`: impide duplicar una membresía activa, pero permite que una
 
 ## 11. Funciones auxiliares reutilizadas en políticas RLS
 
-| Función                                    | Propósito                                                    |
-| ------------------------------------------ | ------------------------------------------------------------ |
-| `has_role(role)` / `has_any_role(roles[])` | ¿el usuario actual tiene ese rol?                            |
-| `is_staff()`                               | ¿tiene algún rol distinto de `miembro`?                      |
-| `is_admin()`                               | ¿es `pastor` o `administrador`?                              |
-| `current_person_id()`                      | `person_id` vinculado al usuario autenticado actual          |
-| `is_ministry_leader(ministry_id)`          | ¿el usuario lidera ESE ministerio? (autorización por ámbito) |
+| Función                                    | Propósito                                                                     |
+| ------------------------------------------ | ----------------------------------------------------------------------------- |
+| `has_role(role)` / `has_any_role(roles[])` | ¿el usuario actual tiene ese rol?                                             |
+| `is_staff()`                               | ¿tiene algún rol distinto de `miembro`?                                       |
+| `is_admin()`                               | ¿es `pastor` o `administrador`?                                               |
+| `current_person_id()`                      | `person_id` vinculado al usuario autenticado actual                           |
+| `is_ministry_leader(ministry_id)`          | ¿el usuario lidera ESE ministerio? (autorización por ámbito)                  |
+| `is_prayer_reader()`                       | ¿puede leer peticiones de oración? (intercesor, admin o líder de intercesión) |
+| `can_manage_activity(ministry_id)`         | ¿puede organizar una actividad de ese ministerio?                             |
+| `is_activity_participant(activity_id)`     | ¿está inscrito? (rompe la recursión RLS, ver 0025)                            |
+| `activity_ministry_id(activity_id)`        | ministerio dueño, sin pasar por la RLS de `activities`                        |

@@ -78,25 +78,26 @@ anteriores.
 
 ## Fases (orden de prioridad del producto)
 
-| #   | Fase                              | Estado                                                          |
-| --- | --------------------------------- | --------------------------------------------------------------- |
-| 1   | Base del proyecto y documentación | ✅ Hecho                                                        |
-| 2   | Modelo de datos                   | ✅ 16 migraciones aplicadas y verificadas contra Postgres real  |
-| 3   | Autenticación                     | ✅ Verificado end-to-end (login/logout real, multi-rol)         |
-| 4   | Roles y permisos                  | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin) |
-| 5   | Directorio central de personas    | ✅ Verificado end-to-end                                        |
-| 6   | Cursos y clases                   | ✅ Verificado end-to-end                                        |
-| 7   | Matrícula, asistencia y progreso  | ✅ Verificado end-to-end                                        |
-| 8   | Importación y deduplicación       | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)     |
-| 9   | Visitantes y seguimiento          | ✅ Verificado end-to-end                                        |
-| 10  | Portal del miembro                | ✅ Verificado end-to-end                                        |
-| 11  | Check-in QR                       | ✅ Check-in manual verificado; escaneo QR verificado por código |
-| 12  | Peticiones de oración             | ✅ Verificado end-to-end, incluida auditoría de acceso          |
-| 13  | Emails y encuestas                | 🔶 Encuestas verificadas; emails sin probar (falta Resend real) |
-| 14  | Paneles y reportes                | ✅ Verificado end-to-end                                        |
-| 15  | Revisión de seguridad             | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo   |
-| 16  | Preparación para producción       | 🔶 Ver checklist en `docs/deployment.md` §5                     |
-| 17  | **Ministerios**                   | ✅ Verificado end-to-end y desplegado en la app en vivo         |
+| #   | Fase                              | Estado                                                                     |
+| --- | --------------------------------- | -------------------------------------------------------------------------- |
+| 1   | Base del proyecto y documentación | ✅ Hecho                                                                   |
+| 2   | Modelo de datos                   | ✅ 16 migraciones aplicadas y verificadas contra Postgres real             |
+| 3   | Autenticación                     | ✅ Verificado end-to-end (login/logout real, multi-rol)                    |
+| 4   | Roles y permisos                  | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin)            |
+| 5   | Directorio central de personas    | ✅ Verificado end-to-end                                                   |
+| 6   | Cursos y clases                   | ✅ Verificado end-to-end                                                   |
+| 7   | Matrícula, asistencia y progreso  | ✅ Verificado end-to-end                                                   |
+| 8   | Importación y deduplicación       | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)                |
+| 9   | Visitantes y seguimiento          | ✅ Verificado end-to-end                                                   |
+| 10  | Portal del miembro                | ✅ Verificado end-to-end                                                   |
+| 11  | Check-in QR                       | ✅ Check-in manual verificado; escaneo QR verificado por código            |
+| 12  | Peticiones de oración             | ✅ Verificado end-to-end, incluida auditoría de acceso                     |
+| 13  | Emails y encuestas                | 🔶 Encuestas verificadas; emails sin probar (falta Resend real)            |
+| 14  | Paneles y reportes                | ✅ Verificado end-to-end                                                   |
+| 15  | Revisión de seguridad             | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo              |
+| 16  | Preparación para producción       | 🔶 Ver checklist en `docs/deployment.md` §5                                |
+| 18  | **Actividades**                   | ✅ Verificado end-to-end contra Supabase real, incluidas pruebas negativas |
+| 17  | **Ministerios**                   | ✅ Verificado end-to-end y desplegado en la app en vivo                    |
 
 ## Fase 16 — qué falta para producción
 
@@ -164,6 +165,33 @@ autorice explícitamente, preparar un proyecto Supabase de producción
 separado del de desarrollo y publicar ahí formalmente.
 
 ## Bitácora
+
+### 2026-09-02 — Módulo de Actividades
+
+Eventos puntuales de la iglesia (retiros, campañas, convivencias), con
+inscripción previa y pase de lista posterior — separados a propósito de
+`services`, que son los cultos recurrentes con check-in.
+
+- Migración `0024`: `activities` + `activity_participants`, enum
+  `activity_status`, función `can_manage_activity()` y un trigger que
+  mantiene `attended_at` coherente con `attended`.
+- **Enganchado a Ministerios**: si la actividad pertenece a un
+  ministerio, su líder la organiza sin necesitar rol de staff. El pastor
+  entra solo por esa vía, coherente con el recorte del 2026-09-02.
+- UI: `/actividades`, `/actividades/nueva`, `/actividades/[id]` con
+  inscripción, cupo, pase de lista y edición. Integrado en el portal
+  ("Mis actividades"), reportes y panel.
+
+**Bug real encontrado en vivo**: `0024` dejó políticas RLS mutuamente
+recursivas y Postgres abortó al abrir la página. Corregido en `0025`
+con funciones `SECURITY DEFINER`. Ver `docs/security.md` §8.e.
+
+**Verificado en vivo**: como administrador, listado con conteos correctos
+y **pase de lista con escritura real** (11 → 12 asistentes, confirmado
+consultando la base, no solo la UI optimista). Como pastor (lidera solo
+Intercesión, sin actividades): ve 0 y las 3 URLs directas de actividades
+ajenas lo rechazan. Como miembro: ve sus 2 actividades en el portal y las
+3 rutas de `/actividades` lo redirigen a `/portal`. 12/12 Playwright.
 
 ### 2026-09-02 — El rol `pastor` deja de ser administrador
 

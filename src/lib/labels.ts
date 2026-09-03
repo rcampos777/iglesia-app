@@ -4,6 +4,7 @@ import type {
   GenderType,
   MembershipStatus,
   MinistryMemberRole,
+  ActivityStatus,
 } from "@/types/database";
 
 export const membershipStatusLabels: Record<MembershipStatus, string> = {
@@ -40,4 +41,11 @@ export const ministryMemberRoleLabels: Record<MinistryMemberRole, string> = {
   lider: "Líder",
   colider: "Colíder",
   miembro: "Miembro del equipo",
+};
+
+export const activityStatusLabels: Record<ActivityStatus, string> = {
+  planificada: "Planificada",
+  abierta: "Inscripciones abiertas",
+  realizada: "Realizada",
+  cancelada: "Cancelada",
 };

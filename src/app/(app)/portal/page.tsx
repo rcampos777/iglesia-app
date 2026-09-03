@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getMyEnrollments, getMyPerson, getMyPrayerRequests } from "@/lib/data/portal";
 import { listMinistriesForPerson } from "@/lib/data/ministries";
-import { ministryMemberRoleLabels } from "@/lib/labels";
+import { listActivitiesForPerson } from "@/lib/data/activities";
+import { activityStatusLabels, ministryMemberRoleLabels } from "@/lib/labels";
 import { ContactForm } from "./contact-form";
 import { PrayerRequestForm } from "./prayer-request-form";
 import { MyQrCode } from "./my-qr-code";
@@ -23,11 +24,12 @@ export default async function PortalPage() {
   if (!user) redirect("/login");
   if (!user.personId) redirect("/dashboard");
 
-  const [person, enrollments, prayerRequests, ministries] = await Promise.all([
+  const [person, enrollments, prayerRequests, ministries, activities] = await Promise.all([
     getMyPerson(user.personId),
     getMyEnrollments(user.personId),
     getMyPrayerRequests(user.userId),
     listMinistriesForPerson(user.personId),
+    listActivitiesForPerson(user.personId),
   ]);
 
   return (
@@ -79,6 +81,31 @@ export default async function PortalPage() {
                 <p className="text-muted-foreground text-sm">Desde {m.joined_at}</p>
               </div>
               <Badge variant="outline">{ministryMemberRoleLabels[m.role_in_ministry]}</Badge>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Mis actividades</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {activities.length === 0 && (
+            <p className="text-muted-foreground">No estás inscrito en ninguna actividad todavía.</p>
+          )}
+          {activities.map((a) => (
+            <div key={a.id} className="flex items-center justify-between border-b pb-2">
+              <div>
+                <p className="font-medium">{a.activityName}</p>
+                <p className="text-muted-foreground text-sm">
+                  {a.activityDate}
+                  {a.activityLocation ? ` · ${a.activityLocation}` : ""}
+                </p>
+              </div>
+              <Badge variant="outline">
+                {a.attended ? "Asististe" : activityStatusLabels[a.activityStatus]}
+              </Badge>
             </div>
           ))}
         </CardContent>

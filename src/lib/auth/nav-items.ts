@@ -53,6 +53,18 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    href: "/actividades",
+    label: "Actividades",
+    roles: [
+      "maestro",
+      "seguimiento",
+      "intercesor",
+      "coordinador_ministerio",
+      "pastor",
+      "administrador",
+    ],
+  },
+  {
     href: "/check-in",
     label: "Check-in",
     roles: ["seguimiento", "coordinador_ministerio", "pastor", "administrador"],

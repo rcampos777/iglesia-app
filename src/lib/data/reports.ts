@@ -172,3 +172,46 @@ export async function getMinistryServingCounts(): Promise<MinistryServingCount[]
     }))
     .sort((a, b) => b.activeMembers - a.activeMembers);
 }
+
+export interface ActivityParticipationCount {
+  activityName: string;
+  registered: number;
+  attended: number;
+}
+
+/** Participación en las actividades más recientes ya realizadas. */
+export async function getRecentActivityParticipation(
+  limit = 8,
+): Promise<ActivityParticipationCount[]> {
+  const supabase = await createClient();
+
+  const { data: activities, error } = await supabase
+    .from("activities")
+    .select("id, name")
+    .eq("status", "realizada")
+    .order("activity_date", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(error.message);
+  if (!activities || activities.length === 0) return [];
+
+  const { data: participants } = await supabase
+    .from("activity_participants")
+    .select("activity_id, attended")
+    .in(
+      "activity_id",
+      activities.map((a) => a.id),
+    );
+
+  const registered = new Map<string, number>();
+  const attended = new Map<string, number>();
+  for (const p of participants ?? []) {
+    registered.set(p.activity_id, (registered.get(p.activity_id) ?? 0) + 1);
+    if (p.attended) attended.set(p.activity_id, (attended.get(p.activity_id) ?? 0) + 1);
+  }
+
+  return activities.map((a) => ({
+    activityName: a.name,
+    registered: registered.get(a.id) ?? 0,
+    attended: attended.get(a.id) ?? 0,
+  }));
+}

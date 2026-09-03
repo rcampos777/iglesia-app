@@ -28,6 +28,8 @@ export type ServiceType = "culto_general" | "oracion" | "jovenes" | "ninos" | "o
 
 export type MinistryMemberRole = "lider" | "colider" | "miembro";
 
+export type ActivityStatus = "planificada" | "abierta" | "realizada" | "cancelada";
+
 export type CheckinMethod = "qr" | "manual";
 
 export type FollowupStatus = "pendiente" | "en_progreso" | "completado" | "no_contactable";
@@ -346,6 +348,34 @@ export type MinistryMembershipRow = {
   created_by: string | null;
 };
 
+export type ActivityRow = {
+  id: string;
+  ministry_id: string | null;
+  name: string;
+  description: string | null;
+  activity_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  location: string | null;
+  capacity: number | null;
+  status: ActivityStatus;
+  responsible_person_id: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+};
+
+export type ActivityParticipantRow = {
+  id: string;
+  activity_id: string;
+  person_id: string;
+  registered_at: string;
+  attended: boolean;
+  attended_at: string | null;
+  notes: string | null;
+  created_by: string | null;
+};
+
 export type AuditLogRow = {
   id: string;
   actor_user_id: string | null;
@@ -396,6 +426,8 @@ export interface Database {
       survey_answers: TableDef<SurveyAnswerRow>;
       import_batches: TableDef<ImportBatchRow>;
       import_rows: TableDef<ImportRowRow>;
+      activities: TableDef<ActivityRow>;
+      activity_participants: TableDef<ActivityParticipantRow>;
       ministries: TableDef<MinistryRow>;
       ministry_memberships: TableDef<MinistryMembershipRow>;
       audit_log: TableDef<AuditLogRow>;
@@ -414,6 +446,7 @@ export interface Database {
       current_person_id: { Args: Record<string, never>; Returns: string | null };
       is_ministry_leader: { Args: { p_ministry_id: string }; Returns: boolean };
       is_prayer_reader: { Args: Record<string, never>; Returns: boolean };
+      can_manage_activity: { Args: { p_ministry_id: string | null }; Returns: boolean };
       set_prayer_ministry: {
         Args: { p_ministry_id: string; p_enabled: boolean };
         Returns: undefined;

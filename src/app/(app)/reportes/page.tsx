@@ -5,6 +5,7 @@ import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
 import {
   getEnrollmentCountsByClass,
   getMinistryServingCounts,
+  getRecentActivityParticipation,
   getFollowUpsByStatus,
   getPeopleByStatus,
   getPrayerRequestsByStatus,
@@ -33,6 +34,7 @@ export default async function ReportsPage() {
     followUpsByStatus,
     prayerByStatus,
     ministryCounts,
+    activityParticipation,
   ] = await Promise.all([
     getPeopleByStatus(),
     getEnrollmentCountsByClass(),
@@ -40,6 +42,7 @@ export default async function ReportsPage() {
     canSeeFollowUps ? getFollowUpsByStatus() : Promise.resolve([]),
     canSeePrayer ? getPrayerRequestsByStatus() : Promise.resolve([]),
     getMinistryServingCounts(),
+    getRecentActivityParticipation(),
   ]);
 
   return (
@@ -50,6 +53,21 @@ export default async function ReportsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Asistencia a actividades realizadas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <StatBarList
+              data={activityParticipation.map((a) => ({
+                label: `${a.activityName} (${a.registered} inscritos)`,
+                count: a.attended,
+              }))}
+              emptyMessage="Todavía no hay actividades realizadas."
+            />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Personas sirviendo por ministerio</CardTitle>

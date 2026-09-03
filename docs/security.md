@@ -212,6 +212,26 @@ RPC y queda registrado en `audit_log`.
 sirve si el rol ya tiene `UPDATE` de tabla. Usar trigger (o revocar la
 tabla y conceder columna por columna).
 
+## 8.e Recursión de políticas en Actividades (2026-09-02)
+
+`0024` creó políticas mutuamente recursivas: `activities_select`
+consultaba `activity_participants` (para que una persona vea las
+actividades en las que está inscrita) y `activity_participants_select`
+consultaba `activities` (para que el líder del ministerio vea a los
+inscritos). Postgres lo detectó en cuanto se abrió `/actividades` con
+sesión real:
+
+    ERROR: infinite recursion detected in policy for relation "activities"
+
+`0025` rompe el ciclo en ambas direcciones con funciones
+`SECURITY DEFINER` (`is_activity_participant`, `activity_ministry_id`),
+que corren como dueño de la tabla y no re-evalúan RLS — mismo patrón que
+`is_ministry_leader()`.
+
+**Regla general para este proyecto**: si la política de A consulta B y la
+de B consulta A, hay que meter al menos una de las dos consultas en una
+función `SECURITY DEFINER`.
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`
