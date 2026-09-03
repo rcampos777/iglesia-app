@@ -78,25 +78,25 @@ anteriores.
 
 ## Fases (orden de prioridad del producto)
 
-| #   | Fase                              | Estado                                                                     |
-| --- | --------------------------------- | -------------------------------------------------------------------------- |
-| 1   | Base del proyecto y documentación | ✅ Hecho                                                                   |
-| 2   | Modelo de datos                   | ✅ 16 migraciones aplicadas y verificadas contra Postgres real             |
-| 3   | Autenticación                     | ✅ Verificado end-to-end (login/logout real, multi-rol)                    |
-| 4   | Roles y permisos                  | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin)            |
-| 5   | Directorio central de personas    | ✅ Verificado end-to-end                                                   |
-| 6   | Cursos y clases                   | ✅ Verificado end-to-end                                                   |
-| 7   | Matrícula, asistencia y progreso  | ✅ Verificado end-to-end                                                   |
-| 8   | Importación y deduplicación       | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)                |
-| 9   | Visitantes y seguimiento          | ✅ Verificado end-to-end                                                   |
-| 10  | Portal del miembro                | ✅ Verificado end-to-end                                                   |
-| 11  | Check-in QR                       | ✅ Check-in manual verificado; escaneo QR verificado por código            |
-| 12  | Peticiones de oración             | ✅ Verificado end-to-end, incluida auditoría de acceso                     |
-| 13  | Emails y encuestas                | 🔶 Encuestas verificadas; emails sin probar (falta Resend real)            |
-| 14  | Paneles y reportes                | ✅ Verificado end-to-end                                                   |
-| 15  | Revisión de seguridad             | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo              |
-| 16  | Preparación para producción       | 🔶 Ver checklist en `docs/deployment.md` §5                                |
-| 17  | **Ministerios**                   | ✅ Verificado end-to-end contra Supabase real, incluidas pruebas negativas |
+| #   | Fase                              | Estado                                                          |
+| --- | --------------------------------- | --------------------------------------------------------------- |
+| 1   | Base del proyecto y documentación | ✅ Hecho                                                        |
+| 2   | Modelo de datos                   | ✅ 16 migraciones aplicadas y verificadas contra Postgres real  |
+| 3   | Autenticación                     | ✅ Verificado end-to-end (login/logout real, multi-rol)         |
+| 4   | Roles y permisos                  | ✅ Verificado end-to-end (RLS positivo y negativo, panel admin) |
+| 5   | Directorio central de personas    | ✅ Verificado end-to-end                                        |
+| 6   | Cursos y clases                   | ✅ Verificado end-to-end                                        |
+| 7   | Matrícula, asistencia y progreso  | ✅ Verificado end-to-end                                        |
+| 8   | Importación y deduplicación       | ✅ Verificado end-to-end (solo CSV; Excel/Access ver abajo)     |
+| 9   | Visitantes y seguimiento          | ✅ Verificado end-to-end                                        |
+| 10  | Portal del miembro                | ✅ Verificado end-to-end                                        |
+| 11  | Check-in QR                       | ✅ Check-in manual verificado; escaneo QR verificado por código |
+| 12  | Peticiones de oración             | ✅ Verificado end-to-end, incluida auditoría de acceso          |
+| 13  | Emails y encuestas                | 🔶 Encuestas verificadas; emails sin probar (falta Resend real) |
+| 14  | Paneles y reportes                | ✅ Verificado end-to-end                                        |
+| 15  | Revisión de seguridad             | ✅ Auditoría de RLS/guards + pruebas negativas reales en vivo   |
+| 16  | Preparación para producción       | 🔶 Ver checklist en `docs/deployment.md` §5                     |
+| 17  | **Ministerios**                   | ✅ Verificado end-to-end y desplegado en la app en vivo         |
 
 ## Fase 16 — qué falta para producción
 
@@ -135,7 +135,12 @@ dataset más limpio.
 ## Despliegue
 
 - **Repositorio**: [github.com/rcampos777/iglesia-app](https://github.com/rcampos777/iglesia-app)
-  (rama `main`, push directo del usuario vía terminal con un PAT —
+  (rama `main`). **Autenticación de git: SSH** desde 2026-09-02. El PAT
+  anterior dejó de funcionar (GitHub no acepta contraseña de cuenta desde
+  2021, y el token estaba vencido); se generó una llave `ed25519` en la
+  máquina del usuario y se registró en GitHub, y el remoto se cambió a
+  `git@github.com:rcampos777/iglesia-app.git`. Historial previo: push
+  directo del usuario vía terminal con un PAT —
   las integraciones de GitHub App vía MCP para Claude y para Vercel
   tenían permisos insuficientes para escribir/crear proyecto por API;
   se resolvió manualmente).
@@ -159,6 +164,29 @@ autorice explícitamente, preparar un proyecto Supabase de producción
 separado del de desarrollo y publicar ahí formalmente.
 
 ## Bitácora
+
+### 2026-09-02 — Desplegado en vivo + bug del enlace de confirmación
+
+- **Push y despliegue**: 3 commits a `main`; Vercel redesplegó y se
+  verificó `/ministerios` y `/reportes` **en el dominio público** con
+  sesión real de `coordinador@iglesia.test`. Todas las peticiones de red
+  en 200, sin errores de consola.
+- **Bug real corregido**: la página de login ignoraba por completo el
+  parámetro `?error=auth` con el que el callback de auth la redirigía.
+  Cuando la confirmación de email fallaba, la persona aterrizaba en el
+  formulario sin ninguna explicación. Le pasó a una usuaria real en
+  desarrollo. Ahora el callback distingue la causa (error devuelto por
+  Supabase, falta de `code`, o fallo del intercambio) y el login explica
+  la causa más común: **abrir el enlace en un navegador distinto al del
+  registro**, que rompe el intercambio PKCE (el `code_verifier` vive en
+  una cookie del navegador original) aunque la cuenta sí quede
+  confirmada.
+- **Pendiente de revisar en el dashboard de Supabase** (Authentication →
+  URL Configuration): confirmar que _Site URL_ apunte a
+  `https://iglesia-app-teal.vercel.app` y no a `localhost:3000`. Si
+  apunta a localhost, el enlace confirma correctamente pero después manda
+  el navegador a una dirección que no existe en el equipo de la persona,
+  y se ve como error.
 
 ### 2026-09-02 — Ministerios verificado en vivo + bug real corregido (0019)
 
