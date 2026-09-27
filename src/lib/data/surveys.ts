@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { fetchAllPages, fetchInChunks } from "./paging";
 import type { SurveyQuestionRow, SurveyRow } from "@/types/database";
 
 export async function listSurveys(): Promise<SurveyRow[]> {
@@ -65,19 +66,33 @@ export async function getSurveyResults(surveyId: string): Promise<{
 }> {
   const supabase = await createClient();
 
-  const [{ data: questions }, { data: responses }] = await Promise.all([
+  const [{ data: questions }, responses] = await Promise.all([
     supabase.from("survey_questions").select("*").eq("survey_id", surveyId).order("order_index"),
-    supabase.from("survey_responses").select("id").eq("survey_id", surveyId),
+    fetchAllPages((from, to) =>
+      supabase
+        .from("survey_responses")
+        .select("id")
+        .eq("survey_id", surveyId)
+        .order("id")
+        .range(from, to),
+    ),
   ]);
 
-  const responseIds = (responses ?? []).map((r) => r.id);
-
-  const { data: answers } = responseIds.length
-    ? await supabase.from("survey_answers").select("*").in("response_id", responseIds)
-    : { data: [] };
+  const answers = await fetchInChunks(
+    responses.map((r) => r.id),
+    (ids) =>
+      fetchAllPages((from, to) =>
+        supabase
+          .from("survey_answers")
+          .select("*")
+          .in("response_id", ids)
+          .order("id")
+          .range(from, to),
+      ).then((data) => ({ data, error: null })),
+  );
 
   const results: QuestionResults[] = (questions ?? []).map((q) => {
-    const questionAnswers = (answers ?? []).filter((a) => a.question_id === q.id);
+    const questionAnswers = answers.filter((a) => a.question_id === q.id);
     const optionCounts: Record<string, number> = {};
     const textAnswers: string[] = [];
 
@@ -95,5 +110,5 @@ export async function getSurveyResults(surveyId: string): Promise<{
     return { question: q, totalAnswers: questionAnswers.length, optionCounts, textAnswers };
   });
 
-  return { responseCount: (responses ?? []).length, questions: results };
+  return { responseCount: responses.length, questions: results };
 }

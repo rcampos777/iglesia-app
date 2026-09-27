@@ -50,6 +50,17 @@ Tres variantes en `src/lib/supabase/`:
 - `middleware.ts` — refresca la sesión en cada request (Next.js
   middleware) para que las cookies no expiren silenciosamente.
 
+### Escala: límite de 1000 filas de PostgREST
+
+Supabase corta **en silencio** cualquier respuesta a 1000 filas
+(`max_rows`), y los filtros `.in(...)` viajan en la URL (cientos de UUIDs
+la rompen). Reglas para el data layer:
+
+- Conteos y reportes: contar en la base (`select("id", { count: "exact", head: true })`), nunca traer filas para contarlas en JS.
+- Listas que pueden crecer sin tope: `fetchAllPages` de `src/lib/data/paging.ts` con un orden estable (terminar en `.order("id")`).
+- Búsquedas por lista de IDs: `fetchInChunks` (tandas de 150).
+- El directorio de personas ya pagina en la UI (25 por página).
+
 ## 4. Rutas (App Router)
 
 ```

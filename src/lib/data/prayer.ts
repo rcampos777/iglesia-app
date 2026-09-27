@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { fetchAllPages, fetchInChunks } from "./paging";
 import type { PrayerRequestRow, PrayerStatus } from "@/types/database";
 
 export interface PrayerRequestListItem extends PrayerRequestRow {
@@ -13,27 +14,34 @@ export async function listPrayerRequests(
 ): Promise<PrayerRequestListItem[]> {
   const supabase = await createClient();
 
-  let query = supabase
-    .from("prayer_requests")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (filters.status && filters.status !== "todas") {
-    query = query.eq("status", filters.status);
-  }
+  const status = filters.status && filters.status !== "todas" ? filters.status : null;
 
-  const { data, error } = await query;
-  if (error) throw new Error(`No se pudieron cargar las peticiones: ${error.message}`);
-  if (!data || data.length === 0) return [];
+  let data: PrayerRequestRow[];
+  try {
+    data = await fetchAllPages((from, to) => {
+      let query = supabase
+        .from("prayer_requests")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(from, to);
+      if (status) query = query.eq("status", status);
+      return query;
+    });
+  } catch (e) {
+    throw new Error(`No se pudieron cargar las peticiones: ${(e as Error).message}`);
+  }
+  if (data.length === 0) return [];
 
   const personIds = data
     .filter((r) => !r.is_anonymous && r.requester_person_id)
     .map((r) => r.requester_person_id as string);
 
-  const { data: people } = personIds.length
-    ? await supabase.from("people").select("id, first_name, last_name").in("id", personIds)
-    : { data: [] };
+  const people = await fetchInChunks(personIds, (ids) =>
+    supabase.from("people").select("id, first_name, last_name").in("id", ids),
+  );
 
-  const nameById = new Map((people ?? []).map((p) => [p.id, `${p.first_name} ${p.last_name}`]));
+  const nameById = new Map(people.map((p) => [p.id, `${p.first_name} ${p.last_name}`]));
 
   return data.map((r) => ({
     ...r,

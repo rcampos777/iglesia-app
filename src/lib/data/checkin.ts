@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { ServiceRow } from "@/types/database";
+import { fetchAllPages, fetchInChunks } from "./paging";
 
 export async function listServices(): Promise<ServiceRow[]> {
   const supabase = await createClient();
@@ -53,22 +54,22 @@ export interface CheckinWithPerson {
 
 export async function listServiceCheckins(serviceId: string): Promise<CheckinWithPerson[]> {
   const supabase = await createClient();
-  const { data: checkins, error } = await supabase
-    .from("service_checkins")
-    .select("*")
-    .eq("service_id", serviceId)
-    .order("checked_in_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  if (!checkins || checkins.length === 0) return [];
+  const checkins = await fetchAllPages((from, to) =>
+    supabase
+      .from("service_checkins")
+      .select("*")
+      .eq("service_id", serviceId)
+      .order("checked_in_at", { ascending: false })
+      .order("id")
+      .range(from, to),
+  );
+  if (checkins.length === 0) return [];
 
-  const { data: people } = await supabase
-    .from("people")
-    .select("id, first_name, last_name")
-    .in(
-      "id",
-      checkins.map((c) => c.person_id),
-    );
-  const peopleById = new Map((people ?? []).map((p) => [p.id, p]));
+  const people = await fetchInChunks(
+    checkins.map((c) => c.person_id),
+    (ids) => supabase.from("people").select("id, first_name, last_name").in("id", ids),
+  );
+  const peopleById = new Map(people.map((p) => [p.id, p]));
 
   return checkins.map((c) => {
     const p = peopleById.get(c.person_id);

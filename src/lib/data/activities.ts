@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { ActivityParticipantRow, ActivityRow, ActivityStatus } from "@/types/database";
+import { fetchAllPages, fetchInChunks } from "./paging";
 
 export interface ActivityWithSummary extends ActivityRow {
   ministryName: string | null;
@@ -43,13 +44,18 @@ export async function listActivities(
     personIds.length
       ? supabase.from("people").select("id, first_name, last_name").in("id", personIds)
       : Promise.resolve({ data: [] as { id: string; first_name: string; last_name: string }[] }),
-    supabase
-      .from("activity_participants")
-      .select("activity_id, attended")
-      .in(
-        "activity_id",
-        activities.map((a) => a.id),
-      ),
+    fetchInChunks(
+      activities.map((a) => a.id),
+      (ids) =>
+        fetchAllPages((from, to) =>
+          supabase
+            .from("activity_participants")
+            .select("id, activity_id, attended")
+            .in("activity_id", ids)
+            .order("id")
+            .range(from, to),
+        ).then((data) => ({ data, error: null })),
+    ),
   ]);
 
   const ministryById = new Map((ministriesRes.data ?? []).map((m) => [m.id, m.name]));
@@ -57,7 +63,7 @@ export async function listActivities(
 
   const registered = new Map<string, number>();
   const attended = new Map<string, number>();
-  for (const p of participantsRes.data ?? []) {
+  for (const p of participantsRes) {
     registered.set(p.activity_id, (registered.get(p.activity_id) ?? 0) + 1);
     if (p.attended) attended.set(p.activity_id, (attended.get(p.activity_id) ?? 0) + 1);
   }
@@ -97,32 +103,33 @@ export async function getActivityDetail(id: string): Promise<ActivityDetail | nu
   if (error) throw new Error(`No se pudo cargar la actividad: ${error.message}`);
   if (!activity) return null;
 
-  const { data: participants, error: participantsError } = await supabase
-    .from("activity_participants")
-    .select("*")
-    .eq("activity_id", id)
-    .order("registered_at");
-  if (participantsError) {
-    throw new Error(`No se pudieron cargar los participantes: ${participantsError.message}`);
+  let rows: ActivityParticipantRow[];
+  try {
+    rows = await fetchAllPages((from, to) =>
+      supabase
+        .from("activity_participants")
+        .select("*")
+        .eq("activity_id", id)
+        .order("registered_at")
+        .order("id")
+        .range(from, to),
+    );
+  } catch (e) {
+    throw new Error(`No se pudieron cargar los participantes: ${(e as Error).message}`);
   }
-
-  const rows = participants ?? [];
   const personIds = new Set(rows.map((p) => p.person_id));
   if (activity.responsible_person_id) personIds.add(activity.responsible_person_id);
 
   const [peopleRes, ministryRes] = await Promise.all([
-    personIds.size
-      ? supabase
-          .from("people")
-          .select("id, first_name, last_name, phone, email")
-          .in("id", [...personIds])
-      : Promise.resolve({ data: [] }),
+    fetchInChunks([...personIds], (ids) =>
+      supabase.from("people").select("id, first_name, last_name, phone, email").in("id", ids),
+    ),
     activity.ministry_id
       ? supabase.from("ministries").select("name").eq("id", activity.ministry_id).maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
 
-  const peopleById = new Map((peopleRes.data ?? []).map((p) => [p.id, p]));
+  const peopleById = new Map(peopleRes.map((p) => [p.id, p]));
   const responsible = activity.responsible_person_id
     ? peopleById.get(activity.responsible_person_id)
     : undefined;

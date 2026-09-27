@@ -10,6 +10,7 @@ import type {
   CourseRow,
   EnrollmentRow,
 } from "@/types/database";
+import { fetchAllPages, fetchInChunks } from "./paging";
 
 export async function listCourseCategories(): Promise<CourseCategoryRow[]> {
   const supabase = await createClient();
@@ -118,7 +119,14 @@ export async function getClassOfferingDetail(id: string): Promise<ClassOfferingD
   const [course, sessionsRes, enrollmentsRes] = await Promise.all([
     supabase.from("courses").select("*").eq("id", offering.course_id).maybeSingle(),
     supabase.from("class_sessions").select("*").eq("class_offering_id", id).order("session_date"),
-    supabase.from("enrollments").select("*").eq("class_offering_id", id),
+    fetchAllPages((from, to) =>
+      supabase
+        .from("enrollments")
+        .select("*")
+        .eq("class_offering_id", id)
+        .order("id")
+        .range(from, to),
+    ),
   ]);
 
   const category = course.data
@@ -137,19 +145,26 @@ export async function getClassOfferingDetail(id: string): Promise<ClassOfferingD
         .maybeSingle()
     : { data: null };
 
-  const enrollments = enrollmentsRes.data ?? [];
-  const personIds = enrollments.map((e) => e.person_id);
+  const enrollments = enrollmentsRes;
+  const enrolledPeople = await fetchInChunks(
+    enrollments.map((e) => e.person_id),
+    (ids) => supabase.from("people").select("id, first_name, last_name").in("id", ids),
+  );
 
-  const { data: enrolledPeople } = personIds.length
-    ? await supabase.from("people").select("id, first_name, last_name").in("id", personIds)
-    : { data: [] };
-
-  const peopleById = new Map((enrolledPeople ?? []).map((p) => [p.id, p]));
+  const peopleById = new Map(enrolledPeople.map((p) => [p.id, p]));
 
   const sessionIds = (sessionsRes.data ?? []).map((s) => s.id);
-  const { data: attendance } = sessionIds.length
-    ? await supabase.from("attendance_records").select("*").in("class_session_id", sessionIds)
-    : { data: [] };
+  // Sesiones × alumnos supera fácilmente 1000 filas: se pagina.
+  const attendance = sessionIds.length
+    ? await fetchAllPages((from, to) =>
+        supabase
+          .from("attendance_records")
+          .select("*")
+          .in("class_session_id", sessionIds)
+          .order("id")
+          .range(from, to),
+      )
+    : [];
 
   return {
     offering: {

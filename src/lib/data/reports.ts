@@ -1,25 +1,31 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { FollowupStatus, MembershipStatus, PrayerStatus } from "@/types/database";
+import { fetchAllPages } from "./paging";
 
 export interface CountBucket {
   label: string;
   count: number;
 }
 
-function countBy<T extends string>(rows: { key: T }[], labels: Record<T, string>): CountBucket[] {
-  const counts = new Map<T, number>();
-  for (const r of rows) counts.set(r.key, (counts.get(r.key) ?? 0) + 1);
-  return Object.entries(labels).map(([key, label]) => ({
-    label: label as string,
-    count: counts.get(key as T) ?? 0,
-  }));
+// Cuenta en la base (head: true) en vez de traer filas: no depende del
+// límite de 1000 filas de PostgREST y no transfiere datos.
+async function countBuckets<T extends string>(
+  labels: Record<T, string>,
+  countFor: (key: T) => PromiseLike<{ count: number | null; error: { message: string } | null }>,
+): Promise<CountBucket[]> {
+  const entries = Object.entries(labels) as [T, string][];
+  return Promise.all(
+    entries.map(async ([key, label]) => {
+      const { count, error } = await countFor(key);
+      if (error) throw new Error(error.message);
+      return { label, count: count ?? 0 };
+    }),
+  );
 }
 
 export async function getPeopleByStatus(): Promise<CountBucket[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("people").select("membership_status");
-  if (error) throw new Error(error.message);
 
   const labels: Record<MembershipStatus, string> = {
     visitante: "Visitantes",
@@ -28,16 +34,16 @@ export async function getPeopleByStatus(): Promise<CountBucket[]> {
     inactivo: "Inactivos",
   };
 
-  return countBy(
-    (data ?? []).map((d) => ({ key: d.membership_status })),
-    labels,
+  return countBuckets(labels, (key) =>
+    supabase
+      .from("people")
+      .select("id", { count: "exact", head: true })
+      .eq("membership_status", key),
   );
 }
 
 export async function getFollowUpsByStatus(): Promise<CountBucket[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("visitor_follow_ups").select("status");
-  if (error) throw new Error(error.message);
 
   const labels: Record<FollowupStatus, string> = {
     pendiente: "Pendiente",
@@ -46,16 +52,16 @@ export async function getFollowUpsByStatus(): Promise<CountBucket[]> {
     no_contactable: "No contactable",
   };
 
-  return countBy(
-    (data ?? []).map((d) => ({ key: d.status })),
-    labels,
+  return countBuckets(labels, (key) =>
+    supabase
+      .from("visitor_follow_ups")
+      .select("id", { count: "exact", head: true })
+      .eq("status", key),
   );
 }
 
 export async function getPrayerRequestsByStatus(): Promise<CountBucket[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("prayer_requests").select("status");
-  if (error) throw new Error(error.message);
 
   const labels: Record<PrayerStatus, string> = {
     nueva: "Nueva",
@@ -64,9 +70,8 @@ export async function getPrayerRequestsByStatus(): Promise<CountBucket[]> {
     cerrada: "Cerrada",
   };
 
-  return countBy(
-    (data ?? []).map((d) => ({ key: d.status })),
-    labels,
+  return countBuckets(labels, (key) =>
+    supabase.from("prayer_requests").select("id", { count: "exact", head: true }).eq("status", key),
   );
 }
 
@@ -78,15 +83,23 @@ export interface ClassEnrollmentCount {
 export async function getEnrollmentCountsByClass(): Promise<ClassEnrollmentCount[]> {
   const supabase = await createClient();
 
-  const [{ data: offerings }, { data: enrollments }] = await Promise.all([
-    supabase.from("class_offerings").select("id, label").eq("status", "activa"),
-    supabase.from("enrollments").select("class_offering_id"),
-  ]);
+  const { data: offerings, error } = await supabase
+    .from("class_offerings")
+    .select("id, label")
+    .eq("status", "activa");
+  if (error) throw new Error(error.message);
+  if (!offerings || offerings.length === 0) return [];
 
   const counts = new Map<string, number>();
-  for (const e of enrollments ?? []) {
-    counts.set(e.class_offering_id, (counts.get(e.class_offering_id) ?? 0) + 1);
-  }
+  await Promise.all(
+    offerings.map(async (o) => {
+      const { count } = await supabase
+        .from("enrollments")
+        .select("id", { count: "exact", head: true })
+        .eq("class_offering_id", o.id);
+      counts.set(o.id, count ?? 0);
+    }),
+  );
 
   return (offerings ?? [])
     .map((o) => ({ label: o.label, count: counts.get(o.id) ?? 0 }))
@@ -110,18 +123,16 @@ export async function getRecentServiceAttendance(limit = 8): Promise<ServiceAtte
 
   if (!services || services.length === 0) return [];
 
-  const { data: checkins } = await supabase
-    .from("service_checkins")
-    .select("service_id")
-    .in(
-      "service_id",
-      services.map((s) => s.id),
-    );
-
   const counts = new Map<string, number>();
-  for (const c of checkins ?? []) {
-    counts.set(c.service_id, (counts.get(c.service_id) ?? 0) + 1);
-  }
+  await Promise.all(
+    services.map(async (s) => {
+      const { count } = await supabase
+        .from("service_checkins")
+        .select("id", { count: "exact", head: true })
+        .eq("service_id", s.id);
+      counts.set(s.id, count ?? 0);
+    }),
+  );
 
   return services
     .map((s) => ({
@@ -153,14 +164,17 @@ export async function getMinistryServingCounts(): Promise<MinistryServingCount[]
   if (error) throw new Error(error.message);
   if (!ministries || ministries.length === 0) return [];
 
-  const { data: memberships, error: membershipsError } = await supabase
-    .from("ministry_memberships")
-    .select("ministry_id")
-    .is("left_at", null);
-  if (membershipsError) throw new Error(membershipsError.message);
+  const memberships = await fetchAllPages((from, to) =>
+    supabase
+      .from("ministry_memberships")
+      .select("id, ministry_id")
+      .is("left_at", null)
+      .order("id")
+      .range(from, to),
+  );
 
   const counts = new Map<string, number>();
-  for (const m of memberships ?? []) {
+  for (const m of memberships) {
     counts.set(m.ministry_id, (counts.get(m.ministry_id) ?? 0) + 1);
   }
 
@@ -194,20 +208,25 @@ export async function getRecentActivityParticipation(
   if (error) throw new Error(error.message);
   if (!activities || activities.length === 0) return [];
 
-  const { data: participants } = await supabase
-    .from("activity_participants")
-    .select("activity_id, attended")
-    .in(
-      "activity_id",
-      activities.map((a) => a.id),
-    );
-
   const registered = new Map<string, number>();
   const attended = new Map<string, number>();
-  for (const p of participants ?? []) {
-    registered.set(p.activity_id, (registered.get(p.activity_id) ?? 0) + 1);
-    if (p.attended) attended.set(p.activity_id, (attended.get(p.activity_id) ?? 0) + 1);
-  }
+  await Promise.all(
+    activities.map(async (a) => {
+      const [reg, att] = await Promise.all([
+        supabase
+          .from("activity_participants")
+          .select("id", { count: "exact", head: true })
+          .eq("activity_id", a.id),
+        supabase
+          .from("activity_participants")
+          .select("id", { count: "exact", head: true })
+          .eq("activity_id", a.id)
+          .eq("attended", true),
+      ]);
+      registered.set(a.id, reg.count ?? 0);
+      attended.set(a.id, att.count ?? 0);
+    }),
+  );
 
   return activities.map((a) => ({
     activityName: a.name,

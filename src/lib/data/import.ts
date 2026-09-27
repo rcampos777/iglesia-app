@@ -1,6 +1,7 @@
 import "server-only";
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/server";
+import { fetchAllPages, fetchInChunks, mapWithConcurrency } from "./paging";
 import { sanitizeSearchTerm } from "@/lib/supabase/filter-utils";
 import {
   importedPersonSchema,
@@ -106,14 +107,15 @@ export async function createImportBatchFromCsv(
     throw new Error(`No se pudo crear el lote de importación: ${batchError?.message}`);
   }
 
-  const rowsToInsert = [];
-  for (const row of parsedRows) {
+  // Una consulta de duplicados por fila; en paralelo acotado para que un
+  // archivo de miles de filas no tarde minutos (ni sature la base).
+  const rowsToInsert = await mapWithConcurrency(parsedRows, 10, async (row) => {
     const match =
       row.errors.length > 0
         ? { status: "invalido" as const, candidateIds: [] }
         : await findMatchCandidates(row.normalized);
 
-    rowsToInsert.push({
+    return {
       batch_id: batch.id,
       row_number: row.rowNumber,
       raw_data: row.raw,
@@ -121,11 +123,15 @@ export async function createImportBatchFromCsv(
       match_status: match.status,
       candidate_person_ids: match.candidateIds,
       validation_errors: row.errors,
-    });
-  }
+    };
+  });
 
-  const { error: rowsError } = await supabase.from("import_rows").insert(rowsToInsert);
-  if (rowsError) throw new Error(`No se pudieron guardar las filas: ${rowsError.message}`);
+  for (let i = 0; i < rowsToInsert.length; i += 500) {
+    const { error: rowsError } = await supabase
+      .from("import_rows")
+      .insert(rowsToInsert.slice(i, i + 500));
+    if (rowsError) throw new Error(`No se pudieron guardar las filas: ${rowsError.message}`);
+  }
 
   return { batchId: batch.id, rowCount: parsedRows.length };
 }
@@ -157,26 +163,26 @@ export async function getImportBatchWithRows(
   if (batchError) throw new Error(batchError.message);
   if (!batch) return null;
 
-  const { data: rows, error: rowsError } = await supabase
-    .from("import_rows")
-    .select("*")
-    .eq("batch_id", batchId)
-    .order("row_number");
-  if (rowsError) throw new Error(rowsError.message);
-
-  const allCandidateIds = Array.from(new Set((rows ?? []).flatMap((r) => r.candidate_person_ids)));
-
-  const { data: candidatePeople } = allCandidateIds.length
-    ? await supabase.from("people").select("id, first_name, last_name").in("id", allCandidateIds)
-    : { data: [] };
-
-  const nameById = new Map(
-    (candidatePeople ?? []).map((p) => [p.id, `${p.first_name} ${p.last_name}`]),
+  const rows = await fetchAllPages((from, to) =>
+    supabase
+      .from("import_rows")
+      .select("*")
+      .eq("batch_id", batchId)
+      .order("row_number")
+      .order("id")
+      .range(from, to),
   );
+
+  const candidatePeople = await fetchInChunks(
+    rows.flatMap((r) => r.candidate_person_ids),
+    (ids) => supabase.from("people").select("id, first_name, last_name").in("id", ids),
+  );
+
+  const nameById = new Map(candidatePeople.map((p) => [p.id, `${p.first_name} ${p.last_name}`]));
 
   return {
     batch,
-    rows: (rows ?? []).map((r) => ({
+    rows: rows.map((r) => ({
       ...r,
       candidateNames: r.candidate_person_ids.map((id) => ({ id, name: nameById.get(id) ?? id })),
     })),

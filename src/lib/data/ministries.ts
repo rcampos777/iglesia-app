@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { MinistryMembershipRow, MinistryRow } from "@/types/database";
+import { fetchAllPages, fetchInChunks } from "./paging";
 
 export interface MinistryWithSummary extends MinistryRow {
   leaderName: string | null;
@@ -46,20 +47,25 @@ export async function listMinistries(
     leaderIds.length
       ? supabase.from("people").select("id, first_name, last_name").in("id", leaderIds)
       : Promise.resolve({ data: [] as { id: string; first_name: string; last_name: string }[] }),
-    supabase
-      .from("ministry_memberships")
-      .select("ministry_id")
-      .is("left_at", null)
-      .in(
-        "ministry_id",
-        ministries.map((m) => m.id),
-      ),
+    fetchInChunks(
+      ministries.map((m) => m.id),
+      (ids) =>
+        fetchAllPages((from, to) =>
+          supabase
+            .from("ministry_memberships")
+            .select("id, ministry_id")
+            .is("left_at", null)
+            .in("ministry_id", ids)
+            .order("id")
+            .range(from, to),
+        ).then((data) => ({ data, error: null })),
+    ),
   ]);
 
   const leaderById = new Map((leadersRes.data ?? []).map((p) => [p.id, p]));
 
   const countByMinistry = new Map<string, number>();
-  for (const row of membershipsRes.data ?? []) {
+  for (const row of membershipsRes) {
     countByMinistry.set(row.ministry_id, (countByMinistry.get(row.ministry_id) ?? 0) + 1);
   }
 
@@ -111,14 +117,11 @@ export async function getMinistryDetail(id: string): Promise<MinistryDetail | nu
   const personIds = new Set(rows.map((m) => m.person_id));
   if (ministry.leader_person_id) personIds.add(ministry.leader_person_id);
 
-  const { data: people } = personIds.size
-    ? await supabase
-        .from("people")
-        .select("id, first_name, last_name, phone, email")
-        .in("id", [...personIds])
-    : { data: [] };
+  const people = await fetchInChunks([...personIds], (ids) =>
+    supabase.from("people").select("id, first_name, last_name, phone, email").in("id", ids),
+  );
 
-  const peopleById = new Map((people ?? []).map((p) => [p.id, p]));
+  const peopleById = new Map(people.map((p) => [p.id, p]));
 
   const withPerson = (m: MinistryMembershipRow): MinistryMemberWithPerson => {
     const p = peopleById.get(m.person_id);
@@ -190,7 +193,16 @@ export interface PersonPickerOption {
  */
 export async function listPeopleForMinistryPicker(): Promise<PersonPickerOption[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("list_people_for_ministry_picker");
-  if (error) throw new Error(`No se pudieron cargar las personas: ${error.message}`);
-  return data ?? [];
+  try {
+    return await fetchAllPages((from, to) =>
+      supabase
+        .rpc("list_people_for_ministry_picker")
+        .order("last_name")
+        .order("first_name")
+        .order("id")
+        .range(from, to),
+    );
+  } catch (e) {
+    throw new Error(`No se pudieron cargar las personas: ${(e as Error).message}`);
+  }
 }

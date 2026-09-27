@@ -1,8 +1,118 @@
 # Progreso del proyecto
 
-Última actualización: 2026-09-02.
+Última actualización: 2026-09-05.
 
 ## Estado general: MVP verificado de punta a punta ✅
+
+### 2026-09-05 — Auditoría de identidad/autorización/auditoría (Fase 1 completa, código; verificación en vivo pendiente)
+
+Encargo del usuario: auditar identidad, autorización y auditoría en
+`Iglesia-App` "contrastando todo con el código y las migraciones — no
+asumas que algo funciona porque está documentado como terminado". Se
+siguió el loop pedido (investigar → definir qué debe permitirse/bloquearse
+→ prueba que reproduce el fallo → corrección mínima completa → revisar
+efectos secundarios → documentar) para las 3 tareas de la Fase 1.
+
+**Problema → cambio → pruebas → resultado → pendientes**, por tarea:
+
+**1.A Identidad (`profiles.person_id`)**
+
+- _Problema_: (1) `handle_new_auth_user()` confiaba en
+  `raw_user_meta_data.person_id`, escribible por cualquiera con la anon
+  key vía el endpoint público de signup — suplantación de identidad sin
+  intervención humana. (2) `profiles_update_own` no restringía columnas:
+  cualquier usuario podía reasignar su propia cuenta a otra persona sin
+  cuenta todavía vía PATCH directo. (3) No existía ninguna invitación
+  verificable, pese a que `0004_profiles.sql` la daba por sentada desde
+  agosto.
+- _Cambio_: `0027_identity_protection.sql` — trigger usa
+  `raw_app_meta_data` (solo Admin API); trigger + `admin_relink_profile()`
+  bloquean cambios de `person_id` fuera de un RPC auditado; tabla
+  `portal_invitations` + `create_portal_invitation()` /
+  `revoke_portal_invitation()`. UI: `InvitePortalCard` en la ficha de
+  persona, ruta pública `/activar-portal` (`activar-portal/actions.ts`
+  usa `service_role` — único punto donde se crea una cuenta sin sesión
+  previa, justificado igual que otros usos en `admin.ts`).
+- _Pruebas_: `scripts/verify-security-phase1.ts` (`npm run
+verify:phase1`) cubre suplantación, auto-reasignación bloqueada, y el
+  camino legítimo de invitación de punta a punta.
+- _Resultado_: `typecheck`/`lint`/`format:check` limpios. **No se pudo
+  correr contra Postgres real en este entorno** — ver "Pendientes"
+  abajo.
+- _Pendientes_: aplicar `0027` (`supabase db push`) y correr
+  `npm run verify:phase1` contra el proyecto de desarrollo.
+
+**1.B Ámbito del rol pastor**
+
+- _Problema_: la decisión del 2026-09-02 (pastor acotado a sus clases y
+  sus ministerios) se aplicó en `is_admin()` (0023) y en los guards de
+  servidor de `ministerios/actions.ts`, pero **nunca en la RLS** de
+  `course_categories`, `courses`, `class_offerings`, `class_sessions`,
+  `enrollments`, `attendance_records`, `ministries` y
+  `ministry_memberships` — 8 políticas seguían dándole a cualquier
+  pastor acceso de escritura global. La propia matriz en
+  `docs/roles-and-permissions.md` tenía un error: decía `CLA` para
+  pastor en "Membresía de ministerio" cuando la decisión real era "solo
+  los que lidera".
+- _Cambio_: `0028_pastor_scope.sql` acota pastor al mismo patrón que
+  `maestro` (`teacher_person_id`) en cursos y al mismo que cualquier
+  líder no-staff (`is_ministry_leader`/`leader_person_id`) en
+  ministerios. `cursos/actions.ts` y `ministerios/actions.ts` ajustados
+  para que el guard de servidor y la RLS coincidan (antes el guard de
+  ministerios ya estaba bien y la RLS no; ahora ambos están alineados).
+  Se le quita a pastor la creación de ministerios nuevos (el flujo
+  documentado es admin/coordinador crea → designa pastor como líder).
+  Matriz de `docs/roles-and-permissions.md` corregida.
+- _Pruebas_: `verify-security-phase1.ts` cubre edición de ministerio
+  propio vs. ajeno, y de clase propia vs. ajena.
+- _Resultado_: mismo estado que 1.A (código verde, DB real pendiente).
+- _Pendientes_: mismos que 1.A.
+
+**1.C Escalada de acceso a oración vía membresía**
+
+- _Problema_: `0021`/`0022` protegían bien la columna
+  `grants_prayer_access`, pero `is_prayer_reader()` también concede
+  lectura a cualquier `lider`/`colider` activo del ministerio marcado —
+  y nada protegía ESA membresía. Un `coordinador_ministerio` (rol
+  global) o el propio líder de intercesión podían auto-concederse o
+  conceder a un tercero ese acceso confidencial con una edición
+  ordinaria de `ministry_memberships`, sin pasar por
+  `set_prayer_ministry()` ni dejar auditoría dedicada.
+- _Cambio_: `0029_prayer_membership_guard.sql` — trigger que exige
+  `administrador` para crear/ascender/reactivar una membresía
+  `lider`/`colider` en un ministerio marcado; la revocación (bajar a
+  `miembro`) sigue abierta a cualquiera con permiso normal. También se
+  protegió reactivar `is_active` en el ministerio marcado, por el mismo
+  motivo (era otra vía indirecta de restaurar el acceso). Mensajes de
+  error en español en `ministerios/actions.ts` para el código `42501`.
+- _Pruebas_: `verify-security-phase1.ts` prueba el otorgamiento
+  bloqueado (self y a terceros), el otorgamiento legítimo por admin
+  (incluida verificación cruzada con `is_prayer_reader()`), y la
+  revocación efectiva.
+- _Resultado_: mismo estado (código verde, DB real pendiente).
+- _Pendientes_: mismos que 1.A.
+
+**Fase 3 (parcial) — revisión de `0026_deletable_users.sql`**: revisada,
+sin cambios — el diseño (FKs `NO ACTION`→`SET NULL` hacia `auth.users`,
+preservando las dos `CASCADE` intencionales de `profiles`/`user_roles`)
+es correcto y conserva la atribución histórica de auditoría al dar de
+baja una cuenta. Sigue sin aplicarse contra la base real (mismo bloqueo
+de red).
+
+**Bloqueo de entorno (nuevo, distinto al de agosto)**: ni el puente al
+equipo del usuario (`device_bash`, VM Linux del propio Mac) ni el
+contenedor en la nube de este agente tuvieron salida de red hacia
+`*.supabase.co` en esta sesión — confirmado con `curl` (falla de DNS en
+un lado, rechazo de política de egreso 403 en el otro). Tampoco fue
+posible correr `npm run build` en el puente al equipo del usuario: esa
+VM es Linux/arm64 (el Mac del usuario es Darwin/arm64), le falta el
+binario nativo de SWC para Linux y no tiene salida a `registry.npmjs.org`
+para bajarlo. `typecheck`/`lint`/`format:check` sí corrieron ahí
+limpios. **Ninguno de los cambios de este día se aplicó ni se probó
+contra la base de desarrollo real** — queda como el paso más importante
+antes de considerar la Fase 1 cerrada. Fases 2, 4 y 5 quedan sin
+empezar; Fase 3 solo con la revisión de `0026` (sin migración nueva
+propia, porque no hizo falta cambiarla).
 
 El bloqueo de entorno original (sin Docker/Supabase CLI) se resolvió:
 el usuario proveyó credenciales de un proyecto Supabase Cloud de
@@ -204,6 +314,28 @@ Es la causa más probable del error que vio una usuaria real al confirmar
 su email.
 
 ## Bitácora
+
+### 2026-09-27 — Revisión de escalabilidad (1000+ personas)
+
+- Hallazgo: PostgREST devuelve máximo 1000 filas sin error. Reportes
+  (personas por estado, seguimiento, oración, inscripciones, asistencia,
+  ministerios, actividades), listas de check-in/seguimiento/oración,
+  detalle de clase (asistencia), resultados de encuestas, lote de
+  importación y el selector de personas de ministerios se habrían
+  truncado en silencio al pasar de 1000 filas.
+- Corregido con conteos en la base y `src/lib/data/paging.ts`
+  (`fetchAllPages`, `fetchInChunks`, `mapWithConcurrency`). La
+  importación ahora busca duplicados con 10 consultas en paralelo e
+  inserta en tandas de 500.
+- Prueba de carga (`scripts/load-test.ts`) en desarrollo con 1500
+  personas sintéticas: 1200 check-ins con 50 simultáneos sin errores
+  (~52/s, p95 1.7 s); consulta sin paginar devolvía 1000 de 1200 y
+  `.in()` con 1200 IDs fallaba (Bad Request); con los helpers: 12/12 OK.
+- Limpieza hecha (2026-09-27): la base de desarrollo quedó solo con las
+  3 cuentas reales (Roberto, Dimarilys, Ester) y sus fichas; sin
+  actividad ni cuentas `@iglesia.test`. Se conservan las 6 categorías de
+  cursos. Las listas de seguimiento/oración/actividades no paginan en
+  la UI; con miles de filas convendrá paginarlas como el directorio.
 
 ### 2026-09-02 — Trayectoria de la persona (requisito de la Pastora Didi)
 

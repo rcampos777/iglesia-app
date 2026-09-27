@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { FollowUpNoteRow, FollowupStatus, VisitorFollowUpRow } from "@/types/database";
+import { fetchAllPages, fetchInChunks } from "./paging";
 
 export interface FollowUpWithPerson extends VisitorFollowUpRow {
   personFirstName: string;
@@ -16,28 +17,32 @@ export async function listFollowUps(
 ): Promise<FollowUpWithPerson[]> {
   const supabase = await createClient();
 
-  let query = supabase
-    .from("visitor_follow_ups")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const status = filters.status && filters.status !== "todos" ? filters.status : null;
 
-  if (filters.status && filters.status !== "todos") {
-    query = query.eq("status", filters.status);
+  let followUps: VisitorFollowUpRow[];
+  try {
+    followUps = await fetchAllPages((from, to) => {
+      let query = supabase
+        .from("visitor_follow_ups")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(from, to);
+      if (status) query = query.eq("status", status);
+      return query;
+    });
+  } catch (e) {
+    throw new Error(`No se pudo cargar el seguimiento: ${(e as Error).message}`);
   }
+  if (followUps.length === 0) return [];
 
-  const { data: followUps, error } = await query;
-  if (error) throw new Error(`No se pudo cargar el seguimiento: ${error.message}`);
-  if (!followUps || followUps.length === 0) return [];
+  const people = await fetchInChunks(
+    followUps.map((f) => f.person_id),
+    (ids) =>
+      supabase.from("people").select("id, first_name, last_name, phone, email").in("id", ids),
+  );
 
-  const { data: people } = await supabase
-    .from("people")
-    .select("id, first_name, last_name, phone, email")
-    .in(
-      "id",
-      followUps.map((f) => f.person_id),
-    );
-
-  const peopleById = new Map((people ?? []).map((p) => [p.id, p]));
+  const peopleById = new Map(people.map((p) => [p.id, p]));
 
   return followUps.map((f) => {
     const p = peopleById.get(f.person_id);
