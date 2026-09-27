@@ -48,6 +48,30 @@ un error, no un dato parcial.
   desarrollo (`npm run dev`) y usuarios sintéticos creados por el seed
   (ver `docs/assumptions.md` para las credenciales de prueba estándar).
 
+## 4.b Scripts de verificación de seguridad (autocontenidos)
+
+`scripts/verify-security-phase1.ts` (`npm run verify:phase1`) prueba
+contra Postgres real, sin depender de datos sembrados: suplantación de
+identidad vía metadata pública, auto-reasignación de `profiles.person_id`,
+el camino legítimo de invitación de portal, el ámbito real de `pastor`
+en cursos/ministerios, y la escalada de acceso a oración vía membresía
+(otorgamiento bloqueado para no-admin, revocación sí permitida). Crea y
+borra sus propios datos sintéticos (prefijo `verif-phase1-`). Requiere
+`0027`/`0028`/`0029` aplicadas. Se agregan scripts equivalentes según se
+auditen las fases siguientes.
+
+`scripts/verify-permissions-management.ts` (`npm run verify:permissions`)
+cubre la gestión de permisos vía "Cuenta y permisos" (`0030`): persona
+sin cuenta, no-op sin escritura/auditoría, guardado transaccional con
+auditoría completa, un fallo no deja cambios parciales, protección de
+último administrador (incluso vía DELETE directo con service_role, para
+ejercitar el trigger), ediciones concurrentes con `STALE_ROLES`, roles
+sin privilegio de admin rechazados en las tres RPC nuevas, escritura
+directa a `user_roles` ahora bloqueada por RLS, Mi portal sin
+regresión, y búsqueda/paginación de `list_users_with_roles`. Mismo
+patrón de datos sintéticos autocontenidos (prefijo `verif-perms-`).
+Requiere `0030` aplicada (después de `0029`).
+
 ## 5. Estado actual
 
 Implementado: `tests/e2e/auth.spec.ts` — smoke tests que **no** requieren

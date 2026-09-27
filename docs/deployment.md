@@ -35,8 +35,16 @@ que sí tiene IPv4:
 supabase db push --db-url "postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres"
 ```
 
-- Las migraciones son **aditivas y ordenadas** (`0001_...` en adelante).
-  No editar una migración ya aplicada en producción: crear una nueva.
+- Las migraciones son **aditivas y ordenadas** (`0001_...` en adelante,
+  29 al 2026-09-05: `0027`/`0028`/`0029` cierran los hallazgos de la
+  auditoría de identidad/autorización — ver `docs/decisions.md`
+  2026-09-05). No editar una migración ya aplicada en producción: crear
+  una nueva.
+- **Producción usa un proyecto Supabase SEPARADO del de desarrollo**
+  (`jlmabwnbtwjrtqaxfafx`, que se queda con sus datos sintéticos para
+  seguir probando). El proyecto de producción arranca vacío y las 29
+  migraciones se aplican ahí una sola vez, en orden — no hace falta
+  borrar nada del proyecto de desarrollo para lanzar.
 - Después de aplicar, verificar en el dashboard de Supabase que **todas**
   las tablas nuevas tengan RLS habilitado (checklist en
   `docs/security.md`).

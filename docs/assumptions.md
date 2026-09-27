@@ -42,3 +42,14 @@ iglesia.
     `people-photos`) para `people.photo_url`; el bucket y sus políticas
     de Storage aún no están creados en migraciones (pendiente, ver
     `docs/progress.md`) — hasta entonces `photo_url` puede quedar vacío.
+11. **Sin modelo de cargos eclesiales**: el proyecto solo modela roles
+    de aplicación (`app_role`: miembro, maestro, seguimiento,
+    intercesor, coordinador_ministerio, pastor, administrador) y
+    asignaciones ya existentes (`ministries.leader_person_id`,
+    `class_offerings.teacher_person_id`) — no hay un concepto separado
+    de "cargo"/función pastoral (ej. diácono, anciano, apóstol) con su
+    propia jerarquía. La pestaña "Cuenta y permisos" (2026-09-06)
+    distingue visualmente responsabilidades (ministerios/clases) de
+    permisos de aplicación, pero no inventa una jerarquía de cargos
+    eclesiales para llenar ese vacío — pendiente de requisitos
+    explícitos del usuario si se necesita en el futuro.

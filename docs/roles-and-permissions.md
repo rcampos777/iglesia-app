@@ -30,10 +30,10 @@ solo sobre registros propios o asignados a uno.
 | Módulo                    | miembro       | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor                     | administrador |
 | ------------------------- | ------------- | ------------- | ------------ | --------------------- | ----------------- | -------------------------- | ------------- |
 | Directorio de personas    | L propio      | L             | CLA          | CLA                   | CLA               | CLA                        | CLAE          |
-| Cursos / categorías       | –             | L             | L            | L                     | CLA               | solo propias               | CLA           |
-| Clases (offerings)        | L             | CLA propio    | L            | L                     | CLA               | CLA                        | CLA           |
+| Cursos / categorías       | –             | L             | L            | L                     | CLA               | – (sin catálogo propio)    | CLA           |
+| Clases (offerings)        | L             | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
 | Ministerios (catálogo)    | –             | L             | L            | L                     | CLA               | solo los que lidera        | CLA           |
-| Membresía de ministerio   | L propia      | L propia      | L            | L                     | CLA               | CLA                        | CLA           |
+| Membresía de ministerio   | L propia      | L propia      | L            | L                     | CLA               | solo los que lidera        | CLA           |
 | Matrícula                 | L propio      | CLA propio    | CLA          | L                     | CLA               | CLA                        | CLA           |
 | Asistencia                | L propio      | CLA propio    | L            | L                     | CLA               | CLA                        | CLA           |
 | Visitantes / seguimiento  | –             | –             | CLA propio+  | L                     | CLA               | CLA                        | CLA           |
@@ -48,12 +48,26 @@ solo sobre registros propios o asignados a uno.
 **El rol `pastor` NO es administrador** (decisión 2026-09-02): en esta
 iglesia hay muchos pastores de áreas distintas y varios sin nada a su
 cargo; el rango más alto son los apóstoles. El pastor ve el directorio y
-los reportes generales, pero en **Cursos** solo las clases que imparte y
-en **Ministerios** solo los que lidera. No otorga roles, no elimina
-personas, no ve la bitácora de auditoría y no lee peticiones de oración
-salvo que lidere el ministerio de intercesión. El flujo previsto es:
-el administrador crea el ministerio, pone al pastor como líder, y ese
-pastor gestiona su propia gente.
+los reportes generales, pero en **Cursos** solo las clases que imparte
+(no el catálogo de cursos/categorías, que no tiene concepto de "propio")
+y en **Ministerios** solo los que lidera — tanto el catálogo como la
+membresía de ese ministerio. No crea ministerios nuevos (eso es de
+administrador/coordinador: primero se crea, luego se designa al pastor
+como líder). No otorga roles, no elimina personas, no ve la bitácora de
+auditoría y no lee peticiones de oración salvo que lidere el ministerio
+de intercesión. El flujo previsto es: el administrador crea el
+ministerio, pone al pastor como líder, y ese pastor gestiona su propia
+gente.
+
+**Corrección 2026-09-05**: la decisión del 2026-09-02 quedó
+correctamente reflejada en `is_admin()` (0023) y en los guards de
+servidor de `ministerios/actions.ts`, pero **no** en la RLS de cursos,
+clases, matrícula, asistencia y ministerios (0005/0006/0018 seguían
+dándole a `pastor` acceso global vía `has_any_role(array[...])`
+directo). `0028_pastor_scope.sql` lo alinea. Esta tabla también tenía un
+error propio: la fila "Membresía de ministerio" decía `CLA` para pastor
+cuando la intención documentada (y la instrucción de negocio) siempre
+fue "solo los que lidera" — se corrige aquí.
 
 **Excepción por ámbito (ministerios)**: además de los roles de la matriz,
 el **líder de un ministerio concreto** (designado en
@@ -82,6 +96,17 @@ distribuir y trabajar el seguimiento del equipo.
 
 ## 5. Gestión de roles
 
-Solo `administrador` (y `pastor` para operaciones de lectura/asignación
-de roles no administrativos) puede otorgar o revocar roles, desde
-`admin/usuarios`. Todo cambio de rol se registra en `audit_log`.
+Solo `administrador` puede consultar o modificar roles (desde
+2026-09-06; antes de `0023` pastor también podía). Se gestiona desde la
+pestaña **"Cuenta y permisos"** del perfil de cada persona
+(`Personas → [persona] → Cuenta y permisos`), no desde una lista de
+botones: los cambios se preparan en la UI y se aplican todos juntos con
+"Guardar cambios" (transacción única, todo o nada). La lista de
+`Administración` (`/admin`) es ahora solo un directorio con búsqueda y
+paginación — nombre, email de acceso, estatus y un enlace "Ver
+permisos" que abre esa misma pestaña. Todo cambio de rol se registra en
+`audit_log` con el estado anterior y posterior. Ver
+`0030_permissions_management.sql` y `docs/security.md` §8.j para el
+detalle de las protecciones (último administrador a prueba de
+condiciones de carrera, detección de ediciones desactualizadas, cierre
+de la escritura directa a `user_roles`).

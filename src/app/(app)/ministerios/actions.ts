@@ -20,8 +20,17 @@ import type { MinistryMemberRole } from "@/types/database";
  */
 const MINISTRY_GLOBAL_ROLES = ["administrador", "coordinador_ministerio"] as const;
 
-/** Quién puede crear un ministerio nuevo. */
-const MINISTRY_CREATE_ROLES = ["administrador", "coordinador_ministerio", "pastor"] as const;
+/**
+ * Quién puede crear un ministerio nuevo. `pastor` no está aquí a
+ * propósito: el flujo documentado es que administrador/coordinador crea
+ * el ministerio y LUEGO designa al pastor como líder — un pastor no
+ * "lidera" algo que todavía no existe (docs/roles-and-permissions.md
+ * §3: "el flujo previsto es: el administrador crea el ministerio, pone
+ * al pastor como líder"). Antes incluía a pastor aquí sin que la RLS
+ * (0018) tuviera ninguna vía acotada para el alta — ver
+ * 0028_pastor_scope.sql.
+ */
+const MINISTRY_CREATE_ROLES = ["administrador", "coordinador_ministerio"] as const;
 
 function leaderPersonIdFrom(formData: FormData): string {
   const raw = formData.get("leaderPersonId");
@@ -234,6 +243,13 @@ export async function addMinistryMemberAction(
     if (error.code === "23505") {
       return actionError("Esa persona ya sirve en este ministerio.");
     }
+    // Trigger de 0029: nadie que no sea administrador puede dar de alta
+    // un lider/colider en el ministerio marcado como de intercesión.
+    if (error.code === "42501") {
+      return actionError(
+        "Solo un administrador puede asignar líder o colíder en el ministerio de intercesión.",
+      );
+    }
     return actionError(`No se pudo agregar a la persona: ${error.message}`);
   }
 
@@ -260,7 +276,16 @@ export async function updateMemberRoleAction(
     .eq("id", membershipId)
     .eq("ministry_id", ministryId);
 
-  if (error) return actionError(`No se pudo actualizar: ${error.message}`);
+  if (error) {
+    // Trigger de 0029: ascender a alguien a lider/colider en el
+    // ministerio de intercesión es exclusivo de administrador.
+    if (error.code === "42501") {
+      return actionError(
+        "Solo un administrador puede asignar líder o colíder en el ministerio de intercesión.",
+      );
+    }
+    return actionError(`No se pudo actualizar: ${error.message}`);
+  }
 
   revalidatePath(`/ministerios/${ministryId}`);
   return actionOk(undefined);

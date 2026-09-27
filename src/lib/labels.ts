@@ -30,6 +30,16 @@ export const roleLabels: Record<AppRole, string> = {
   administrador: "Administrador",
 };
 
+export const roleDescriptions: Record<AppRole, string> = {
+  miembro: "Acceso a Mi portal: puede ver y actualizar sus propios datos de contacto.",
+  maestro: "Gestiona asistencia y matrícula de las clases donde figura como maestro.",
+  seguimiento: "Da seguimiento a visitantes y puede registrar personas nuevas.",
+  intercesor: "Puede ver y atender las peticiones de oración asignadas o del equipo.",
+  coordinador_ministerio: "Gestiona personas, cursos, clases y ministerios de su área.",
+  pastor: "Gestiona las clases que imparte y los ministerios que lidera (no es acceso global).",
+  administrador: "Acceso completo: gestión de roles, configuración y todos los módulos.",
+};
+
 export const followupStatusLabels: Record<FollowupStatus, string> = {
   pendiente: "Pendiente",
   en_progreso: "En progreso",

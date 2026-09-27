@@ -2,6 +2,143 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-09-06 — Gestión de permisos: de botones inmediatos a guardado transaccional en el perfil
+
+**Contexto**: encargo explícito del usuario de mover la gestión de
+acceso de la "pared de botones" de `/admin` (cada clic = escritura
+inmediata de una fila en `user_roles`, sin resumen ni transacción) a
+una pestaña "Cuenta y permisos" dentro del perfil de cada persona, con
+cambios preparados y aplicados mediante un botón "Guardar cambios"
+explícito.
+
+**Decisiones de diseño**:
+
+1. **Guardado transaccional con detección de ediciones
+   desactualizadas, sin columna de versión**: en vez de agregar una
+   columna `version`/`updated_at` a `user_roles`, el cliente manda el
+   conjunto de roles que tenía cargado (`p_expected_roles`) además del
+   conjunto final deseado (`p_new_roles`). `admin_set_person_roles()`
+   compara `p_expected_roles` contra el estado real dentro de la misma
+   transacción y rechaza con `STALE_ROLES:` si no coincide, en vez de
+   sobrescribir en silencio el cambio de otro administrador.
+2. **Último administrador: la garantía vive en un trigger, no en la
+   RPC**: un chequeo de conteo dentro de la propia función de guardado
+   no es seguro ante dos transacciones concurrentes que remueven el rol
+   `administrador` a DOS cuentas distintas (cada una podría ver a la
+   otra como "el admin que queda" antes de que ninguna confirme). La
+   garantía real es un trigger `BEFORE DELETE` sobre `user_roles` con
+   `pg_advisory_xact_lock` de alcance de **transacción completa** (no se
+   libera hasta commit/rollback), que serializa cualquier intento de
+   borrar el último `administrador` sin importar la vía de escritura.
+   El chequeo dentro de la RPC queda solo como atajo de mensaje más
+   claro para el caso obvio, documentado explícitamente como NO la
+   garantía de concurrencia.
+3. **Cierre de la escritura directa a `user_roles`**: se retira la
+   política RLS `user_roles_all_admin` (permitía a cualquier
+   `administrador` escribir la tabla directo por PostgREST, sin pasar
+   por auditoría ni por las protecciones nuevas) y se reemplaza por una
+   política de solo lectura. La única forma de escribir `user_roles`
+   pasa a ser una función `security definer` (`admin_set_person_roles`
+   o `grant_default_role` de `0004`). Esto es lo que impide que
+   reintroducir un botón viejo, o llamar a la API REST directo con la
+   anon key de un administrador, evite las protecciones nuevas.
+4. **No se tocó el modelo de cargos eclesiales**: el pedido distinguía
+   "cargo"/función pastoral, responsabilidad en un ministerio/clase, y
+   permisos de la aplicación. El proyecto no tiene (todavía) un modelo
+   de cargos eclesiales — solo roles de aplicación (`app_role`) y
+   asignaciones ya existentes (`ministries.leader_person_id`,
+   `class_offerings.teacher_person_id`). No se inventó una jerarquía de
+   cargos para resolver este cambio: la pestaña "Cuenta y permisos"
+   muestra "Responsabilidades" (ministerios/clases, reutilizando datos
+   ya existentes) separado de "Permisos de la aplicación" (los 7
+   `app_role`), y la ausencia de un modelo de cargos queda documentada
+   como pendiente en `docs/assumptions.md`.
+5. **Cuentas sin perfil no se vinculan automáticamente**: la lista de
+   Administración muestra `person_id = null` tal cual (con un
+   indicador visual), sin ninguna acción que las asocie a una persona
+   por inferencia — evita vincular por error una cuenta a la persona
+   equivocada.
+
+**Verificación**: `typecheck`, `lint` y `format:check` limpios contra
+todo el árbol. `build` y las pruebas contra Postgres real
+(`npm run verify:permissions`, nuevo script de regresión en
+`scripts/verify-permissions-management.ts`) **no se pudieron ejecutar
+en este entorno** — mismo límite de red hacia `*.supabase.co` ya
+documentado en la entrada del 2026-09-05 (sin cambios: seguía sin
+salida de red en esta sesión). Migración y código quedan listos; falta
+aplicar `0030_permissions_management.sql` (`supabase db push`, después
+de `0029`) y correr `npm run verify:permissions` desde un entorno con
+salida de red normal antes de considerar esta funcionalidad probada en
+el sentido estricto pedido ("no declares probado algo que solo
+revisaste por código"). Tampoco se pudo verificar visualmente la UI
+(la pestaña nueva, el flujo de guardado, responsive/teclado) por la
+misma razón: el servidor de desarrollo necesita una base de datos viva.
+
+**Consecuencias**: `admin/actions.ts` y `admin/role-toggles.tsx` se
+eliminan (superados). `Mi portal` no cambia — sigue sin ninguna vía
+para que un miembro edite sus propios roles o su `person_id`, y las
+protecciones de `0027` (que bloquean cambiar `profiles.person_id` fuera
+de `admin_relink_profile`) siguen intactas sin haber sido tocadas por
+este cambio.
+
+## 2026-09-05 — Auditoría de identidad/autorización/auditoría: 3 fallos reales cerrados
+
+**Contexto**: encargo explícito del usuario de auditar identidad,
+autorización y auditoría antes de seguir con la experiencia diaria de
+administración. Se comparó cada control documentado contra el código y
+las migraciones reales (no solo la documentación) — la consigna
+explícita fue "no asumas que algo funciona porque está documentado como
+terminado".
+
+**Hallazgos y decisiones**:
+
+1. `handle_new_auth_user()` confiaba en `raw_user_meta_data.person_id`
+   (escribible por cualquiera con la anon key, sin pasar por la app):
+   permitía suplantar la identidad de cualquier persona del directorio
+   sin cuenta todavía. Se cambia a `raw_app_meta_data` (solo Admin
+   API/service_role). Ver `0027_identity_protection.sql`.
+2. `profiles_update_own` no restringía columnas: un usuario podía
+   reasignar su propia cuenta a cualquier persona sin cuenta vía PATCH
+   directo. Se agrega un trigger que bloquea el cambio de `person_id`
+   salvo por un RPC de administrador auditado (`admin_relink_profile`).
+3. Se construyó la invitación verificable de portal
+   (`portal_invitations` + `create_portal_invitation`/
+   `revoke_portal_invitation`) que `0004_profiles.sql` prometía desde
+   agosto pero nunca se implementó — sin ella, no había forma legítima
+   de vincular una cuenta nueva a una persona existente.
+4. La decisión del 2026-09-02 (pastor acotado) nunca se aplicó en la
+   RLS de cursos/clases/matrícula/asistencia/ministerios — solo en
+   `is_admin()` y en los guards de servidor de ministerios. Ocho
+   políticas seguían dándole acceso global. Ver
+   `0028_pastor_scope.sql` y la corrección de la matriz en
+   `docs/roles-and-permissions.md` (la fila "Membresía de ministerio"
+   decía `CLA` para pastor por error de documentación, no por decisión
+   real).
+5. La protección de `grants_prayer_access` (0021/0022) no cubría la vía
+   de **membresía**: un coordinador o el propio líder de intercesión
+   podían auto-concederse/conceder a un tercero `lider`/`colider` de ese
+   ministerio por una edición ordinaria, saltándose por completo el
+   control cuidadosamente construido para la columna. Ver
+   `0029_prayer_membership_guard.sql`.
+
+**Verificación**: `typecheck`, `lint` y `format:check` limpios. `build`
+y las pruebas contra Postgres real (`npm run verify:phase1`, nuevo
+script de regresión en `scripts/verify-security-phase1.ts`) **no se
+pudieron ejecutar en este entorno**: ni el puente al equipo del usuario
+ni el contenedor en la nube de este agente tuvieron salida de red hacia
+`*.supabase.co` en esta sesión (bloqueado por política de red, no por
+error de configuración). Migraciones y código quedan listos; falta
+aplicar `0027`/`0028`/`0029` (`supabase db push`) y correr
+`npm run verify:phase1` desde un entorno con salida de red normal (la
+terminal del propio usuario, por ejemplo) antes de dar la Fase 1 por
+cerrada en el sentido estricto de `CLAUDE.md`.
+
+**Consecuencias**: ninguna funcionalidad legítima documentada se quita
+— pastor sigue viendo el directorio completo, gestionando sus propias
+clases y sus propios ministerios; coordinadores siguen pudiendo agregar
+miembros normales a cualquier ministerio. Solo se cierra lo que nunca
+debió estar abierto.
+
 ## 2026-09-02 — `pastor` deja de ser administrador; oración se ata al ministerio de intercesión
 
 **Decisión** (dueño del producto, cambia `CLAUDE.md` §3.11 y §4):

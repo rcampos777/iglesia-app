@@ -232,6 +232,125 @@ que corren como dueño de la tabla y no re-evalúan RLS — mismo patrón que
 de B consulta A, hay que meter al menos una de las dos consultas en una
 función `SECURITY DEFINER`.
 
+## 8.f Identidad de cuenta: person_id ya no se puede falsificar ni cambiar (2026-09-05)
+
+Auditoría de la Fase 1 (identidad y acceso) encontró dos fallos reales,
+ninguno visible por `lint`/`typecheck`/`build`, ambos explotables sin
+pasar por la app:
+
+- `handle_new_auth_user()` confiaba en `raw_user_meta_data.person_id`
+  — el campo `data` del endpoint público `POST /auth/v1/signup`, que
+  cualquiera puede rellenar con la `anon key` sin usar `registerAction`.
+  Alguien que conociera el `id` de una persona en el directorio podía
+  "ser" esa persona registrándose. Corregido: el trigger ahora exige
+  `raw_app_meta_data.person_id`, que solo la Admin API (service_role)
+  puede escribir.
+- `profiles_update_own` no restringía columnas: cualquier usuario podía
+  `PATCH /rest/v1/profiles` y reasignar su propia cuenta a cualquier
+  persona del directorio sin cuenta todavía. Corregido con un trigger
+  (`prevent_profile_person_id_change`) que bloquea todo cambio de
+  `person_id` salvo por `admin_relink_profile()` (exige administrador,
+  audita en `audit_log`).
+
+Ver `supabase/migrations/0027_identity_protection.sql` para el detalle
+completo y `scripts/verify-security-phase1.ts` para las pruebas de
+regresión (pendientes de correr contra la base real — ver `docs/progress.md`).
+
+## 8.g Invitación verificable al portal (2026-09-05)
+
+Nueva tabla `portal_invitations` + funciones `create_portal_invitation()`
+/ `revoke_portal_invitation()`: la vía prevista desde `0004_profiles.sql`
+para activar el portal de una persona YA EXISTENTE sin crear otro
+expediente y sin fusionar por coincidencia de nombre/teléfono/email no
+verificado, pero que nunca se había construido. Solo se guarda el hash
+del token (sha256); el valor crudo se muestra una sola vez a quien la
+crea (staff con acceso de escritura sobre `people`), para compartirlo
+por un canal separado (WhatsApp, en persona) — este proyecto no envía
+emails reales todavía (`RESEND_API_KEY` pendiente, ver `.env.local`).
+UI en la ficha de persona (`InvitePortalCard`), aceptación pública en
+`/activar-portal`.
+
+## 8.h Ámbito real del rol pastor en RLS (2026-09-05)
+
+La decisión del 2026-09-02 ("pastor administra solo lo que lidera/imparte")
+quedó bien reflejada en `is_admin()` (0023) y en los guards de servidor
+de `ministerios/actions.ts`, pero **ocho políticas RLS** en
+`course_categories`, `courses`, `class_offerings`, `class_sessions`,
+`enrollments`, `attendance_records`, `ministries` y
+`ministry_memberships` seguían dándole a cualquier `pastor` acceso de
+escritura global (no acotado). `0028_pastor_scope.sql` lo corrige:
+pastor queda con el mismo ámbito que `maestro`
+(`teacher_person_id = current_person_id()`) en cursos, y el mismo que
+cualquier líder no-staff (`leader_person_id`/`is_ministry_leader()`) en
+ministerios. Además se le quitó a `pastor` la capacidad de **crear**
+ministerios nuevos (el flujo documentado es que administrador/coordinador
+lo crea y luego designa al pastor como líder).
+
+## 8.i Escalada de acceso a oración vía membresía, no solo vía el flag (2026-09-05)
+
+`0021`/`0022` protegieron correctamente quién puede marcar
+`ministries.grants_prayer_access`. Pero `is_prayer_reader()` también
+concede lectura a cualquier `lider`/`colider` **activo** del ministerio
+marcado — y nada protegía ESA membresía: un `coordinador_ministerio`
+(rol global) o el propio líder del ministerio de intercesión podían
+agregarse a sí mismos o a un tercero como colíder mediante una edición
+ordinaria de `ministry_memberships`, obteniendo lectura de TODAS las
+peticiones de oración sin pasar por `set_prayer_ministry()` ni dejar
+ningún rastro dedicado. `0029_prayer_membership_guard.sql` cierra esta
+vía con un trigger: solo `administrador` puede crear/ascender/reactivar
+una membresía `lider`/`colider` en un ministerio con
+`grants_prayer_access = true`. La revocación (bajar a `miembro`) sigue
+abierta a cualquiera con permiso de escritura sobre esa membresía — solo
+otorgar el acceso requiere admin. También se protegió reactivar
+`is_active` en el ministerio marcado, por el mismo motivo.
+
+## 8.j Gestión de permisos: guardado transaccional y cierre de escritura directa (2026-09-06)
+
+Se mueve la gestión de roles de la "pared de botones" de `/admin`
+(otorgar/quitar rol = escritura inmediata por fila, sin resumen ni
+transacción) a la pestaña "Cuenta y permisos" del perfil de cada
+persona (`0030_permissions_management.sql`), con un guardado
+transaccional explícito. Cambios de fondo:
+
+- `admin_set_person_roles(p_person_id, p_expected_roles, p_new_roles, p_reason)`
+  aplica el conjunto completo de roles deseado en una sola función
+  `plpgsql` (todo o nada), compara `p_expected_roles` contra el estado
+  real en la base para detectar ediciones desactualizadas (rechaza con
+  `STALE_ROLES:` en vez de sobrescribir en silencio), y audita
+  antes/después/agregados/quitados con `log_audit_event`. Es un no-op
+  (sin escritura ni auditoría) si `p_expected_roles == p_new_roles`.
+- **Último administrador**: la garantía real y a prueba de condiciones
+  de carrera vive en un trigger `BEFORE DELETE` sobre `user_roles`
+  (`user_roles_guard_last_admin_trg`), que serializa con
+  `pg_advisory_xact_lock` de alcance de **transacción** (se libera solo
+  al hacer commit/rollback). Esto cubre cualquier vía de borrado, no
+  solo la RPC nueva. El chequeo dentro de `admin_set_person_roles` es
+  solo un atajo de mensaje más claro, documentado explícitamente como
+  NO la garantía de concurrencia.
+- **Cierre de la vía antigua**: se retira `user_roles_all_admin` (RLS)
+  y se reemplaza por una política de solo lectura
+  (`user_roles_select_admin`). A partir de esta migración, `user_roles`
+  ya **no acepta ninguna escritura por PostgREST** — la única vía es una
+  función `security definer` (`admin_set_person_roles` o
+  `grant_default_role` de `0004`). Las Server Actions viejas
+  (`grantRoleAction`/`revokeRoleAction` en `admin/actions.ts`) se
+  eliminaron del código; aunque no se hubieran eliminado, la RLS ya
+  rechazaría el INSERT/DELETE directo.
+- `admin_get_account_for_person(p_person_id)` expone el email de
+  **autenticación** (`auth.users.email`) y su estado de verificación
+  para la sección "Cuenta" — nunca `people.email` (el de contacto), que
+  puede estar lleno sin que exista ninguna cuenta.
+- `list_users_with_roles` gana búsqueda (`p_search`) y paginación
+  (`p_limit`/`p_offset`), y ahora también devuelve `person_id` (para
+  saber a qué ficha ir y para detectar cuentas sin perfil asociado, que
+  se muestran tal cual, sin vincularse automáticamente).
+
+Todas las funciones nuevas repiten el guard `if not is_admin()` en el
+propio cuerpo (defensa en profundidad, independiente de la Server
+Action que las llama). `Mi portal` no cambia: sigue sin ninguna vía para
+que un miembro edite sus propios roles o su `person_id` (ver `0015` y
+`0027`).
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

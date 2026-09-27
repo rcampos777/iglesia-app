@@ -9,6 +9,13 @@ import { classOfferingSchema, classSessionSchema, courseSchema } from "@/lib/val
 import type { AttendanceStatus } from "@/types/database";
 
 const MANAGE_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
+// El catálogo de cursos/categorías no tiene concepto de "propio": a
+// diferencia de una clase concreta (teacher_person_id), un curso no
+// pertenece a nadie en particular. Por eso pastor NO entra aquí (ver
+// docs/roles-and-permissions.md "Cursos/categorías: pastor solo
+// propias" y 0028_pastor_scope.sql, que le quitó el mismo acceso en RLS
+// — antes la RLS y este guard estaban desalineados).
+const COURSE_CATALOG_ROLES = ["administrador", "coordinador_ministerio"] as const;
 
 function zodFieldErrors(error: {
   flatten: () => { fieldErrors: Record<string, string[] | undefined> };
@@ -23,7 +30,7 @@ function zodFieldErrors(error: {
 
 export async function createCourseAction(formData: FormData): Promise<ActionResult> {
   try {
-    await requireRole([...MANAGE_ROLES]);
+    await requireRole([...COURSE_CATALOG_ROLES]);
   } catch (err) {
     if (err instanceof AuthError) return actionError(err.message);
     throw err;
@@ -50,8 +57,9 @@ export async function createCourseAction(formData: FormData): Promise<ActionResu
 }
 
 export async function createClassOfferingAction(formData: FormData): Promise<ActionResult> {
+  let actor;
   try {
-    await requireRole([...MANAGE_ROLES]);
+    actor = await requireRole([...MANAGE_ROLES]);
   } catch (err) {
     if (err instanceof AuthError) return actionError(err.message);
     throw err;
@@ -69,6 +77,18 @@ export async function createClassOfferingAction(formData: FormData): Promise<Act
     status: formData.get("status") || "planificada",
   });
   if (!parsed.success) return actionError("Revisa los datos.", zodFieldErrors(parsed.error));
+
+  // pastor (sin admin/coordinador) queda acotado a las clases que le
+  // corresponden: solo puede crear una clase donde ÉL sea el maestro
+  // (mismo ámbito que ya aplica RLS en class_offerings_write_staff,
+  // 0028_pastor_scope.sql). Se valida aquí también para un mensaje claro
+  // en español en vez de un error crudo de Postgres.
+  const isGlobalManager = actor.roles.some(
+    (r) => r === "administrador" || r === "coordinador_ministerio",
+  );
+  if (!isGlobalManager && parsed.data.teacherPersonId !== actor.personId) {
+    return actionError("Solo puedes crear una clase donde tú seas el maestro asignado.");
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase

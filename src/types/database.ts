@@ -321,6 +321,20 @@ export type ImportRowRow = {
   reviewed_at: string | null;
 };
 
+export type PortalInvitationRow = {
+  id: string;
+  person_id: string;
+  email: string;
+  token_hash: string;
+  created_by: string | null;
+  created_at: string;
+  expires_at: string;
+  used_at: string | null;
+  used_by_user_id: string | null;
+  revoked_at: string | null;
+  revoked_by: string | null;
+};
+
 export type MinistryRow = {
   id: string;
   name: string;
@@ -431,6 +445,7 @@ export interface Database {
       ministries: TableDef<MinistryRow>;
       ministry_memberships: TableDef<MinistryMembershipRow>;
       audit_log: TableDef<AuditLogRow>;
+      portal_invitations: TableDef<PortalInvitationRow>;
     };
     Views: {
       enrollment_progress: {
@@ -487,13 +502,48 @@ export interface Database {
         Returns: undefined;
       };
       list_users_with_roles: {
-        Args: Record<string, never>;
+        Args: { p_search?: string | null; p_limit?: number; p_offset?: number };
         Returns: {
           user_id: string;
           email: string | null;
           created_at: string;
           roles: AppRole[];
+          person_id: string | null;
+          person_first_name: string | null;
+          person_last_name: string | null;
+          total_count: number;
         }[];
+      };
+      admin_get_account_for_person: {
+        Args: { p_person_id: string };
+        Returns: {
+          user_id: string;
+          email: string | null;
+          email_confirmed_at: string | null;
+          account_created_at: string;
+          roles: AppRole[];
+        }[];
+      };
+      admin_set_person_roles: {
+        Args: {
+          p_person_id: string;
+          p_expected_roles: AppRole[];
+          p_new_roles: AppRole[];
+          p_reason?: string | null;
+        };
+        Returns: undefined;
+      };
+      create_portal_invitation: {
+        Args: { p_person_id: string; p_email: string };
+        Returns: string;
+      };
+      revoke_portal_invitation: {
+        Args: { p_invitation_id: string };
+        Returns: undefined;
+      };
+      admin_relink_profile: {
+        Args: { p_user_id: string; p_new_person_id: string; p_reason?: string | null };
+        Returns: undefined;
       };
     };
     Enums: {
