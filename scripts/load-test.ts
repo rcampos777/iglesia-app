@@ -58,7 +58,7 @@ async function main() {
 
   // 2. Servicio y check-ins individuales concurrentes (como gente llegando al culto)
   const today = new Date().toISOString().slice(0, 10);
-  const service = must(
+  const service: { id: string } = must(
     await supabase
       .from("services")
       .insert({ name: "CARGA — Culto", service_date: today, is_checkin_open: true })
@@ -93,7 +93,7 @@ async function main() {
   check("Check-in duplicado rechazado", dup.error ? "sí" : "NO", Boolean(dup.error));
 
   // 3. Ministerio, actividad y clase grandes
-  const ministry = must(
+  const ministry: { id: string } = must(
     await supabase.from("ministries").insert({ name: "CARGA — Ministerio" }).select("id").single(),
   );
   const members = ids.slice(0, 1100);
@@ -104,7 +104,7 @@ async function main() {
         .insert(members.slice(i, i + 500).map((p) => ({ ministry_id: ministry.id, person_id: p }))),
     );
   }
-  const activity = must(
+  const activity: { id: string } = must(
     await supabase
       .from("activities")
       .insert({ name: "CARGA — Actividad", activity_date: today, status: "realizada" })
@@ -122,15 +122,17 @@ async function main() {
       ),
     );
   }
-  const category = must(await supabase.from("course_categories").select("id").limit(1).single());
-  const course = must(
+  const category: { id: string } = must(
+    await supabase.from("course_categories").select("id").limit(1).single(),
+  );
+  const course: { id: string } = must(
     await supabase
       .from("courses")
       .insert({ category_id: category.id, name: "CARGA — Curso" })
       .select("id")
       .single(),
   );
-  const offering = must(
+  const offering: { id: string } = must(
     await supabase
       .from("class_offerings")
       .insert({ course_id: course.id, label: "CARGA — Clase", status: "activa" })

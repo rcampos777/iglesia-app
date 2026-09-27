@@ -40,11 +40,12 @@ supabase db push --db-url "postgresql://postgres.<ref>:<password>@aws-0-<region>
   auditoría de identidad/autorización — ver `docs/decisions.md`
   2026-09-05). No editar una migración ya aplicada en producción: crear
   una nueva.
-- **Producción usa un proyecto Supabase SEPARADO del de desarrollo**
-  (`jlmabwnbtwjrtqaxfafx`, que se queda con sus datos sintéticos para
-  seguir probando). El proyecto de producción arranca vacío y las 29
-  migraciones se aplican ahí una sola vez, en orden — no hace falta
-  borrar nada del proyecto de desarrollo para lanzar.
+- **Un proyecto Supabase por iglesia + uno de demostración.**
+  `jlmabwnbtwjrtqaxfafx` es el proyecto de **demo/desarrollo**: solo
+  datos sintéticos, se usa para pruebas de carga y para enseñar la app a
+  otras iglesias. Cada iglesia real tiene su propio proyecto (arranca
+  vacío; se aplican todas las migraciones en orden). Ver "Alta de una
+  iglesia nueva" abajo.
 - Después de aplicar, verificar en el dashboard de Supabase que **todas**
   las tablas nuevas tengan RLS habilitado (checklist en
   `docs/security.md`).
@@ -100,3 +101,24 @@ manual en navegador con múltiples roles (login real, RLS positivo y
 negativo, mutaciones vía Server Actions). Sigue pendiente: repetir este
 proceso contra el proyecto de **producción** cuando exista, y todo lo
 listado en el checklist de la sección 5.
+
+## Alta de una iglesia nueva
+
+1. Crear el proyecto en Supabase (región cercana a la iglesia). Guardar
+   la contraseña de la base en un gestor de contraseñas.
+2. Crear `.env.production.local` (ignorado por git) con la URL, la anon
+   key y la service role key del proyecto nuevo.
+3. Aplicar las migraciones con el connection string del **Session
+   pooler** (IPv4):
+   `npx supabase db push --db-url "postgresql://postgres.<ref>:<password>@<host-pooler>:5432/postgres"`
+4. Copiar `church.example.json` a `<iglesia>.local.json` (ignorado por
+   git) con las cuentas iniciales reales y correr:
+   `npx tsx --env-file=.env.production.local scripts/bootstrap-church.ts <iglesia>.local.json`
+   El script se niega a correr contra el proyecto de demo. Sin SMTP
+   configurado, agregar `--temp-passwords` (quedan en
+   `church-passwords.local.txt`; entregarlas en privado y borrar).
+5. En Supabase → Authentication → URL Configuration: Site URL = dominio
+   de la iglesia; Redirect URLs = `https://<dominio>/auth/callback`.
+6. Configurar SMTP propio (Resend) en Authentication → Emails.
+7. En Vercel: variables de entorno de producción apuntando al proyecto
+   nuevo y dominio conectado. Publicar solo con autorización explícita.

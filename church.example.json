@@ -1,0 +1,17 @@
+{
+  "church": "Iglesia de Ejemplo",
+  "accounts": [
+    {
+      "email": "admin@correo-ejemplo.test",
+      "firstName": "Ana",
+      "lastName": "Administradora",
+      "roles": ["miembro", "administrador"]
+    },
+    {
+      "email": "pastor@correo-ejemplo.test",
+      "firstName": "Pedro",
+      "lastName": "Pastor",
+      "roles": ["miembro", "pastor", "maestro"]
+    }
+  ]
+}

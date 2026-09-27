@@ -80,3 +80,7 @@ next-env.d.ts
 # Excepciones: datos sintéticos versionados a propósito para desarrollo
 !scripts/fixtures/**
 !supabase/seed/**
+
+# Configuración real de cada iglesia (emails de personas reales)
+*.local.json
+*.local.txt
