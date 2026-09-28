@@ -315,6 +315,21 @@ su email.
 
 ## Bitácora
 
+### 2026-09-27 — Proyecto de producción de Ciudad de Avivamiento
+
+- Modelo: un proyecto Supabase por iglesia; `jlmabwnbtwjrtqaxfafx`
+  (iglesia-app-dev) queda como **demo** con datos sintéticos.
+- Producción: `ciudad-de-avivamiento` (`ccempuwuefjnaarmxbkz`,
+  us-west-1). 30/30 migraciones aplicadas; 29/29 tablas con RLS y
+  políticas. 3 cuentas iniciales creadas con `bootstrap-church.ts`
+  (sin contraseña: entran con "¿Olvidaste tu contraseña?" cuando haya
+  SMTP).
+- Pendiente para salir en vivo: dominio, Resend (dominio verificado +
+  SMTP en Supabase + plantillas en español), Auth URL Configuration con
+  el dominio, variables de producción en Vercel, merge de
+  `preparar-lanzamiento` y publicar (con autorización). Volver a sembrar
+  el proyecto demo con datos sintéticos.
+
 ### 2026-09-27 — Revisión de escalabilidad (1000+ personas)
 
 - Hallazgo: PostgREST devuelve máximo 1000 filas sin error. Reportes
