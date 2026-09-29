@@ -10,7 +10,7 @@ import Image from "next/image";
 export function LogoMark({ className = "size-8" }: { className?: string }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center rounded-md bg-[var(--brand-warm-white)] p-[12%] ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-md bg-[var(--brand-warm-white)] p-1 ${className}`}
     >
       <Image
         src="/brand/logo-mark.png"
