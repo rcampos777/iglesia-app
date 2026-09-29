@@ -1,41 +1,40 @@
-/**
- * Logo de Ciudad de Avivamiento | Ponce.
- *
- * ⚠️ PROVISIONAL — este monograma está construido en código, no es la
- * marca oficial de la iglesia. Se usa mientras llega el archivo real.
- * Para sustituirlo: coloca el SVG (o un PNG de al menos 1000 px de ancho
- * con fondo transparente) en `public/` y reemplaza el <svg> de
- * `LogoMark` por una <Image>. Ver docs/design.md §3.
- *
- * Al ser vectorial no se ve borroso ni deformado en ningún tamaño; el
- * viewBox cuadrado con `preserveAspectRatio` por defecto impide que se
- * estire.
- */
+import Image from "next/image";
 
+/**
+ * Logo oficial de Ciudad de Avivamiento | Ponce (archivos en
+ * `public/brand/`, fondo transparente).
+ *
+ * El símbolo va sobre una baldosa clara: el edificio carbón del logo se
+ * perdería sobre el fondo carbón del menú lateral.
+ */
 export function LogoMark({ className = "size-8" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      className={className}
-      role="img"
-      aria-label="Ciudad de Avivamiento"
-      focusable="false"
+    <span
+      className={`inline-flex shrink-0 items-center justify-center rounded-md bg-[var(--brand-warm-white)] p-[12%] ${className}`}
     >
-      <rect width="32" height="32" rx="4" fill="var(--brand-red)" />
-      <text
-        x="16"
-        y="16"
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="var(--brand-warm-white)"
-        fontSize="13"
-        fontWeight="700"
-        letterSpacing="0.3"
-        fontFamily="var(--font-sans), system-ui, sans-serif"
-      >
-        CA
-      </text>
-    </svg>
+      <Image
+        src="/brand/logo-mark.png"
+        alt="Ciudad de Avivamiento"
+        width={256}
+        height={256}
+        className="size-full object-contain"
+        priority
+      />
+    </span>
+  );
+}
+
+/** Logo completo (símbolo + nombre + lema) para pantallas de acceso. */
+export function LogoFull({ className = "" }: { className?: string }) {
+  return (
+    <Image
+      src="/brand/logo-full.png"
+      alt="Ciudad de Avivamiento — Jesucristo es el Dios Todopoderoso"
+      width={1250}
+      height={828}
+      className={`h-auto ${className}`}
+      priority
+    />
   );
 }
 
@@ -52,7 +51,7 @@ export function Logo({
 }) {
   return (
     <span className={`flex items-center gap-2.5 ${className}`}>
-      <LogoMark className="size-8 shrink-0" />
+      <LogoMark className="size-9" />
       <span className="flex flex-col leading-tight">
         <span
           className={

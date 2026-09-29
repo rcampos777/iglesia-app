@@ -67,33 +67,27 @@ el mapeo central `src/lib/status-tones.ts`. Están fuera de
 `components/ui/` porque el core de shadcn no se edita a mano
 (CLAUDE.md §9).
 
-## 4. Logo — PROVISIONAL, hay que sustituirlo
+## 4. Logo oficial
 
-⚠️ **El logo actual NO es la marca oficial de la iglesia.** Es un
-monograma tipográfico "CA" construido en código
-(`src/components/brand/logo.tsx` y `src/app/icon.svg`), usado mientras
-llega el archivo real. Al ser vectorial no se ve borroso ni deformado en
-ningún tamaño.
+Entregado por el usuario el 2026-09-28 (PNG 1600×882, fondo
+transparente). Archivos derivados:
 
-**Para sustituirlo** hace falta del cliente:
+- `public/brand/logo-full.png` — logo completo (símbolo + nombre +
+  lema), usado en las pantallas de acceso (`LogoFull`).
+- `public/brand/logo-mark.png` — solo el símbolo (llama + edificios),
+  cuadrado, usado en el menú (`LogoMark`). Va sobre una baldosa
+  `--brand-warm-white` porque el edificio carbón se perdería sobre el
+  menú carbón.
+- `src/app/icon.png`, `apple-icon.png`, `favicon.ico` — el símbolo sobre
+  fondo claro.
 
-- SVG del logo, o PNG de al menos 1000 px de ancho con fondo transparente.
-- Una versión clara, para el menú lateral en carbón.
-- Un icono cuadrado para el favicon.
-
-Pasos: colocar el archivo en `public/`, reemplazar el `<svg>` de
-`LogoMark` por un `<Image>` de `next/image` con `alt` descriptivo, y
-regenerar `src/app/icon.svg`.
-
-No se descargó la imagen de Facebook: bajar archivos de terceros se
-consulta con el usuario antes de hacerlo.
+Si llega un SVG oficial, reemplazar estos PNG manteniendo los nombres.
 
 ## 5. Accesibilidad del logo
 
-`LogoMark` es un `<svg role="img">` con `aria-label="Ciudad de
-Avivamiento"`. Donde va acompañado del nombre en texto (`Logo`), el
-`aria-label` sigue describiendo la marca y el texto es legible por sí
-mismo, así que no hay duplicación confusa para lectores de pantalla.
+Las imágenes llevan `alt` descriptivo. En las pantallas de acceso el
+nombre de la iglesia queda como `<h1 className="sr-only">` porque el
+logo completo ya lo muestra visualmente.
 
 ## 6. Tema oscuro
 
