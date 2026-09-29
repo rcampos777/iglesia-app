@@ -324,11 +324,15 @@ su email.
   políticas. 3 cuentas iniciales creadas con `bootstrap-church.ts`
   (sin contraseña: entran con "¿Olvidaste tu contraseña?" cuando haya
   SMTP).
-- Pendiente para salir en vivo: dominio, Resend (dominio verificado +
-  SMTP en Supabase + plantillas en español), Auth URL Configuration con
-  el dominio, variables de producción en Vercel, merge de
-  `preparar-lanzamiento` y publicar (con autorización). Volver a sembrar
-  el proyecto demo con datos sintéticos.
+- **Publicado 2026-09-28** en https://app.ciudaddeavivamiento.org
+  (Vercel `iglesia-app`, variables de Production → proyecto nuevo;
+  Preview sigue en el proyecto demo). DNS en GoDaddy: `A app →
+76.76.21.21` y registros de Resend (dominio verificado).
+- Pendiente: plantillas de correo en español en Supabase (están en
+  `docs/email-templates/`, aún en inglés en el panel); confirmar que el
+  SMTP de Resend está guardado en Supabase; subir Vercel y Supabase a
+  Pro; página de la iglesia en `ciudaddeavivamiento.org`; volver a
+  sembrar el proyecto demo con datos sintéticos.
 
 ### 2026-09-27 — Revisión de escalabilidad (1000+ personas)
 
