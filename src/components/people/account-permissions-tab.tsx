@@ -31,6 +31,10 @@ const ROLE_GROUPS: { label: string; description?: string; roles: AppRole[] }[] =
       "Ser miembro de un ministerio o tener el título de servidor no concede ninguno de estos accesos: se otorgan aquí, uno por uno.",
     roles: ["ujier", "gestion_cultos", "control_checkin", "correccion_asistencia"],
   },
+  {
+    label: "Sitio web",
+    roles: ["sitio_web"],
+  },
 ];
 
 function sortRoles(roles: AppRole[]): AppRole[] {

@@ -262,6 +262,7 @@ const MANAGEABLE_ROLES: AppRole[] = [
   "gestion_cultos",
   "control_checkin",
   "correccion_asistencia",
+  "sitio_web",
 ];
 
 function sortRoles(roles: AppRole[]): AppRole[] {

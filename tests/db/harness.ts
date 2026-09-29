@@ -12,7 +12,10 @@ import { citext } from "@electric-sql/pglite/contrib/citext";
 import { pgcrypto } from "@electric-sql/pglite/contrib/pgcrypto";
 
 const MIGRATIONS_DIR = path.join(import.meta.dirname, "../../supabase/migrations");
-const SKIP = new Set(["0033_schedule_service_generation.sql"]);
+const SKIP = new Set([
+  "0033_schedule_service_generation.sql",
+  "0039_site_storage.sql", // storage.* no existe en PGlite
+]);
 
 const PRELUDE = `
 create schema if not exists extensions;

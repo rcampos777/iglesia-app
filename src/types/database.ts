@@ -18,7 +18,8 @@ export type AppRole =
   | "control_checkin"
   | "correccion_asistencia"
   | "apostol"
-  | "finanzas";
+  | "finanzas"
+  | "sitio_web";
 
 export type MembershipStatus = "visitante" | "asistente_habitual" | "miembro" | "inactivo";
 
@@ -337,6 +338,111 @@ export type DonationLetterListItem = {
   review_reason: string | null;
   issued_at: string;
   issued_by_name: string | null;
+};
+
+export type SiteMediaRow = {
+  id: string;
+  storage_path: string;
+  thumb_path: string;
+  alt_text: string;
+  width: number | null;
+  height: number | null;
+  created_at: string;
+  created_by: string | null;
+};
+
+export type SiteSettingsRow = {
+  id: boolean;
+  hero_eyebrow: string;
+  hero_title: string;
+  hero_subtitle: string | null;
+  hero_media_id: string | null;
+  about_title: string;
+  about_text: string | null;
+  about_media_id: string | null;
+  mission_text: string | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  map_query: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  youtube_url: string | null;
+  portal_url: string;
+  updated_at: string;
+  updated_by: string | null;
+};
+
+export type SiteAlbumRow = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  album_date: string | null;
+  cover_media_id: string | null;
+  published: boolean;
+  sort_order: number;
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
+};
+
+export type SiteAlbumPhotoRow = {
+  album_id: string;
+  media_id: string;
+  sort_order: number;
+  caption: string | null;
+};
+
+export type SitePostRow = {
+  id: string;
+  kind: "evento" | "anuncio";
+  title: string;
+  body: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  location: string | null;
+  media_id: string | null;
+  link_url: string | null;
+  link_label: string | null;
+  visible_until: string | null;
+  published: boolean;
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
+};
+
+export type SiteVideoRow = {
+  id: string;
+  title: string;
+  youtube_id: string;
+  description: string | null;
+  recorded_on: string | null;
+  featured: boolean;
+  published: boolean;
+  created_at: string;
+  created_by: string | null;
+};
+
+export type SiteMinistryRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  media_id: string | null;
+  sort_order: number;
+  published: boolean;
+  created_at: string;
+};
+
+export type SiteTeamRow = {
+  id: string;
+  name: string;
+  role_title: string | null;
+  bio: string | null;
+  media_id: string | null;
+  sort_order: number;
+  published: boolean;
+  created_at: string;
 };
 
 export type ServiceSeriesRow = {
@@ -661,6 +767,14 @@ export interface Database {
       service_checkins: TableDef<ServiceCheckinRow>;
       service_series: TableDef<ServiceSeriesRow>;
       donations: TableDef<DonationRow>;
+      site_media: TableDef<SiteMediaRow>;
+      site_settings: TableDef<SiteSettingsRow>;
+      site_albums: TableDef<SiteAlbumRow>;
+      site_album_photos: TableDef<SiteAlbumPhotoRow>;
+      site_posts: TableDef<SitePostRow>;
+      site_videos: TableDef<SiteVideoRow>;
+      site_ministries: TableDef<SiteMinistryRow>;
+      site_team: TableDef<SiteTeamRow>;
       finance_settings: TableDef<FinanceSettingsRow>;
       service_series_rules: TableDef<ServiceSeriesRuleRow>;
       service_schedule_settings: TableDef<ServiceScheduleSettingsRow>;
@@ -865,6 +979,11 @@ export interface Database {
           start_time: string | null;
           attendance: number;
         }[];
+      };
+      can_edit_site: { Args: Record<string, never>; Returns: boolean };
+      public_service_schedule: {
+        Args: Record<string, never>;
+        Returns: { weekday: number; local_time: string; name: string }[];
       };
       has_finance_access: { Args: Record<string, never>; Returns: boolean };
       is_apostol: { Args: Record<string, never>; Returns: boolean };

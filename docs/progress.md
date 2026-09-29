@@ -315,6 +315,19 @@ su email.
 
 ## Bitácora
 
+### 2026-09-29 — Sitio web público editable desde la app (implementado; no desplegado)
+
+- Página pública en `/sitio` con el diseño de referencia (oscuro/crema,
+  Manrope, máquina de escribir, menú a pantalla completa), servida en
+  `ciudaddeavivamiento.org` por el `proxy`. Editor en la app → **Sitio
+  web**: fotos, álbumes, eventos y anuncios, videos, ministerios, equipo
+  pastoral, textos y contacto. Rol nuevo `sitio_web`. Ver `docs/site.md`.
+- Pruebas: `test:db` 49/49 (6 del sitio), unitarias 9/9, E2E 34/34, check
+  y build limpios. Revisión visual con fotos de la landing (página temporal,
+  eliminada) en 375 px: portada, cita, próximos, anuncios, menú.
+- Sin verificar: subida real de fotos a Supabase Storage (el bucket se crea
+  con 0039), el dominio raíz en Vercel, captura de escritorio completa.
+
 ### 2026-09-28 — SuperAdmin (rol `apostol`) con todos los permisos (implementado; pendiente de aplicar 0036)
 
 - Migración `0036_apostol_all_permissions.sql`: `has_role`/`has_any_role`

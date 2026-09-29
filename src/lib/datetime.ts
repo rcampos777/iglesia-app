@@ -84,3 +84,21 @@ export function formatLocalTime(time: string): string {
   const [h = "0", m = "0"] = time.split(":");
   return timeFmt.format(new Date(Date.UTC(2026, 0, 1, Number(h) + 4, Number(m))));
 }
+
+/**
+ * Valor de `<input type="datetime-local">` ("2026-10-10T19:00") interpretado
+ * como hora de Puerto Rico → ISO. Puerto Rico está en UTC−4 todo el año
+ * (sin horario de verano), así que el desfase es fijo.
+ */
+export function prLocalInputToIso(value: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return null;
+  const d = new Date(`${value}:00-04:00`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+/** ISO → valor para `<input type="datetime-local">` en hora de Puerto Rico. */
+export function isoToPrLocalInput(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(new Date(iso).getTime() - 4 * 3600_000);
+  return d.toISOString().slice(0, 16);
+}

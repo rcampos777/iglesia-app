@@ -236,5 +236,6 @@ docs/                                # documentación del proyecto
 | [`docs/assumptions.md`](docs/assumptions.md)                     | Supuestos tomados sin confirmar con el usuario |
 | [`docs/decisions.md`](docs/decisions.md)                         | Registro de decisiones técnicas (ADR ligero)   |
 | [`docs/services-schedule.md`](docs/services-schedule.md)         | Cultos recurrentes, ventana y check-in         |
+| [`docs/site.md`](docs/site.md)                                   | Sitio web público y su editor                  |
 | [`docs/finance.md`](docs/finance.md)                             | Donaciones, cartas y acceso financiero         |
 | [`docs/progress.md`](docs/progress.md)                           | Estado actual, próxima tarea                   |

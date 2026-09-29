@@ -2,6 +2,30 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-09-29 — Sitio público dentro de la app, editable desde "Sitio web"
+
+**Contexto**: el dueño del producto quiere agregar fotos, álbumes, eventos,
+anuncios, videos, ministerios y equipo pastoral sin tocar código, con un
+diseño de referencia (oscuro/crema, Manrope) que pidió aplicar con los datos
+de la iglesia.
+
+**Decisiones**:
+
+1. **El sitio vive en esta app** (`/sitio`), servido en el dominio raíz por
+   reescritura en `proxy.ts`, en vez de la landing estática separada de
+   `landing/`. Así lee el mismo contenido y los mismos horarios de
+   Asistencia. Alternativa descartada: landing estática leyendo Supabase en
+   el navegador (peor SEO y sin reutilizar código).
+2. **Web, no React Native**: el diseño de referencia pedía Expo y una
+   vitrina de 3 iPhones; se implementó como página web adaptable que en el
+   celular reproduce esas pantallas. No se usaron las imágenes del diseño
+   (de otra iglesia/plantilla).
+3. **Fotos en Supabase Storage (bucket público `sitio`)**, reducidas en el
+   navegador (sin dependencias nuevas ni servicio de imágenes de pago).
+4. **Rol `sitio_web`** para editores sin acceso a datos internos.
+5. **Horarios desde la programación** (`public_service_schedule()`), sin
+   duplicarlos.
+
 ## 2026-09-28 — SuperAdmin (rol `apostol`) con todos los permisos
 
 **Contexto**: el dueño del producto aclaró que el rol pensado como

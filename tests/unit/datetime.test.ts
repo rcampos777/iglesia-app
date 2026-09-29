@@ -38,3 +38,10 @@ test("aritmética y formato de fechas locales", () => {
   assert.equal(formatDateKey("2026-10-04", false), "Domingo, 4 de octubre");
   assert.match(formatLocalTime("19:30:00"), /^7:30\sp\.\s?m\.$/);
 });
+
+test("fecha y hora de formularios en hora de Puerto Rico", async () => {
+  const { prLocalInputToIso, isoToPrLocalInput } = await import("../../src/lib/datetime");
+  assert.equal(prLocalInputToIso("2026-10-10T19:00"), "2026-10-10T23:00:00.000Z");
+  assert.equal(isoToPrLocalInput("2026-10-10T23:00:00.000Z"), "2026-10-10T19:00");
+  assert.equal(prLocalInputToIso("nada"), null);
+});

@@ -44,6 +44,7 @@ export const roleLabels: Record<AppRole, string> = {
   correccion_asistencia: "Corregir asistencia",
   apostol: "SuperAdmin",
   finanzas: "Finanzas",
+  sitio_web: "Editor del sitio web",
 };
 
 export const roleDescriptions: Record<AppRole, string> = {
@@ -65,6 +66,8 @@ export const roleDescriptions: Record<AppRole, string> = {
     "Pastores generales (apóstoles): todos los permisos de la app (administración, oración, asistencia y finanzas). Único que concede o revoca SuperAdmin y Finanzas; lo gestiona un SuperAdmin, no el administrador.",
   finanzas:
     "Registra y consulta donaciones, totales, cartas y exportaciones. Lo concede un SuperAdmin, no el administrador.",
+  sitio_web:
+    "Sube fotos y publica eventos, anuncios, videos, álbumes, ministerios y equipo pastoral en el sitio web. No da acceso a datos internos.",
 };
 
 export const serviceTypeLabels: Record<ServiceType, string> = {
