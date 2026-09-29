@@ -227,7 +227,8 @@ function PermissionsSection({ personId, account }: { personId: string; account: 
                 .join(", ")}
             </p>
             <p className="text-muted-foreground text-xs">
-              Solo un Apóstol lo concede o revoca (Finanzas → Acceso). No se cambia desde aquí.
+              Solo un SuperAdmin lo concede o revoca (Finanzas → Acceso). No se cambia desde aquí.
+              {account.roles.includes("apostol") ? " SuperAdmin tiene todos los permisos." : ""}
             </p>
           </div>
         ) : null}

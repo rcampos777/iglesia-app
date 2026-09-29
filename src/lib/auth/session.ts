@@ -35,12 +35,17 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   };
 }
 
+/** `apostol` = todos los permisos (espeja has_role/has_any_role de 0036). */
+function isApostolRole(user: CurrentUser | null): boolean {
+  return user?.roles.includes("apostol") ?? false;
+}
+
 export function hasRole(user: CurrentUser | null, role: AppRole): boolean {
-  return user?.roles.includes(role) ?? false;
+  return isApostolRole(user) || (user?.roles.includes(role) ?? false);
 }
 
 export function hasAnyRole(user: CurrentUser | null, roles: AppRole[]): boolean {
-  return user ? user.roles.some((r) => roles.includes(r)) : false;
+  return isApostolRole(user) || (user ? user.roles.some((r) => roles.includes(r)) : false);
 }
 
 export const STAFF_ROLES: AppRole[] = [

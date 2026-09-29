@@ -84,7 +84,7 @@ export async function createClassOfferingAction(formData: FormData): Promise<Act
   // 0028_pastor_scope.sql). Se valida aquí también para un mensaje claro
   // en español en vez de un error crudo de Postgres.
   const isGlobalManager = actor.roles.some(
-    (r) => r === "administrador" || r === "coordinador_ministerio",
+    (r) => r === "administrador" || r === "coordinador_ministerio" || r === "apostol",
   );
   if (!isGlobalManager && parsed.data.teacherPersonId !== actor.personId) {
     return actionError("Solo puedes crear una clase donde tú seas el maestro asignado.");

@@ -133,6 +133,8 @@ export function visibleNavItems(
 ): NavItem[] {
   return NAV_ITEMS.filter((item) => {
     if (item.href === "/oracion" && extras.isPrayerReader) return true;
+    // apostol = todos los permisos (0036).
+    if (userRoles.includes("apostol")) return true;
     return !item.roles || item.roles.some((r) => userRoles.includes(r));
   });
 }

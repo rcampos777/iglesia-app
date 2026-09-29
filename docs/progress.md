@@ -315,6 +315,16 @@ su email.
 
 ## Bitácora
 
+### 2026-09-28 — SuperAdmin (rol `apostol`) con todos los permisos (implementado; pendiente de aplicar 0036)
+
+- Migración `0036_apostol_all_permissions.sql`: `has_role`/`has_any_role`
+  aceptan `apostol` → todos los permisos en RLS y funciones. Código, menú
+  y textos: se muestra como **SuperAdmin**; Finanzas → Acceso permite dar
+  SuperAdmin además de Finanzas.
+- Pruebas: `npm run test:db` 43/43 (nueva: SuperAdmin pasa todos los
+  chequeos; administrador sigue sin finanzas; finanzas sin oración ni
+  administración).
+
 ### 2026-09-28 — Donaciones y Finanzas (implementado y probado localmente; **no desplegado**)
 
 - **Implementado**: roles `apostol`/`finanzas` con asignación exclusiva por

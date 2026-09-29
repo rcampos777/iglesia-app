@@ -112,7 +112,7 @@ export function SettingsForm({
             className="mt-0.5"
           />
           Plantilla revisada y aprobada (quita el aviso de BORRADOR de las cartas nuevas).
-          {!canApprove ? " Solo un Apóstol puede cambiarlo." : ""}
+          {!canApprove ? " Solo un SuperAdmin puede cambiarlo." : ""}
         </label>
       </fieldset>
       {msg ? (

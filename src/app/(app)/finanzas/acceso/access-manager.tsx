@@ -154,8 +154,10 @@ export function AccountSearch() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {a.roles.includes("apostol") ? (
-                <StatusBadge tone="tracking">Apóstol</StatusBadge>
-              ) : null}
+                <StatusBadge tone="tracking">SuperAdmin</StatusBadge>
+              ) : (
+                <RoleToggle userId={a.user_id} role="apostol" has={false} label="SuperAdmin" />
+              )}
               <RoleToggle
                 userId={a.user_id}
                 role="finanzas"

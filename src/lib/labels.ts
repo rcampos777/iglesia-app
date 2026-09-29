@@ -42,7 +42,7 @@ export const roleLabels: Record<AppRole, string> = {
   gestion_cultos: "Gestionar cultos",
   control_checkin: "Controlar check-in",
   correccion_asistencia: "Corregir asistencia",
-  apostol: "Apóstol",
+  apostol: "SuperAdmin",
   finanzas: "Finanzas",
 };
 
@@ -62,9 +62,9 @@ export const roleDescriptions: Record<AppRole, string> = {
   correccion_asistencia:
     "Anular o agregar asistencias fuera de la ventana, siempre con motivo y queda auditado.",
   apostol:
-    "Nivel más alto de Donaciones y Finanzas. Único que concede o revoca Finanzas. Lo gestiona un Apóstol, no el administrador.",
+    "Pastores generales (apóstoles): todos los permisos de la app (administración, oración, asistencia y finanzas). Único que concede o revoca SuperAdmin y Finanzas; lo gestiona un SuperAdmin, no el administrador.",
   finanzas:
-    "Registra y consulta donaciones, totales, cartas y exportaciones. Lo concede un Apóstol, no el administrador.",
+    "Registra y consulta donaciones, totales, cartas y exportaciones. Lo concede un SuperAdmin, no el administrador.",
 };
 
 export const serviceTypeLabels: Record<ServiceType, string> = {

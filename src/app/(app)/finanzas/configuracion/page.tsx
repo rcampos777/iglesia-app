@@ -11,7 +11,7 @@ export default async function FinanceSettingsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Configuración de cartas"
-        description="Plantilla provisional: queda marcada como BORRADOR hasta que la iglesia envíe su ejemplo y un Apóstol la apruebe."
+        description="Plantilla provisional: queda marcada como BORRADOR hasta que la iglesia envíe su ejemplo y un SuperAdmin la apruebe."
       />
       <section className="bg-card ring-foreground/10 max-w-3xl rounded-xl p-4 shadow-xs ring-1 sm:p-6">
         {settings ? (

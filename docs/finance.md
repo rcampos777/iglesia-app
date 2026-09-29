@@ -1,5 +1,9 @@
 # Donaciones y Finanzas
 
+> **SuperAdmin** = rol interno `apostol` (0036): pastores generales con todos
+> los permisos de la app. En este documento "Apóstol" y "SuperAdmin" son lo
+> mismo.
+
 Migraciones: `0034_financial_roles.sql` (roles) y `0035_donations_finance.sql`
 (todo lo demás). Permisos: [`roles-and-permissions.md`](roles-and-permissions.md) §7.
 

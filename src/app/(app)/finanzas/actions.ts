@@ -364,7 +364,9 @@ export async function setFinancialRoleAction(
   });
   if (error) {
     if (/última cuenta/.test(error.message)) {
-      return actionError("No se puede quitar el acceso Apóstol a la última cuenta que lo tiene.");
+      return actionError(
+        "No se puede quitar el acceso SuperAdmin a la última cuenta que lo tiene.",
+      );
     }
     return actionError(dbErrorMessage(error));
   }

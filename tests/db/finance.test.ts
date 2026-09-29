@@ -365,10 +365,25 @@ describe("petición de oración del sobre", () => {
     }
   });
 
-  test("finanzas no abre la bandeja de oración", async () => {
+  test("finanzas no abre la bandeja de oración (SuperAdmin sí, desde 0036)", async () => {
     await db.query(`insert into prayer_requests (content) values ('Petición general sintética')`);
     assert.equal((await q(finanzas, `select id from prayer_requests`)).length, 0);
-    assert.equal((await q(apostol, `select id from prayer_requests`)).length, 0);
+    assert.ok((await q(apostol, `select id from prayer_requests`)).length > 0);
+  });
+
+  test("SuperAdmin (apostol) tiene todos los permisos; admin sigue sin finanzas", async () => {
+    const checks = await q<Json>(
+      apostol,
+      `select is_admin() a, is_staff() s, is_prayer_reader() p, can_record_attendance() r,
+              can_manage_services() m, can_control_checkin() c, can_correct_attendance() x,
+              has_finance_access() f`,
+    );
+    assert.deepEqual(Object.values(checks[0]!), [true, true, true, true, true, true, true, true]);
+    assert.ok((await q(apostol, `select * from list_users_with_roles()`)).length > 0);
+    const adminChecks = await q<Json>(admin, `select has_finance_access() f, is_apostol() a`);
+    assert.deepEqual(adminChecks[0], { f: false, a: false });
+    const finChecks = await q<Json>(finanzas, `select is_admin() a, is_prayer_reader() p`);
+    assert.deepEqual(finChecks[0], { a: false, p: false });
   });
 
   test("compartir con intercesión exige autorización registrada y no duplica", async () => {

@@ -138,7 +138,7 @@ export default async function LettersPage({
               {preview.draft ? (
                 <p className="border-state-warning/40 bg-state-warning/10 rounded-md border p-2.5 text-sm">
                   La plantilla es un <strong>borrador provisional</strong>: el PDF saldrá marcado
-                  como tal. Un Apóstol la aprueba en Configuración cuando la iglesia confirme el
+                  como tal. Un SuperAdmin la aprueba en Configuración cuando la iglesia confirme el
                   texto y los datos.
                 </p>
               ) : null}

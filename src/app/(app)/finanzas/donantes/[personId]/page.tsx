@@ -10,7 +10,7 @@ import { formatCents } from "@/lib/money";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Historial financiero de una persona: solo Apóstol y Finanzas. */
+/** Historial financiero de una persona: solo SuperAdmin y Finanzas. */
 export default async function DonorPage({ params }: { params: Promise<{ personId: string }> }) {
   await requireFinancePage();
   const { personId } = await params;

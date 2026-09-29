@@ -2,6 +2,24 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-09-28 — SuperAdmin (rol `apostol`) con todos los permisos
+
+**Contexto**: el dueño del producto aclaró que el rol pensado como
+"Apóstol" es para los pastores generales de la congregación y debe tener
+**todos los permisos**, y pidió mostrarlo como **SuperAdmin**. Esto
+reemplaza la regla de 0035 ("apóstol solo abre Finanzas") y amplía la
+regla 11 de CLAUDE.md (peticiones de oración).
+
+**Decisión**: `has_role()` y `has_any_role()` devuelven verdadero para un
+usuario con `apostol` (0036), así que SuperAdmin pasa todos los chequeos
+de RLS y de servidor (administración, personas, cursos, ministerios,
+asistencia, oración y finanzas); `hasRole/hasAnyRole` y el menú lo
+espejan. El identificador interno sigue siendo `apostol` (ya existe en
+producción; renombrar un valor de enum obligaría a recrear todas las
+funciones que lo usan). Se mantiene: `administrador` sin acceso
+financiero; solo un SuperAdmin concede SuperAdmin/Finanzas; último
+SuperAdmin protegido; alta inicial explícita.
+
 ## 2026-09-28 — Módulo de Donaciones y Finanzas
 
 **Decisiones**:

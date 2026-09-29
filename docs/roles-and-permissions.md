@@ -2,21 +2,21 @@
 
 ## 1. Roles mínimos
 
-| Rol (código)             | Descripción                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------- |
-| `miembro`                | Rol por defecto de toda cuenta nueva. Acceso al portal del miembro.                   |
-| `maestro`                | Gestiona sus propias clases (asistencia, matrícula) donde es `teacher_person_id`.     |
-| `seguimiento`            | Da seguimiento a visitantes; puede crear personas/visitantes.                         |
-| `intercesor`             | Atiende peticiones de oración.                                                        |
-| `coordinador_ministerio` | Gestiona personas, cursos, clases y **ministerios** de su(s) área(s).                 |
-| `pastor`                 | **Acotado** (desde 2026-09-02): sus clases y los ministerios que lidera. No es admin. |
-| `administrador`          | Único rol con acceso completo: gestión de roles, configuración y todo lo demás.       |
-| `ujier`                  | **"Servidor / Ujier"**: registrar asistencia a cultos (check-in). Nada más.           |
-| `gestion_cultos`         | Crear cultos especiales, reprogramar/cancelar fechas, configurar recurrencias.        |
-| `control_checkin`        | Abrir o cerrar el registro de asistencia de un culto.                                 |
-| `correccion_asistencia`  | Anular o agregar asistencias fuera de la ventana, con motivo auditado.                |
-| `apostol`                | Nivel más alto de **Donaciones y Finanzas**. Único que concede/revoca Finanzas.       |
-| `finanzas`               | Registra y consulta donaciones, totales, cartas y exportaciones.                      |
+| Rol (código)               | Descripción                                                                               |
+| -------------------------- | ----------------------------------------------------------------------------------------- |
+| `miembro`                  | Rol por defecto de toda cuenta nueva. Acceso al portal del miembro.                       |
+| `maestro`                  | Gestiona sus propias clases (asistencia, matrícula) donde es `teacher_person_id`.         |
+| `seguimiento`              | Da seguimiento a visitantes; puede crear personas/visitantes.                             |
+| `intercesor`               | Atiende peticiones de oración.                                                            |
+| `coordinador_ministerio`   | Gestiona personas, cursos, clases y **ministerios** de su(s) área(s).                     |
+| `pastor`                   | **Acotado** (desde 2026-09-02): sus clases y los ministerios que lidera. No es admin.     |
+| `administrador`            | Único rol con acceso completo: gestión de roles, configuración y todo lo demás.           |
+| `ujier`                    | **"Servidor / Ujier"**: registrar asistencia a cultos (check-in). Nada más.               |
+| `gestion_cultos`           | Crear cultos especiales, reprogramar/cancelar fechas, configurar recurrencias.            |
+| `control_checkin`          | Abrir o cerrar el registro de asistencia de un culto.                                     |
+| `correccion_asistencia`    | Anular o agregar asistencias fuera de la ventana, con motivo auditado.                    |
+| `apostol` (**SuperAdmin**) | Pastores generales: **todos los permisos** (0036). Único que concede SuperAdmin/Finanzas. |
+| `finanzas`                 | Registra y consulta donaciones, totales, cartas y exportaciones.                          |
 
 Los cuatro últimos (desde 2026-09-28, migraciones 0031–0032) son
 **accesos de asistencia**: valores del mismo enum `app_role`, asignados
@@ -185,7 +185,14 @@ tenga la pantalla abierta. Probado en `tests/db/attendance.test.ts`.
 `audit_log` (`update_roles`) el actor, antes/después, añadidos y
 quitados; `user_roles.granted_by` guarda quién otorgó cada rol.
 
-## 7. Donaciones y Finanzas (`apostol`, `finanzas`)
+## 7. Donaciones y Finanzas (`apostol` = SuperAdmin, `finanzas`)
+
+> **Actualización 2026-09-28 (0036)**: `apostol` se muestra como
+> **SuperAdmin** y tiene **todos los permisos** de la app (pasa
+> `has_role`/`has_any_role`): administración, oración, asistencia y
+> finanzas. En la tabla de abajo, la columna "apostol" es ✔ en todo. Lo
+> demás se mantiene: el administrador no tiene acceso financiero y solo un
+> SuperAdmin concede SuperAdmin o Finanzas.
 
 Desde 2026-09-28 (0034–0035). Ver [`finance.md`](finance.md).
 

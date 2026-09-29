@@ -68,6 +68,9 @@ sin una decisión explícita registrada en `docs/decisions.md`:
     puede cambiar (RPC `set_prayer_ministry`, protegido además por
     trigger). Todo acceso de lectura queda registrado en
     `prayer_request_access_log`.
+    **Excepción (decisión 2026-09-28)**: el rol `apostol`, mostrado como
+    **SuperAdmin** (pastores generales), tiene todos los permisos,
+    incluidas las peticiones de oración.
 12. **Los emails sobre peticiones de oración nunca incluyen el texto
     completo de la petición** — solo un aviso genérico con link a la app.
 13. **No se implementa información detallada de menores de edad** sin
@@ -83,8 +86,10 @@ sin una decisión explícita registrada en `docs/decisions.md`:
 2026-09-28): `ujier` ("Servidor / Ujier"), `gestion_cultos`,
 `control_checkin`, `correccion_asistencia` — ver
 `docs/roles-and-permissions.md` §6. Accesos financieros (2026-09-28):
-`apostol` y `finanzas` — **`administrador` NO tiene acceso financiero** y
-no puede asignarlos; solo un Apóstol. Ver `docs/finance.md`.
+`apostol` (visible como **SuperAdmin**: todos los permisos de la app,
+para los pastores generales; ver 0036) y `finanzas` — **`administrador`
+NO tiene acceso financiero** y no puede asignarlos; solo un SuperAdmin.
+Ver `docs/finance.md`.
 
 - Un usuario puede tener **múltiples roles** simultáneamente.
 - **`pastor` NO equivale a administrador.** En esta iglesia hay muchos
