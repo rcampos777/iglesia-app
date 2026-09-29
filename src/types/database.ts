@@ -16,7 +16,9 @@ export type AppRole =
   | "ujier"
   | "gestion_cultos"
   | "control_checkin"
-  | "correccion_asistencia";
+  | "correccion_asistencia"
+  | "apostol"
+  | "finanzas";
 
 export type MembershipStatus = "visitante" | "asistente_habitual" | "miembro" | "inactivo";
 
@@ -35,6 +37,15 @@ export type MinistryMemberRole = "lider" | "colider" | "miembro";
 export type ActivityStatus = "planificada" | "abierta" | "realizada" | "cancelada";
 
 export type CheckinMethod = "qr" | "manual";
+
+export type DonationType = "diezmo" | "ofrenda" | "semilla" | "primicias";
+
+export type DonationPaymentMethod =
+  "efectivo" | "ath" | "credito" | "ath_movil" | "cheque" | "giro";
+
+export type DonationStatus = "vigente" | "anulada";
+
+export type DonationLetterStatus = "vigente" | "requiere_revision" | "reemplazada";
 
 export type ServiceStatus = "programado" | "cancelado";
 
@@ -219,6 +230,113 @@ export type ServiceCheckinRow = {
   void_reason: string | null;
   is_correction: boolean;
   correction_reason: string | null;
+};
+
+export type DonationRow = {
+  id: string;
+  person_id: string | null;
+  is_anonymous: boolean;
+  donation_date: string;
+  /** Centavos enteros. */
+  amount_cents: number;
+  donation_type: DonationType;
+  payment_method: DonationPaymentMethod;
+  reference: string | null;
+  status: DonationStatus;
+  version: number;
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
+  updated_by: string | null;
+  voided_at: string | null;
+  voided_by: string | null;
+  void_reason: string | null;
+};
+
+export type FinanceSettingsRow = {
+  id: boolean;
+  church_name: string;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  tax_id: string | null;
+  letter_recipient: string;
+  letter_body: string;
+  letter_closing: string;
+  signer_name: string | null;
+  signer_title: string | null;
+  template_status: "borrador" | "aprobada";
+  updated_at: string;
+  updated_by: string | null;
+};
+
+export type DonationListItem = {
+  id: string;
+  donation_date: string;
+  person_id: string | null;
+  donor_name: string | null;
+  is_anonymous: boolean;
+  amount_cents: number;
+  donation_type: DonationType;
+  payment_method: DonationPaymentMethod;
+  reference: string | null;
+  status: DonationStatus;
+  created_at: string;
+  total_count: number;
+};
+
+export type DonationTotals = {
+  total_cents: number;
+  count: number;
+  identified_cents: number;
+  identified_count: number;
+  anonymous_cents: number;
+  anonymous_count: number;
+  by_type: { key: DonationType; cents: number; count: number }[];
+  by_method: { key: DonationPaymentMethod; cents: number; count: number }[];
+};
+
+export type DonationRevision = {
+  revision: number;
+  action: "creada" | "corregida" | "anulada";
+  before: Partial<DonationRow> | null;
+  after: Partial<DonationRow>;
+  reason: string | null;
+  created_at: string;
+  actor_name: string | null;
+};
+
+export type DonationDetail = {
+  donation: DonationRow;
+  donor_name: string | null;
+  created_by_name: string | null;
+  has_prayer_note: boolean;
+  revisions: DonationRevision[];
+};
+
+export type LetterData = {
+  person_name: string;
+  total_cents: number;
+  donation_count: number;
+  next_version: number;
+  donations: { date: string; type: DonationType; amount_cents: number }[];
+  settings: Omit<FinanceSettingsRow, "id" | "updated_at" | "updated_by">;
+};
+
+export type DonationLetterListItem = {
+  id: string;
+  person_id: string;
+  person_name: string;
+  period_start: string;
+  period_end: string;
+  version: number;
+  document_code: string;
+  total_cents: number;
+  donation_count: number;
+  status: DonationLetterStatus;
+  review_reason: string | null;
+  issued_at: string;
+  issued_by_name: string | null;
 };
 
 export type ServiceSeriesRow = {
@@ -542,6 +660,8 @@ export interface Database {
       services: TableDef<ServiceRow>;
       service_checkins: TableDef<ServiceCheckinRow>;
       service_series: TableDef<ServiceSeriesRow>;
+      donations: TableDef<DonationRow>;
+      finance_settings: TableDef<FinanceSettingsRow>;
       service_series_rules: TableDef<ServiceSeriesRuleRow>;
       service_schedule_settings: TableDef<ServiceScheduleSettingsRow>;
       visitor_follow_ups: TableDef<VisitorFollowUpRow>;
@@ -745,6 +865,166 @@ export interface Database {
           start_time: string | null;
           attendance: number;
         }[];
+      };
+      has_finance_access: { Args: Record<string, never>; Returns: boolean };
+      is_apostol: { Args: Record<string, never>; Returns: boolean };
+      apostol_set_financial_role: {
+        Args: { p_user_id: string; p_role: AppRole; p_grant: boolean; p_reason?: string | null };
+        Returns: "concedido" | "revocado" | "sin_cambios";
+      };
+      finance_list_role_holders: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          display_name: string;
+          email: string | null;
+          role: AppRole;
+          granted_at: string;
+          granted_by_name: string | null;
+        }[];
+      };
+      finance_search_accounts: {
+        Args: { p_query: string };
+        Returns: {
+          user_id: string;
+          display_name: string;
+          email: string | null;
+          roles: AppRole[];
+        }[];
+      };
+      finance_get_person: {
+        Args: { p_person_id: string };
+        Returns: { person_id: string; display_name: string }[];
+      };
+      finance_search_people: {
+        Args: { p_query: string };
+        Returns: { person_id: string; display_name: string; hint: string | null }[];
+      };
+      create_donation: {
+        Args: {
+          p_idempotency_key: string;
+          p_person_id: string | null;
+          p_is_anonymous: boolean;
+          p_donation_date: string;
+          p_amount_cents: number;
+          p_donation_type: DonationType;
+          p_payment_method: DonationPaymentMethod;
+          p_reference?: string | null;
+          p_prayer_text?: string | null;
+          p_share_with_intercession?: boolean;
+          p_share_authorized?: boolean;
+        };
+        Returns: { id: string; created: boolean };
+      };
+      correct_donation: {
+        Args: {
+          p_donation_id: string;
+          p_expected_version: number;
+          p_person_id: string | null;
+          p_is_anonymous: boolean;
+          p_donation_date: string;
+          p_amount_cents: number;
+          p_donation_type: DonationType;
+          p_payment_method: DonationPaymentMethod;
+          p_reference: string | null;
+          p_reason: string;
+        };
+        Returns: number;
+      };
+      void_donation: {
+        Args: { p_donation_id: string; p_expected_version: number; p_reason: string };
+        Returns: number;
+      };
+      read_donation_prayer_note: {
+        Args: { p_donation_id: string };
+        Returns: {
+          content: string;
+          created_at: string;
+          shared: boolean;
+          share_authorized_at: string | null;
+          share_authorized_by_name: string | null;
+        }[];
+      };
+      share_donation_prayer_note: {
+        Args: { p_donation_id: string; p_authorized: boolean };
+        Returns: "compartida" | "ya_compartida";
+      };
+      finance_list_donations: {
+        Args: {
+          p_from?: string | null;
+          p_to?: string | null;
+          p_person_id?: string | null;
+          p_type?: DonationType | null;
+          p_method?: DonationPaymentMethod | null;
+          p_status?: DonationStatus | null;
+          p_identity?: "identificadas" | "anonimas" | null;
+          p_limit?: number;
+          p_offset?: number;
+        };
+        Returns: DonationListItem[];
+      };
+      finance_donation_totals: {
+        Args: {
+          p_from?: string | null;
+          p_to?: string | null;
+          p_person_id?: string | null;
+          p_type?: DonationType | null;
+          p_method?: DonationPaymentMethod | null;
+          p_identity?: "identificadas" | "anonimas" | null;
+        };
+        Returns: DonationTotals;
+      };
+      finance_donor_yearly: {
+        Args: { p_person_id: string };
+        Returns: { year: number; total_cents: number; donation_count: number }[];
+      };
+      finance_get_donation: { Args: { p_donation_id: string }; Returns: DonationDetail | null };
+      finance_record_export: {
+        Args: { p_filters: Record<string, unknown>; p_rows: number };
+        Returns: undefined;
+      };
+      finance_update_settings: {
+        Args: {
+          p_church_name: string;
+          p_address: string | null;
+          p_phone: string | null;
+          p_email: string | null;
+          p_tax_id: string | null;
+          p_letter_recipient: string;
+          p_letter_body: string;
+          p_letter_closing: string;
+          p_signer_name: string | null;
+          p_signer_title: string | null;
+          p_template_status: "borrador" | "aprobada";
+        };
+        Returns: undefined;
+      };
+      finance_letter_data: {
+        Args: { p_person_id: string; p_from: string; p_to: string };
+        Returns: LetterData;
+      };
+      issue_donation_letter: {
+        Args: {
+          p_letter_id: string;
+          p_person_id: string;
+          p_from: string;
+          p_to: string;
+          p_expected_total_cents: number;
+          p_expected_count: number;
+          p_expected_version: number;
+          p_document_code: string;
+          p_snapshot: Record<string, unknown>;
+          p_pdf_base64: string;
+        };
+        Returns: { id: string; created: boolean };
+      };
+      list_donation_letters: {
+        Args: { p_person_id?: string | null };
+        Returns: DonationLetterListItem[];
+      };
+      get_donation_letter_pdf: {
+        Args: { p_letter_id: string };
+        Returns: { document_code: string; pdf_base64: string }[];
       };
       service_attendance_unique_people: {
         Args: { p_from: string; p_to: string; p_service_type?: ServiceType | null };

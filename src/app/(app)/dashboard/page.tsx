@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  HandCoins,
   BookOpen,
   CalendarDays,
   ChevronRight,
@@ -89,6 +90,12 @@ const QUICK_ACTIONS: QuickAction[] = [
     label: "Importar datos",
     icon: Upload,
     allowed: (u) => hasAnyRole(u, PEOPLE_WRITE),
+  },
+  {
+    href: "/finanzas/nueva",
+    label: "Registrar donación",
+    icon: HandCoins,
+    allowed: (u) => hasAnyRole(u, ["apostol", "finanzas"]),
   },
   { href: "/portal", label: "Mi portal", icon: UserRound, allowed: () => true },
 ];

@@ -122,6 +122,8 @@ export const NAV_ITEMS: NavItem[] = [
       "administrador",
     ],
   },
+  // Solo acceso financiero explícito: un administrador NO lo ve (0035).
+  { href: "/finanzas", label: "Finanzas", roles: ["apostol", "finanzas"] },
   { href: "/admin", label: "Administración", roles: ["administrador"] },
 ];
 

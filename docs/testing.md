@@ -99,6 +99,24 @@ prueba intercalando transacciones de dos usuarios y verificando que el
 índice único rechace el duplicado; no hay dos conexiones reales en
 paralelo.
 
+`tests/db/finance.test.ts` (Donaciones y Finanzas, 22 pruebas): alta
+inicial única; administrador sin autoasignación (RPC, escritura directa y
+trigger); finanzas no concede; admin sigue gestionando los demás roles;
+último Apóstol protegido (también al borrar la cuenta); concesiones
+auditadas; cada tipo y forma de pago; donante sin cuenta; anónimas;
+validación de montos, fechas y referencias; doble clic/reintento sin
+duplicar y aportaciones iguales permitidas; centavos exactos; totales de
+todo el filtro con paginación; límites de período; aislamiento para
+administrador, pastor, ujier, miembro e intercesor; `audit_log` sin
+montos; revocación inmediata; petición vacía/con texto, separada y
+auditada, ausente de listados/detalle/revisiones/auditorías; finanzas sin
+bandeja de oración; compartir solo con autorización y sin duplicar;
+corrección/anulación con versión y revisiones inmutables; cartas con total
+exacto (sin anónimas, anuladas ni fuera de período), versiones, revisión y
+PDF conservado; configuración y aprobación de plantilla.
+
+`tests/unit/money.test.ts`: lectura y formato de montos sin punto flotante.
+
 `tests/unit/datetime.test.ts` (`npm run test:unit`): formato de fecha y
 hora de la iglesia; ejecutar con `TZ=Asia/Tokyo npm run test:unit`
 (o cualquier otra zona) para comprobar que el dispositivo no afecta.

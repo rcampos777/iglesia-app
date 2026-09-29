@@ -8,6 +8,7 @@ import {
   BookOpen,
   CalendarDays,
   ClipboardList,
+  HandCoins,
   HandHeart,
   HeartHandshake,
   LayoutDashboard,
@@ -44,6 +45,7 @@ const ICONS: Record<string, LucideIcon> = {
   "/oracion": HandHeart,
   "/reportes": BarChart3,
   "/importar": Upload,
+  "/finanzas": HandCoins,
   "/admin": Settings,
 };
 
@@ -52,7 +54,7 @@ const GROUPS: { label: string | null; hrefs: string[] }[] = [
   { label: "Congregación", hrefs: ["/personas", "/visitantes", "/ministerios", "/check-in"] },
   { label: "Formación y eventos", hrefs: ["/cursos", "/actividades", "/encuestas"] },
   { label: "Cuidado pastoral", hrefs: ["/oracion"] },
-  { label: "Gestión", hrefs: ["/reportes", "/importar", "/admin"] },
+  { label: "Gestión", hrefs: ["/finanzas", "/reportes", "/importar", "/admin"] },
 ];
 
 function groupItems(items: NavItem[]) {

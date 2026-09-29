@@ -568,7 +568,7 @@ describe("correcciones y reportes", () => {
 
     const report = await asUser(db, admin, () =>
       db.query<{ attendance: number }>(
-        `select attendance::int from service_attendance_report(current_date, current_date, 'otro') where service_id = $1`,
+        `select attendance::int from service_attendance_report((select service_date from services where id = $1), (select service_date from services where id = $1), 'otro') where service_id = $1`,
         [id],
       ),
     );

@@ -15,6 +15,8 @@
 | `gestion_cultos`         | Crear cultos especiales, reprogramar/cancelar fechas, configurar recurrencias.        |
 | `control_checkin`        | Abrir o cerrar el registro de asistencia de un culto.                                 |
 | `correccion_asistencia`  | Anular o agregar asistencias fuera de la ventana, con motivo auditado.                |
+| `apostol`                | Nivel más alto de **Donaciones y Finanzas**. Único que concede/revoca Finanzas.       |
+| `finanzas`               | Registra y consulta donaciones, totales, cartas y exportaciones.                      |
 
 Los cuatro últimos (desde 2026-09-28, migraciones 0031–0032) son
 **accesos de asistencia**: valores del mismo enum `app_role`, asignados
@@ -182,3 +184,44 @@ tenga la pantalla abierta. Probado en `tests/db/attendance.test.ts`.
 **Quién concede y revoca**: `admin_set_person_roles()` registra en
 `audit_log` (`update_roles`) el actor, antes/después, añadidos y
 quitados; `user_roles.granted_by` guarda quién otorgó cada rol.
+
+## 7. Donaciones y Finanzas (`apostol`, `finanzas`)
+
+Desde 2026-09-28 (0034–0035). Ver [`finance.md`](finance.md).
+
+| Acción                                                          | apostol | finanzas | administrador | pastor | intercesor | ujier / miembro / demás |
+| --------------------------------------------------------------- | ------- | -------- | ------------- | ------ | ---------- | ----------------------- |
+| Ver donaciones, montos, totales, historial por persona          | ✔       | ✔        | ✘             | ✘      | ✘          | ✘                       |
+| Registrar, corregir y anular (con motivo)                       | ✔       | ✔        | ✘             | ✘      | ✘          | ✘                       |
+| Exportar CSV                                                    | ✔       | ✔        | ✘             | ✘      | ✘          | ✘                       |
+| Emitir y descargar cartas / versiones                           | ✔       | ✔        | ✘             | ✘      | ✘          | ✘                       |
+| Editar datos de la iglesia y texto de la carta                  | ✔       | ✔        | ✘             | ✘      | ✘          | ✘                       |
+| Aprobar la plantilla (quitar "BORRADOR")                        | ✔       | ✘        | ✘             | ✘      | ✘          | ✘                       |
+| Leer la petición del sobre de una donación (auditado)           | ✔       | ✔        | ✘             | ✘      | ✘          | ✘                       |
+| Compartir la petición con intercesión (autorización registrada) | ✔       | ✔        | ✘             | ✘      | ✘          | ✘                       |
+| Ver la bandeja general de oración                               | ✘ (\*)  | ✘ (\*)   | ✔             | ✘      | ✔          | ✘                       |
+| Ver la petición ya compartida (en el módulo de oración)         | ✘ (\*)  | ✘ (\*)   | ✔             | ✘      | ✔          | ✘                       |
+| Conceder/revocar Finanzas y Apóstol                             | ✔       | ✘        | ✘             | ✘      | ✘          | ✘                       |
+| Leer la auditoría financiera y de lecturas del sobre            | ✔       | ✘        | ✘             | ✘      | ✘          | ✘                       |
+
+(\*) Salvo que además tengan un rol de oración por su cuenta. Intercesión
+nunca ve monto, forma de pago ni la donación.
+
+**Reglas**:
+
+- `apostol` **no** es `pastor` ni `administrador`, y no abre ningún otro
+  módulo confidencial. Un `administrador` técnico **no** tiene acceso
+  financiero.
+- `admin_set_person_roles` (la pestaña "Cuenta y permisos") ya no puede
+  añadir ni quitar `apostol`/`finanzas`: se muestran solo como lectura.
+  Además, un trigger en `user_roles` rechaza cualquier escritura de esos
+  roles que no venga de `apostol_set_financial_role()` o del alta inicial.
+- Solo un `apostol` concede o revoca (Finanzas → Acceso). No se puede
+  quitar el último `apostol` (tampoco borrando su cuenta).
+- **Alta inicial**: `bootstrap_first_apostol()` solo desde el SQL Editor de
+  Supabase (rol `postgres`), una sola vez, con nota de quién lo autorizó.
+  Nunca automática, nunca por nombre ni por email desde la app. Ver
+  `finance.md` §7. En este trabajo **no** se asignó a nadie.
+- Concesiones y revocaciones quedan en `audit_log` (`grant_financial_role`,
+  `revoke_financial_role`, `bootstrap_first_apostol`) sin montos.
+- Revocación inmediata: roles leídos en cada operación (probado).

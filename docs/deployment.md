@@ -50,6 +50,9 @@ supabase db push --db-url "postgresql://postgres.<ref>:<password>@aws-0-<region>
   desplegar la app **en el mismo paso** (0032 elimina
   `services.is_checkin_open`). 0033 activa pg_cron. Pasos exactos y
   consultas de verificación en `docs/services-schedule.md` §6.
+- **0034–0035 (Donaciones y Finanzas, 2026-09-28)**: aditivas. Después,
+  alta inicial del Apóstol en el SQL Editor (`bootstrap_first_apostol`,
+  ver `docs/finance.md` §7). Nadie tiene acceso financiero hasta ese paso.
 - Después de aplicar, verificar en el dashboard de Supabase que **todas**
   las tablas nuevas tengan RLS habilitado (checklist en
   `docs/security.md`).

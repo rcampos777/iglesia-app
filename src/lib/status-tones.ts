@@ -2,6 +2,8 @@ import type { StatusTone } from "@/components/ui-brand/status-badge";
 import type {
   ActivityStatus,
   CheckinState,
+  DonationLetterStatus,
+  DonationStatus,
   ClassStatus,
   EnrollmentStatus,
   FollowupStatus,
@@ -61,4 +63,15 @@ export const checkinStateTone: Record<CheckinState, StatusTone> = {
   pendiente: "tracking",
   cerrado: "idle",
   cancelado: "error",
+};
+
+export const donationStatusTone: Record<DonationStatus, StatusTone> = {
+  vigente: "active",
+  anulada: "error",
+};
+
+export const letterStatusTone: Record<DonationLetterStatus, StatusTone> = {
+  vigente: "active",
+  requiere_revision: "warning",
+  reemplazada: "idle",
 };

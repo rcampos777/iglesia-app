@@ -2,6 +2,10 @@ import type {
   AppRole,
   CheckinMethod,
   CheckinState,
+  DonationLetterStatus,
+  DonationPaymentMethod,
+  DonationStatus,
+  DonationType,
   ServiceType,
   FollowupStatus,
   GenderType,
@@ -38,6 +42,8 @@ export const roleLabels: Record<AppRole, string> = {
   gestion_cultos: "Gestionar cultos",
   control_checkin: "Controlar check-in",
   correccion_asistencia: "Corregir asistencia",
+  apostol: "Apóstol",
+  finanzas: "Finanzas",
 };
 
 export const roleDescriptions: Record<AppRole, string> = {
@@ -55,6 +61,10 @@ export const roleDescriptions: Record<AppRole, string> = {
   control_checkin: "Abrir o cerrar el registro de asistencia de un culto.",
   correccion_asistencia:
     "Anular o agregar asistencias fuera de la ventana, siempre con motivo y queda auditado.",
+  apostol:
+    "Nivel más alto de Donaciones y Finanzas. Único que concede o revoca Finanzas. Lo gestiona un Apóstol, no el administrador.",
+  finanzas:
+    "Registra y consulta donaciones, totales, cartas y exportaciones. Lo concede un Apóstol, no el administrador.",
 };
 
 export const serviceTypeLabels: Record<ServiceType, string> = {
@@ -87,6 +97,33 @@ export const weekdayLabels = [
   "Viernes",
   "Sábado",
 ] as const;
+
+export const donationTypeLabels: Record<DonationType, string> = {
+  diezmo: "Diezmo",
+  ofrenda: "Ofrenda",
+  semilla: "Semilla",
+  primicias: "Primicias",
+};
+
+export const paymentMethodLabels: Record<DonationPaymentMethod, string> = {
+  efectivo: "Efectivo (Cash)",
+  ath: "ATH",
+  credito: "Crédito",
+  ath_movil: "ATH Móvil",
+  cheque: "Cheque",
+  giro: "Giro",
+};
+
+export const donationStatusLabels: Record<DonationStatus, string> = {
+  vigente: "Vigente",
+  anulada: "Anulada",
+};
+
+export const letterStatusLabels: Record<DonationLetterStatus, string> = {
+  vigente: "Vigente",
+  requiere_revision: "Requiere revisión",
+  reemplazada: "Reemplazada",
+};
 
 export const followupStatusLabels: Record<FollowupStatus, string> = {
   pendiente: "Pendiente",

@@ -168,6 +168,24 @@ null`). Nunca se borra: `voided_at/voided_by/void_reason` para
   anulaciones y `is_correction/correction_reason` para altas fuera de
   la ventana.
 
+## 5.b Donaciones (0035)
+
+- `donations`: `person_id` (null si `is_anonymous`), `donation_date`,
+  `amount_cents` (bigint), `donation_type`, `payment_method`, `reference`,
+  `status` (`vigente`/`anulada`), `version`, `idempotency_key` (única),
+  auditoría de creación/actualización/anulación.
+- `donation_revisions`: una fila por creación/corrección/anulación (antes,
+  después, motivo, actor). Inmutable.
+- `donation_prayer_notes`: petición del sobre (1:1 con la donación),
+  autorización de compartir y `shared_prayer_request_id`. Sin políticas de
+  lectura. `donation_prayer_note_access_log` registra cada lectura.
+- `donation_letters`: carta emitida — persona, período, versión, código,
+  total, cantidad, `snapshot` (jsonb), `pdf` (bytea), `pdf_sha256`, estado
+  (`vigente`/`requiere_revision`/`reemplazada`).
+- `finance_settings` (fila única): datos de la iglesia y plantilla.
+- `finance_audit_log`: cartas, descargas, exportaciones, configuración y
+  envíos a intercesión. Inmutable; solo `apostol`.
+
 ## 6. Visitantes y seguimiento
 
 - `visitor_follow_ups`: una "tarjeta" de seguimiento por persona con

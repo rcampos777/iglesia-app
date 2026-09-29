@@ -315,6 +315,33 @@ su email.
 
 ## Bitácora
 
+### 2026-09-28 — Donaciones y Finanzas (implementado y probado localmente; **no desplegado**)
+
+- **Implementado**: roles `apostol`/`finanzas` con asignación exclusiva por
+  Apóstol (trigger + RPC + alta inicial por SQL); registro de donaciones
+  (4 tipos, 6 formas de pago, anónimas, centavos exactos, idempotencia);
+  corrección/anulación con motivo, versión e historial inmutable; petición
+  de oración del sobre separada y auditada, con envío opcional a
+  intercesión solo con autorización registrada; listado con filtros,
+  paginación y totales de todo el filtro; historial por donante;
+  exportación CSV protegida y auditada; cartas con vista previa,
+  emisión con instantánea y PDF exacto, versiones y marca de revisión;
+  configuración de datos y plantilla provisional (BORRADOR); pantalla de
+  acceso para el Apóstol. Ver `docs/finance.md`.
+- **Probado localmente**: `npm run test:db` 42/42 (22 de finanzas, PGlite
+  con las migraciones reales y RLS); `npm run test:unit` (dinero y fechas);
+  E2E 26/26 (10 nuevas de protección de rutas y descargas directas);
+  `npm run check` y `npm run build` limpios. PDF sintético de 3 páginas
+  revisado visualmente (saltos de página, encabezado repetido, total,
+  pie con versión). Pantallas revisadas con datos sintéticos en 375 px y
+  1280 px (página temporal, eliminada).
+- **Sin verificar**: flujo completo contra Supabase real (no se aplicaron
+  migraciones remotas); descarga de PDF/CSV con sesión real de cada rol
+  (cubierto a nivel de base y de guard, no de punta a punta); impresión
+  física del PDF.
+- **Pendiente**: aplicar 0034–0035, alta inicial del Apóstol, ejemplo de
+  carta y datos institucionales (ver `docs/finance.md` §6–7).
+
 ### 2026-09-28 — Cultos recurrentes y check-in por ujieres (implementado; **no activado** en producción)
 
 - **Programación**: domingo 9:30 a. m., miércoles 7:30 p. m. y viernes

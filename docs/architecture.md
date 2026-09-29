@@ -84,6 +84,7 @@ src/app/
     portal/                                          # portal del miembro (self-service)
     encuestas/                                         # crear/responder/ver resultados
     reportes/                                            # paneles agregados por rol
+    finanzas/                                              # donaciones, cartas, exportar (apostol/finanzas)
     admin/                                                 # usuarios y roles
 ```
 
@@ -119,6 +120,15 @@ Detalle completo en [`docs/services-schedule.md`](services-schedule.md).
   (`attendance-console.tsx`) es un Client Component que recibe las
   Server Actions por props, refresca la lista cada 20 s (varios ujieres
   a la vez) y no muestra éxito hasta que el servidor confirma.
+
+## 5.b Donaciones y Finanzas
+
+Ver [`docs/finance.md`](finance.md). Capa de datos en
+`src/lib/data/finance.ts` (solo RPC), dinero en `src/lib/money.ts`
+(centavos), cartas en `src/lib/finance/letter.ts` (instantánea) y
+`letter-pdf.ts` (PDF con `pdf-lib`, en el servidor). Los PDF emitidos se
+guardan en la base (`donation_letters.pdf`) y se sirven por un Route
+Handler protegido; no se usa almacenamiento público.
 
 ## 6. Envío de emails
 

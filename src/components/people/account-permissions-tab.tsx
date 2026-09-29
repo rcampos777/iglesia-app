@@ -217,6 +217,20 @@ function PermissionsSection({ personId, account }: { personId: string; account: 
           </Alert>
         )}
 
+        {account.roles.some((r) => r === "apostol" || r === "finanzas") ? (
+          <div className="bg-muted/40 rounded-md border p-3 text-sm">
+            <p className="font-medium">
+              Acceso financiero:{" "}
+              {account.roles
+                .filter((r) => r === "apostol" || r === "finanzas")
+                .map((r) => roleLabels[r])
+                .join(", ")}
+            </p>
+            <p className="text-muted-foreground text-xs">
+              Solo un Apóstol lo concede o revoca (Finanzas → Acceso). No se cambia desde aquí.
+            </p>
+          </div>
+        ) : null}
         {ROLE_GROUPS.map((group) => (
           <div key={group.label} className="space-y-2">
             <div>

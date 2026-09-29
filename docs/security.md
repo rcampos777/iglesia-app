@@ -95,6 +95,34 @@ security;` en la misma migración donde se crean.
   `ensure_service_occurrences()`, que exige una capacidad de asistencia
   y es idempotente.
 
+## 5.b Donaciones y Finanzas
+
+Detalle en `docs/finance.md` y matriz en `docs/roles-and-permissions.md` §7.
+
+- Solo `apostol`/`finanzas` (`has_finance_access()`); `administrador` no.
+  RLS de lectura en todas las tablas financieras, **ninguna** política de
+  escritura: todo pasa por funciones `security definer` que validan el
+  acceso primero y responden "No autorizado." sin datos. Las rutas de
+  PDF/CSV responden 404 sin acceso y `no-store`.
+- Sin fugas por métricas: el panel general, los reportes, `audit_log` (que
+  lee el administrador) y la búsqueda de personas no incluyen montos. La
+  auditoría financiera va a `finance_audit_log` (solo `apostol`).
+- Autoasignación bloqueada: trigger `user_roles_guard_financial` + regla en
+  `admin_set_person_roles`. Último `apostol` protegido.
+- Dinero en centavos `bigint`; sin punto flotante en servidor ni cliente.
+- Petición del sobre: tabla sin políticas; lectura solo por función
+  auditada; nunca en listados/reportes/exportaciones/cartas/errores/logs.
+  Compartir con intercesión exige autorización registrada por el operador.
+- Historial inmutable (`donation_revisions`, `finance_audit_log`,
+  `donation_prayer_note_access_log`) y donaciones no borrables (triggers).
+- CSV protegido contra inyección de fórmulas.
+- **Límites conocidos**: (1) Con la `service_role key` o el rol `postgres`
+  se puede todo, como en el resto del sistema. (2) Si un administrador
+  intentara borrar una persona con donaciones llamando a la API directo
+  (la app no tiene esa función), el error de clave foránea de Postgres
+  mencionaría `donations`. (3) La búsqueda de personas para Finanzas
+  expone nombre y una pista, como la de check-in.
+
 ## 6. Importación de datos
 
 Ver `docs/import-process.md` para el flujo completo. Resumen de

@@ -2,6 +2,36 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-09-28 — Módulo de Donaciones y Finanzas
+
+**Decisiones**:
+
+1. **Roles `apostol` y `finanzas` en `app_role`** (no un sistema paralelo).
+   `administrador` no obtiene acceso financiero. `admin_set_person_roles`
+   ignora/rechaza los roles financieros y un trigger en `user_roles` los
+   protege de cualquier otra vía; solo `apostol_set_financial_role()` (un
+   Apóstol) y `bootstrap_first_apostol()` (SQL Editor, una vez) los escriben.
+   El Apóstol puede conceder también Apóstol (sucesión) con protección del
+   último titular.
+2. **Centavos `bigint`** y sumas en la base; formato y lectura en el cliente
+   con aritmética entera.
+3. **Idempotencia por clave del formulario**, no por "misma persona, fecha y
+   monto" (bloquearía aportaciones legítimas).
+4. **Versionado optimista** (`version`) para correcciones simultáneas.
+5. **Petición del sobre en tabla separada sin políticas de lectura**;
+   acceso definido: Apóstol y Finanzas, solo por función auditada desde el
+   detalle. Compartir con intercesión crea una `prayer_requests` con
+   `submitted_by_user_id = null`.
+6. **Auditoría financiera separada** (`finance_audit_log`, solo Apóstol)
+   porque `audit_log` lo lee el administrador.
+7. **PDF con `pdf-lib`** (MIT, JS puro, sin servicios externos) generado en
+   el servidor; se guarda el PDF exacto en la base para reproducir versiones
+   emitidas. Alternativas descartadas: generar en el navegador (el total
+   debe venir del servidor), Supabase Storage (otra superficie de acceso a
+   proteger, sin necesidad para este volumen).
+8. **Plantilla provisional** marcada BORRADOR hasta aprobación de un Apóstol;
+   no afirma deducibilidad.
+
 ## 2026-09-28 — Cultos recurrentes y check-in controlado por ujieres (reemplaza el auto check-in)
 
 **Contexto**: encargo del dueño del producto: que los cultos (domingo

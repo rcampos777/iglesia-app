@@ -82,7 +82,9 @@ sin una decisión explícita registrada en `docs/decisions.md`:
 `pastor`, `administrador`. Accesos de asistencia a cultos (mismo enum,
 2026-09-28): `ujier` ("Servidor / Ujier"), `gestion_cultos`,
 `control_checkin`, `correccion_asistencia` — ver
-`docs/roles-and-permissions.md` §6.
+`docs/roles-and-permissions.md` §6. Accesos financieros (2026-09-28):
+`apostol` y `finanzas` — **`administrador` NO tiene acceso financiero** y
+no puede asignarlos; solo un Apóstol. Ver `docs/finance.md`.
 
 - Un usuario puede tener **múltiples roles** simultáneamente.
 - **`pastor` NO equivale a administrador.** En esta iglesia hay muchos
@@ -229,4 +231,5 @@ docs/                                # documentación del proyecto
 | [`docs/assumptions.md`](docs/assumptions.md)                     | Supuestos tomados sin confirmar con el usuario |
 | [`docs/decisions.md`](docs/decisions.md)                         | Registro de decisiones técnicas (ADR ligero)   |
 | [`docs/services-schedule.md`](docs/services-schedule.md)         | Cultos recurrentes, ventana y check-in         |
+| [`docs/finance.md`](docs/finance.md)                             | Donaciones, cartas y acceso financiero         |
 | [`docs/progress.md`](docs/progress.md)                           | Estado actual, próxima tarea                   |
