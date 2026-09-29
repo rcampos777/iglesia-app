@@ -1,6 +1,6 @@
 # Progreso del proyecto
 
-Última actualización: 2026-09-05.
+Última actualización: 2026-09-28.
 
 ## Estado general: MVP verificado de punta a punta ✅
 
@@ -314,6 +314,46 @@ Es la causa más probable del error que vio una usuaria real al confirmar
 su email.
 
 ## Bitácora
+
+### 2026-09-28 — Cultos recurrentes y check-in por ujieres (implementado; **no activado** en producción)
+
+- **Programación**: domingo 9:30 a. m., miércoles 7:30 p. m. y viernes
+  7:30 p. m. (PR) como series versionadas; fechas generadas con 4
+  semanas de anticipación por `generate_service_occurrences()`
+  (idempotente, advisory lock, índice único). pg_cron diario (0033) +
+  respaldo al abrir Asistencia. Cancelar, reactivar, mover una fecha,
+  cambiar una serie "a partir de" (con la fecha y el efecto visibles
+  antes de aplicar), terminar serie, cultos especiales y horizonte
+  configurable, en `/check-in/programacion`.
+- **Ventana**: abre 1 h antes; sin cierre automático por defecto
+  (configurable por serie); abrir/cerrar manual con `control_checkin`.
+- **Ujieres**: accesos `ujier` ("Servidor / Ujier"), `gestion_cultos`,
+  `control_checkin`, `correccion_asistencia` en la pestaña "Cuenta y
+  permisos" (mismo guardado auditado). Consola `/check-in`
+  ("Asistencia"): búsqueda en el servidor con datos mínimos y pista para
+  homónimos, QR con cámara (BarcodeDetector o jsQR) o lector externo,
+  "Ya registrado", reintento sin duplicar, lista compartida que se
+  refresca sola, correcciones con motivo.
+- **Auto check-in retirado**: el miembro ya no puede confirmarse solo
+  (política eliminada en la base, no solo el botón); muestra su QR, que
+  se renueva solo.
+- **Reportes**: asistencia por rango de fechas y tipo de culto
+  (asistencias, cultos, personas distintas); sin anuladas, futuras ni
+  canceladas.
+- **Pruebas**: `npm run test:db` 20/20 (PGlite, migraciones reales,
+  RLS); `npm run test:unit` 4/4 en UTC, Tokio, Los Ángeles y Kiritimati;
+  E2E 16/16 (4 nuevas de protección de rutas); `npm run check` y
+  `npm run build` limpios. Revisión visual con datos sintéticos (página
+  temporal, ya eliminada) en 375 px y 1280 px: búsqueda, confirmación,
+  corte de red + reintento, estado cerrado con corrección, formularios
+  de programación.
+- **Sin verificar**: flujo completo contra Supabase real (demo y
+  producción no tienen 0031–0033; no se ejecutan migraciones remotas en
+  esta tarea), cámara real en iPhone/Android, pg_cron ejecutándose,
+  dos conexiones realmente concurrentes.
+- **Pendiente de activar**: ver `docs/services-schedule.md` §6
+  (migraciones + despliegue juntos, verificar `cron.job`, asignar
+  accesos, retirar el QR fijo impreso).
 
 ### 2026-09-28 — Rediseño visual (Geist, navegación, panel, listas, portal)
 

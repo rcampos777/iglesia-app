@@ -11,6 +11,16 @@
 | `coordinador_ministerio` | Gestiona personas, cursos, clases y **ministerios** de su(s) área(s).                 |
 | `pastor`                 | **Acotado** (desde 2026-09-02): sus clases y los ministerios que lidera. No es admin. |
 | `administrador`          | Único rol con acceso completo: gestión de roles, configuración y todo lo demás.       |
+| `ujier`                  | **"Servidor / Ujier"**: registrar asistencia a cultos (check-in). Nada más.           |
+| `gestion_cultos`         | Crear cultos especiales, reprogramar/cancelar fechas, configurar recurrencias.        |
+| `control_checkin`        | Abrir o cerrar el registro de asistencia de un culto.                                 |
+| `correccion_asistencia`  | Anular o agregar asistencias fuera de la ventana, con motivo auditado.                |
+
+Los cuatro últimos (desde 2026-09-28, migraciones 0031–0032) son
+**accesos de asistencia**: valores del mismo enum `app_role`, asignados
+en la misma pestaña "Cuenta y permisos" y guardados por la misma
+`admin_set_person_roles()` (auditada). No hay un sistema de permisos
+paralelo. Ver §6.
 
 Un usuario puede tener **varios roles** a la vez (tabla `user_roles`,
 clave compuesta `(user_id, role)`). La UI y las políticas RLS combinan
@@ -27,23 +37,23 @@ revisión posterior.
 Leyenda: **C**rear, **L**eer, **A**ctualizar, **E**liminar. `propio` =
 solo sobre registros propios o asignados a uno.
 
-| Módulo                    | miembro       | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor                     | administrador |
-| ------------------------- | ------------- | ------------- | ------------ | --------------------- | ----------------- | -------------------------- | ------------- |
-| Directorio de personas    | L propio      | L             | CLA          | CLA                   | CLA               | CLA                        | CLAE          |
-| Cursos / categorías       | –             | L             | L            | L                     | CLA               | – (sin catálogo propio)    | CLA           |
-| Clases (offerings)        | L             | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
-| Ministerios (catálogo)    | –             | L             | L            | L                     | CLA               | solo los que lidera        | CLA           |
-| Membresía de ministerio   | L propia      | L propia      | L            | L                     | CLA               | solo los que lidera        | CLA           |
-| Matrícula                 | L propio      | CLA propio    | CLA          | L                     | CLA               | CLA                        | CLA           |
-| Asistencia                | L propio      | CLA propio    | L            | L                     | CLA               | CLA                        | CLA           |
-| Visitantes / seguimiento  | –             | –             | CLA propio+  | L                     | CLA               | CLA                        | CLA           |
-| Check-in servicios        | C propio (QR) | –             | C            | L                     | CLA               | CLA                        | CLA           |
-| Peticiones de oración     | C, L propio   | –             | –            | CLA asignadas+bandeja | –                 | solo si lidera intercesión | CLA           |
-| Notificaciones/plantillas | –             | –             | –            | –                     | L                 | CLA                        | CLA           |
-| Encuestas                 | responder     | L, responder  | L, responder | L, responder          | CLA               | CLA                        | CLA           |
-| Importación de datos      | –             | –             | CLA          | –                     | CLA               | CLA                        | CLA           |
-| Roles de usuarios         | L propio      | L propio      | L propio     | L propio              | L propio          | L propio                   | CLA           |
-| Reportes/paneles          | propio        | propio+clases | seguimiento  | oración               | su área           | todo                       | todo          |
+| Módulo                    | miembro        | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor                     | administrador |
+| ------------------------- | -------------- | ------------- | ------------ | --------------------- | ----------------- | -------------------------- | ------------- |
+| Directorio de personas    | L propio       | L             | CLA          | CLA                   | CLA               | CLA                        | CLAE          |
+| Cursos / categorías       | –              | L             | L            | L                     | CLA               | – (sin catálogo propio)    | CLA           |
+| Clases (offerings)        | L              | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
+| Ministerios (catálogo)    | –              | L             | L            | L                     | CLA               | solo los que lidera        | CLA           |
+| Membresía de ministerio   | L propia       | L propia      | L            | L                     | CLA               | solo los que lidera        | CLA           |
+| Matrícula                 | L propio       | CLA propio    | CLA          | L                     | CLA               | CLA                        | CLA           |
+| Asistencia                | L propio       | CLA propio    | L            | L                     | CLA               | CLA                        | CLA           |
+| Visitantes / seguimiento  | –              | –             | CLA propio+  | L                     | CLA               | CLA                        | CLA           |
+| Asistencia a cultos       | – (muestra QR) | –             | C            | –                     | C                 | C                          | todo          |
+| Peticiones de oración     | C, L propio    | –             | –            | CLA asignadas+bandeja | –                 | solo si lidera intercesión | CLA           |
+| Notificaciones/plantillas | –              | –             | –            | –                     | L                 | CLA                        | CLA           |
+| Encuestas                 | responder      | L, responder  | L, responder | L, responder          | CLA               | CLA                        | CLA           |
+| Importación de datos      | –              | –             | CLA          | –                     | CLA               | CLA                        | CLA           |
+| Roles de usuarios         | L propio       | L propio      | L propio     | L propio              | L propio          | L propio                   | CLA           |
+| Reportes/paneles          | propio         | propio+clases | seguimiento  | oración               | su área           | todo                       | todo          |
 
 **El rol `pastor` NO es administrador** (decisión 2026-09-02): en esta
 iglesia hay muchos pastores de áreas distintas y varios sin nada a su
@@ -110,3 +120,65 @@ permisos" que abre esa misma pestaña. Todo cambio de rol se registra en
 detalle de las protecciones (último administrador a prueba de
 condiciones de carrera, detección de ediciones desactualizadas, cierre
 de la escritura directa a `user_roles`).
+
+## 6. Asistencia a cultos (check-in por ujieres)
+
+Desde 2026-09-28 la asistencia a cultos la confirma **personal
+autorizado**. El miembro ya **no** puede confirmarse a sí mismo (se
+retiró la política `service_checkins_insert_self` de 0017 y el botón
+"Confirmar mi asistencia"); solo muestra su QR personal en Mi portal.
+
+### Matriz final
+
+| Capacidad (función SQL)                                     | Roles que la tienen                                                                                 |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Registrar asistencia — `can_record_attendance()`            | `administrador`, `ujier`, y (preservados de 0007) `seguimiento`, `coordinador_ministerio`, `pastor` |
+| Gestionar cultos — `can_manage_services()`                  | `administrador`, `gestion_cultos`                                                                   |
+| Controlar check-in (abrir/cerrar) — `can_control_checkin()` | `administrador`, `control_checkin`                                                                  |
+| Corregir asistencia — `can_correct_attendance()`            | `administrador`, `correccion_asistencia`                                                            |
+| Conceder o revocar cualquiera de los anteriores             | solo `administrador` (`admin_set_person_roles`, auditado)                                           |
+
+Qué incluye **registrar asistencia**:
+
+- Ver los cultos (hoy y los abiertos) en **Asistencia** (`/check-in`).
+- Buscar personas con datos mínimos: nombre + una pista discreta
+  (últimos 4 dígitos del teléfono o email enmascarado). Mínimo 2
+  letras, máximo 25 resultados; nunca se descarga el directorio.
+- Confirmar asistencia manual o escaneando el QR personal.
+- Ver quién ya está registrado en el culto seleccionado (sin ver quién
+  lo registró ni los registros anulados: eso es de corrección).
+
+Qué **no** incluye: administración, importaciones, peticiones de
+oración, directorio de personas, edición de personas, reportes (el rol
+`ujier` no es staff: `is_staff()` no lo incluye). Ser miembro de un
+ministerio o tener el título de servidor **no** concede el acceso.
+
+**Por qué se preservan `seguimiento`, `coordinador_ministerio` y
+`pastor` para registrar**: ya podían hacer check-in desde 0007; quitarlo
+dejaría fuera a operadores legítimos. **No** conservan crear/abrir/
+cerrar/borrar cultos ni borrar check-ins (lo tenían en 0007): esas
+operaciones ahora son `gestion_cultos`, `control_checkin` y
+`correccion_asistencia`, que el administrador asigna explícitamente.
+
+### Dónde se aplica cada barrera
+
+1. **Interfaz**: el menú "Asistencia", los botones de abrir/cerrar,
+   "Anular", "Agregar (corrección)" y "Programación de cultos" solo
+   aparecen con la capacidad correspondiente
+   (`src/lib/auth/attendance.ts`).
+2. **Servidor**: cada Server Action (`check-in/actions.ts`,
+   `check-in/programacion/actions.ts`) vuelve a leer los roles de la
+   base con `requireRole()`.
+3. **Base de datos**: toda escritura pasa por funciones `security
+definer` que llaman a `can_*()` y validan la ventana de registro. No
+   hay políticas de escritura directa en `services`, `service_checkins`,
+   `service_series*` ni `service_schedule_settings`.
+
+**Revocación inmediata**: los roles se leen en cada operación (no hay
+token con roles embebidos), así que al quitar `ujier` la siguiente
+búsqueda o registro falla con "No tienes permiso…", aunque el ujier
+tenga la pantalla abierta. Probado en `tests/db/attendance.test.ts`.
+
+**Quién concede y revoca**: `admin_set_person_roles()` registra en
+`audit_log` (`update_roles`) el actor, antes/después, añadidos y
+quitados; `user_roles.granted_by` guarda quién otorgó cada rol.

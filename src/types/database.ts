@@ -12,7 +12,11 @@ export type AppRole =
   | "intercesor"
   | "coordinador_ministerio"
   | "pastor"
-  | "administrador";
+  | "administrador"
+  | "ujier"
+  | "gestion_cultos"
+  | "control_checkin"
+  | "correccion_asistencia";
 
 export type MembershipStatus = "visitante" | "asistente_habitual" | "miembro" | "inactivo";
 
@@ -31,6 +35,11 @@ export type MinistryMemberRole = "lider" | "colider" | "miembro";
 export type ActivityStatus = "planificada" | "abierta" | "realizada" | "cancelada";
 
 export type CheckinMethod = "qr" | "manual";
+
+export type ServiceStatus = "programado" | "cancelado";
+
+/** Estado calculado por `service_checkin_state()` en la base de datos. */
+export type CheckinState = "abierto" | "pendiente" | "cerrado" | "cancelado";
 
 export type FollowupStatus = "pendiente" | "en_progreso" | "completado" | "no_contactable";
 
@@ -173,12 +182,29 @@ export type ServiceRow = {
   id: string;
   name: string;
   service_type: ServiceType;
+  /** Fecha local (America/Puerto_Rico), derivada de starts_at. */
   service_date: string;
+  /** Hora local, derivada de starts_at. */
   start_time: string | null;
   location: string | null;
-  is_checkin_open: boolean;
+  series_id: string | null;
+  series_rule_id: string | null;
+  occurrence_date: string | null;
+  starts_at: string;
+  status: ServiceStatus;
+  is_exception: boolean;
+  cancelled_at: string | null;
+  cancelled_by: string | null;
+  cancel_reason: string | null;
+  checkin_opens_at: string;
+  checkin_closes_at: string | null;
+  checkin_manual_state: "abierto" | "cerrado" | null;
+  checkin_state_changed_at: string | null;
+  checkin_state_changed_by: string | null;
   created_at: string;
   created_by: string | null;
+  updated_at: string;
+  updated_by: string | null;
 };
 
 export type ServiceCheckinRow = {
@@ -188,6 +214,93 @@ export type ServiceCheckinRow = {
   method: CheckinMethod;
   checked_in_at: string;
   checked_in_by: string | null;
+  voided_at: string | null;
+  voided_by: string | null;
+  void_reason: string | null;
+  is_correction: boolean;
+  correction_reason: string | null;
+};
+
+export type ServiceSeriesRow = {
+  id: string;
+  name: string;
+  created_at: string;
+  created_by: string | null;
+};
+
+export type ServiceSeriesRuleRow = {
+  id: string;
+  series_id: string;
+  name: string;
+  service_type: ServiceType;
+  /** 0 = domingo … 6 = sábado. */
+  weekday: number;
+  local_time: string;
+  location: string | null;
+  checkin_opens_minutes_before: number;
+  checkin_closes_minutes_after: number | null;
+  effective_from: string;
+  effective_until: string | null;
+  created_at: string;
+  created_by: string | null;
+};
+
+export type ServiceScheduleSettingsRow = {
+  id: boolean;
+  timezone: string;
+  horizon_weeks: number;
+  updated_at: string;
+  updated_by: string | null;
+};
+
+export type ServiceWithState = {
+  id: string;
+  name: string;
+  service_type: ServiceType;
+  service_date: string;
+  start_time: string | null;
+  starts_at: string;
+  location: string | null;
+  status: ServiceStatus;
+  is_exception: boolean;
+  series_id: string | null;
+  occurrence_date: string | null;
+  checkin_opens_at: string;
+  checkin_closes_at: string | null;
+  checkin_manual_state: "abierto" | "cerrado" | null;
+  checkin_state: CheckinState;
+  cancel_reason: string | null;
+  /** null si quien consulta no opera asistencia. */
+  attendance: number | null;
+};
+
+export type CheckinSearchResult = {
+  person_id: string;
+  display_name: string;
+  hint: string | null;
+  membership_status: MembershipStatus;
+  already_checked_in: boolean;
+};
+
+export type ServiceAttendanceEntry = {
+  checkin_id: string;
+  person_id: string;
+  display_name: string;
+  checked_in_at: string;
+  method: CheckinMethod;
+  is_correction: boolean;
+  correction_reason: string | null;
+  recorded_by_name: string | null;
+  voided_at: string | null;
+  void_reason: string | null;
+};
+
+export type RecordAttendanceResult = {
+  result: "registrado" | "ya_registrado";
+  checkin_id?: string;
+  checked_in_at?: string;
+  person_name: string;
+  by_me?: boolean;
 };
 
 export type VisitorFollowUpRow = {
@@ -428,6 +541,9 @@ export interface Database {
       attendance_records: TableDef<AttendanceRecordRow>;
       services: TableDef<ServiceRow>;
       service_checkins: TableDef<ServiceCheckinRow>;
+      service_series: TableDef<ServiceSeriesRow>;
+      service_series_rules: TableDef<ServiceSeriesRuleRow>;
+      service_schedule_settings: TableDef<ServiceScheduleSettingsRow>;
       visitor_follow_ups: TableDef<VisitorFollowUpRow>;
       follow_up_notes: TableDef<FollowUpNoteRow>;
       prayer_requests: TableDef<PrayerRequestRow>;
@@ -544,6 +660,95 @@ export interface Database {
       admin_relink_profile: {
         Args: { p_user_id: string; p_new_person_id: string; p_reason?: string | null };
         Returns: undefined;
+      };
+      can_record_attendance: { Args: Record<string, never>; Returns: boolean };
+      can_manage_services: { Args: Record<string, never>; Returns: boolean };
+      can_control_checkin: { Args: Record<string, never>; Returns: boolean };
+      can_correct_attendance: { Args: Record<string, never>; Returns: boolean };
+      ensure_service_occurrences: { Args: Record<string, never>; Returns: number };
+      list_services_with_state: {
+        Args: { p_from?: string | null; p_to?: string | null; p_service_id?: string | null };
+        Returns: ServiceWithState[];
+      };
+      search_people_for_checkin: {
+        Args: { p_service_id: string; p_query: string; p_limit?: number };
+        Returns: CheckinSearchResult[];
+      };
+      list_service_attendance: {
+        Args: { p_service_id: string; p_include_voided?: boolean };
+        Returns: ServiceAttendanceEntry[];
+      };
+      record_service_attendance: {
+        Args: { p_service_id: string; p_person_id: string; p_method: CheckinMethod };
+        Returns: RecordAttendanceResult;
+      };
+      set_service_checkin_state: {
+        Args: { p_service_id: string; p_state: "abierto" | "cerrado" };
+        Returns: undefined;
+      };
+      correct_attendance_add: {
+        Args: { p_service_id: string; p_person_id: string; p_reason: string };
+        Returns: RecordAttendanceResult;
+      };
+      void_service_attendance: {
+        Args: { p_checkin_id: string; p_reason: string };
+        Returns: undefined;
+      };
+      create_special_service: {
+        Args: {
+          p_name: string;
+          p_service_type: ServiceType;
+          p_local_date: string;
+          p_local_time: string;
+          p_location?: string | null;
+          p_closes_minutes_after?: number | null;
+        };
+        Returns: string;
+      };
+      cancel_service: {
+        Args: { p_service_id: string; p_reason: string | null };
+        Returns: undefined;
+      };
+      reinstate_service: { Args: { p_service_id: string }; Returns: undefined };
+      reschedule_service: {
+        Args: {
+          p_service_id: string;
+          p_local_date: string;
+          p_local_time: string;
+          p_reason?: string | null;
+        };
+        Returns: undefined;
+      };
+      update_service_series: {
+        Args: {
+          p_series_id: string;
+          p_effective_from: string;
+          p_name: string | null;
+          p_service_type: ServiceType | null;
+          p_weekday: number | null;
+          p_local_time: string | null;
+          p_location: string | null;
+          p_opens_minutes_before: number | null;
+          p_closes_minutes_after: number | null;
+          p_end_series?: boolean;
+        };
+        Returns: { removed: number; kept: number; created: number; new_rule_id: string | null };
+      };
+      update_service_schedule_settings: { Args: { p_horizon_weeks: number }; Returns: number };
+      service_attendance_report: {
+        Args: { p_from: string; p_to: string; p_service_type?: ServiceType | null };
+        Returns: {
+          service_id: string;
+          name: string;
+          service_type: ServiceType;
+          service_date: string;
+          start_time: string | null;
+          attendance: number;
+        }[];
+      };
+      service_attendance_unique_people: {
+        Args: { p_from: string; p_to: string; p_service_type?: ServiceType | null };
+        Returns: number;
       };
     };
     Enums: {

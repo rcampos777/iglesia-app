@@ -72,6 +72,37 @@ regresión, y búsqueda/paginación de `list_users_with_roles`. Mismo
 patrón de datos sintéticos autocontenidos (prefijo `verif-perms-`).
 Requiere `0030` aplicada (después de `0029`).
 
+## 4.c Pruebas de base de datos aisladas (`npm run test:db`)
+
+`tests/db/` aplica **todas** las migraciones (menos 0033, pg_cron) a un
+Postgres en memoria (PGlite) con un esquema `auth` mínimo emulado
+(`auth.users`, `auth.uid()` leyendo el claim de sesión, roles
+`anon`/`authenticated`). No usa Docker ni ningún proyecto remoto; datos
+100 % sintéticos (`@example.test`). `asUser()` ejecuta como un usuario
+con RLS activo.
+
+`tests/db/attendance.test.ts` (cultos y asistencia, 20 pruebas): días y
+horas de las tres series en PR; mismo resultado con la sesión en otra
+zona horaria; generación repetida sin duplicados; generador no
+ejecutable sin rol; cancelaciones y cambios manuales respetados;
+cambio de serie que conserva historial y asistencia; ventana
+(pendiente/abierto/cerrado programado y manual, cancelado); registro
+manual y QR, persona sin cuenta, "ya registrado"; dos ujieres sobre la
+misma persona; rechazo a miembro, auto check-in y escritura directa;
+datos mínimos del ujier (sin directorio, oración, auditoría,
+importaciones ni administración); revocación inmediata con auditoría;
+solo admin concede; separación de los cuatro accesos; anulación y
+alta por corrección auditadas; reporte sin dobles conteos ni anuladas.
+
+**Límite**: PGlite tiene una sola conexión, así que "simultáneo" se
+prueba intercalando transacciones de dos usuarios y verificando que el
+índice único rechace el duplicado; no hay dos conexiones reales en
+paralelo.
+
+`tests/unit/datetime.test.ts` (`npm run test:unit`): formato de fecha y
+hora de la iglesia; ejecutar con `TZ=Asia/Tokyo npm run test:unit`
+(o cualquier otra zona) para comprobar que el dispositivo no afecta.
+
 ## 5. Estado actual
 
 Implementado: `tests/e2e/auth.spec.ts` — smoke tests que **no** requieren

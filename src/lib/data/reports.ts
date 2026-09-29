@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { FollowupStatus, MembershipStatus, PrayerStatus } from "@/types/database";
+import type { FollowupStatus, MembershipStatus, PrayerStatus, ServiceType } from "@/types/database";
 import { fetchAllPages } from "./paging";
 
 export interface CountBucket {
@@ -115,10 +115,14 @@ export interface ServiceAttendanceCount {
 export async function getRecentServiceAttendance(limit = 8): Promise<ServiceAttendanceCount[]> {
   const supabase = await createClient();
 
+  // Solo cultos ya iniciados y no cancelados: los recurrentes se generan
+  // con semanas de anticipación y no deben aparecer como "0 asistentes".
   const { data: services } = await supabase
     .from("services")
     .select("id, name, service_date")
-    .order("service_date", { ascending: false })
+    .eq("status", "programado")
+    .lte("starts_at", new Date().toISOString())
+    .order("starts_at", { ascending: false })
     .limit(limit);
 
   if (!services || services.length === 0) return [];
@@ -129,7 +133,8 @@ export async function getRecentServiceAttendance(limit = 8): Promise<ServiceAtte
       const { count } = await supabase
         .from("service_checkins")
         .select("id", { count: "exact", head: true })
-        .eq("service_id", s.id);
+        .eq("service_id", s.id)
+        .is("voided_at", null);
       counts.set(s.id, count ?? 0);
     }),
   );
@@ -141,6 +146,61 @@ export async function getRecentServiceAttendance(limit = 8): Promise<ServiceAtte
       count: counts.get(s.id) ?? 0,
     }))
     .reverse();
+}
+
+export type ServiceAttendanceReport = {
+  rows: {
+    serviceId: string;
+    name: string;
+    serviceType: ServiceType;
+    date: string;
+    startTime: string | null;
+    attendance: number;
+  }[];
+  totalAttendance: number;
+  uniquePeople: number;
+};
+
+/**
+ * Asistencia por culto en un rango de fechas (hora de PR) y, opcional,
+ * un tipo de culto. Cuenta registros vigentes (no anulados); una persona
+ * cuenta una sola vez por culto (índice único). `uniquePeople` = personas
+ * distintas en todo el rango.
+ */
+export async function getServiceAttendanceReport(
+  from: string,
+  to: string,
+  serviceType: ServiceType | null,
+): Promise<ServiceAttendanceReport> {
+  const supabase = await createClient();
+  const [report, unique] = await Promise.all([
+    supabase.rpc("service_attendance_report", {
+      p_from: from,
+      p_to: to,
+      p_service_type: serviceType,
+    }),
+    supabase.rpc("service_attendance_unique_people", {
+      p_from: from,
+      p_to: to,
+      p_service_type: serviceType,
+    }),
+  ]);
+  if (report.error) throw new Error(report.error.message);
+  if (unique.error) throw new Error(unique.error.message);
+
+  const rows = (report.data ?? []).map((r) => ({
+    serviceId: r.service_id,
+    name: r.name,
+    serviceType: r.service_type,
+    date: r.service_date,
+    startTime: r.start_time,
+    attendance: Number(r.attendance),
+  }));
+  return {
+    rows,
+    totalAttendance: rows.reduce((sum, r) => sum + r.attendance, 0),
+    uniquePeople: Number(unique.data ?? 0),
+  };
 }
 
 export interface MinistryServingCount {

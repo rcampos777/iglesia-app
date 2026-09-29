@@ -72,6 +72,7 @@ export async function getPersonJourney(personId: string): Promise<PersonJourney 
         .from("service_checkins")
         .select("id, checked_in_at")
         .eq("person_id", personId)
+        .is("voided_at", null)
         .order("checked_in_at", { ascending: false }),
     ]);
 

@@ -12,14 +12,25 @@ import { roleDescriptions, roleLabels } from "@/lib/labels";
 import type { AppRole } from "@/types/database";
 import type { PersonAccount, PersonResponsibilities } from "@/lib/data/permissions";
 
-const ALL_ROLES: AppRole[] = [
-  "miembro",
-  "maestro",
-  "seguimiento",
-  "intercesor",
-  "coordinador_ministerio",
-  "pastor",
-  "administrador",
+const ROLE_GROUPS: { label: string; description?: string; roles: AppRole[] }[] = [
+  {
+    label: "Roles",
+    roles: [
+      "miembro",
+      "maestro",
+      "seguimiento",
+      "intercesor",
+      "coordinador_ministerio",
+      "pastor",
+      "administrador",
+    ],
+  },
+  {
+    label: "Asistencia a cultos",
+    description:
+      "Ser miembro de un ministerio o tener el título de servidor no concede ninguno de estos accesos: se otorgan aquí, uno por uno.",
+    roles: ["ujier", "gestion_cultos", "control_checkin", "correccion_asistencia"],
+  },
 ];
 
 function sortRoles(roles: AppRole[]): AppRole[] {
@@ -206,25 +217,35 @@ function PermissionsSection({ personId, account }: { personId: string; account: 
           </Alert>
         )}
 
-        <ul className="divide-y rounded-md border">
-          {ALL_ROLES.map((role) => {
-            const active = staged.includes(role);
-            return (
-              <li key={role} className="flex items-center justify-between gap-4 px-3 py-2.5">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{roleLabels[role]}</p>
-                  <p className="text-muted-foreground text-xs">{roleDescriptions[role]}</p>
-                </div>
-                <Switch
-                  checked={active}
-                  disabled={isPending}
-                  onCheckedChange={() => toggleRole(role)}
-                  aria-label={`${active ? "Quitar" : "Otorgar"} rol ${roleLabels[role]}`}
-                />
-              </li>
-            );
-          })}
-        </ul>
+        {ROLE_GROUPS.map((group) => (
+          <div key={group.label} className="space-y-2">
+            <div>
+              <h3 className="text-sm font-semibold">{group.label}</h3>
+              {group.description ? (
+                <p className="text-muted-foreground text-xs">{group.description}</p>
+              ) : null}
+            </div>
+            <ul className="divide-y rounded-md border">
+              {group.roles.map((role) => {
+                const active = staged.includes(role);
+                return (
+                  <li key={role} className="flex items-center justify-between gap-4 px-3 py-2.5">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">{roleLabels[role]}</p>
+                      <p className="text-muted-foreground text-xs">{roleDescriptions[role]}</p>
+                    </div>
+                    <Switch
+                      checked={active}
+                      disabled={isPending}
+                      onCheckedChange={() => toggleRole(role)}
+                      aria-label={`${active ? "Quitar" : "Otorgar"} ${roleLabels[role]}`}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
 
         {hasChanges && (
           <Alert>

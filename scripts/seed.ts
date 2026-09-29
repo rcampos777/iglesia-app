@@ -262,7 +262,9 @@ async function seedServicesAndCheckins(peopleIds: string[]) {
       service_type: "culto_general",
       service_date: new Date().toISOString().slice(0, 10),
       start_time: "10:00",
-      is_checkin_open: true,
+      starts_at: new Date().toISOString(),
+      checkin_opens_at: new Date(Date.now() - 3600_000).toISOString(),
+      checkin_manual_state: "abierto",
     })
     .select("id")
     .single();

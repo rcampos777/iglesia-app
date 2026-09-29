@@ -61,7 +61,13 @@ async function main() {
   const service: { id: string } = must(
     await supabase
       .from("services")
-      .insert({ name: "CARGA — Culto", service_date: today, is_checkin_open: true })
+      .insert({
+        name: "CARGA — Culto",
+        service_date: today,
+        starts_at: new Date().toISOString(),
+        checkin_opens_at: new Date(Date.now() - 3600_000).toISOString(),
+        checkin_manual_state: "abierto",
+      })
       .select("id")
       .single(),
   );

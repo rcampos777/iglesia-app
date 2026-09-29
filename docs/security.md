@@ -52,18 +52,48 @@ security;` en la misma migración donde se crean.
   genérico con link a la app, donde el acceso vuelve a pasar por RLS +
   auditoría.
 
-## 5. Check-in por QR
+## 5. Check-in por QR y asistencia a cultos
 
 - El QR de una persona no codifica su `person_id` en texto plano de
   forma permanente. Codifica un token firmado (HMAC-SHA256 con
-  `QR_CHECKIN_SECRET`) que incluye `person_id` + `exp` (expiración
-  corta). Ver `src/lib/checkin/token.ts`.
-- `POST /api/checkin/scan` valida la firma y expiración en el servidor
-  antes de crear el `service_checkin`, usando el cliente Supabase de
-  servidor con la sesión del operador (respeta RLS, no usa
-  `service_role`).
-- Si el token expiró, se rechaza con un mensaje claro para regenerar el
-  QR (el portal del miembro puede regenerarlo bajo demanda).
+  `QR_CHECKIN_SECRET`) que incluye `person_id` + `exp` (5 minutos). Ver
+  `src/lib/checkin/token.ts`. Mi portal lo renueva solo cada 4 minutos.
+- **El QR solo identifica a la persona; no concede nada a quien lo
+  escanea.** `scanAttendanceAction` exige primero que el operador
+  tenga la capacidad de registrar asistencia, valida firma y expiración
+  en el servidor, y recién entonces llama a `record_service_attendance()`
+  con la sesión del operador (sin `service_role`).
+- **Desde 2026-09-28 no hay auto check-in**: se retiró la política
+  `service_checkins_insert_self` (0017) y la escritura directa en
+  `service_checkins` y `services`. Toda escritura pasa por funciones
+  `security definer` que validan la capacidad (`can_record_attendance()`
+  etc.) y la ventana de registro (`service_checkin_state()`): un culto
+  pendiente, cerrado o cancelado no acepta registros ordinarios.
+- Una sola asistencia vigente por persona y culto: índice único parcial
+  `service_checkins_one_active_uidx` + `ON CONFLICT DO NOTHING`. Dos
+  ujieres que registran a la misma persona a la vez obtienen
+  "registrado" y "ya registrado"; un reintento tras un corte de red no
+  duplica.
+- Las correcciones nunca borran: `void_service_attendance()` marca el
+  registro como anulado con motivo, y `correct_attendance_add()` agrega
+  fuera de la ventana con motivo. Ambas escriben en `audit_log` (actor,
+  motivo, datos originales). Solo `correccion_asistencia` o
+  `administrador`.
+- La búsqueda para check-in (`search_people_for_checkin`) devuelve
+  nombre + una pista discreta (últimos 4 dígitos del teléfono o email
+  enmascarado), mínimo 2 letras y máximo 25 filas. **Límite conocido**:
+  un ujier con paciencia podría recorrer nombres probando combinaciones
+  de letras; no hay límite de frecuencia. Los datos expuestos son solo
+  nombre y pista, por diseño.
+- El método (`qr`/`manual`) lo fija la Server Action. Un ujier que
+  llamara la función SQL directamente con la anon key podría declarar
+  otro método para una persona que igual está autorizado a registrar:
+  es un dato informativo, no una barrera.
+- El generador de cultos (`generate_service_occurrences`) no es
+  ejecutable por `anon` ni `authenticated`; corre con pg_cron dentro de
+  la base (sin endpoint HTTP). La app solo puede invocar
+  `ensure_service_occurrences()`, que exige una capacidad de asistencia
+  y es idempotente.
 
 ## 6. Importación de datos
 
@@ -167,8 +197,9 @@ error:
 - `/encuestas/[id]` sigue accesible a cualquier autenticado: es donde un
   miembro **responde** una encuesta. Los resultados agregados sí están
   limitados a roles de gestión dentro de la misma página.
-- `/check-in/publico` sigue accesible a cualquier autenticado: es el
-  auto check-in por QR fijo (ver `docs/architecture.md` §5).
+- `/check-in/publico` sigue accesible a cualquier autenticado: era el
+  destino del antiguo QR fijo de la entrada. Desde 2026-09-28 **ya no
+  registra asistencia**; solo muestra el QR personal de quien lo abre.
 - `/ministerios/[id]` admite además al **líder de ese ministerio** aunque
   no sea staff, para no romper la autorización por ámbito de `0018`.
 

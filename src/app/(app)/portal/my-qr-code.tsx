@@ -23,8 +23,12 @@ export function MyQrCode() {
     });
   }
 
+  // El token vence a los 5 minutos: se renueva solo cada 4 mientras la
+  // pantalla está abierta, para que el ujier nunca escanee uno vencido.
   useEffect(() => {
     refresh();
+    const id = window.setInterval(refresh, 4 * 60 * 1000);
+    return () => window.clearInterval(id);
   }, []);
 
   return (
@@ -39,7 +43,7 @@ export function MyQrCode() {
         </div>
       )}
       <p className="text-muted-foreground max-w-xs text-center text-sm">
-        Válido por unos minutos. Muéstralo al llegar al servicio y regenera si expiró.
+        Se renueva solo cada pocos minutos. Si el ujier te dice que expiró, toca «Regenerar código».
       </p>
       <Button variant="outline" size="sm" onClick={refresh} disabled={isPending}>
         <RefreshCw className="size-4" aria-hidden />

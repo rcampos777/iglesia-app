@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui-brand/page-header";
+import { ATTENDANCE_AREA_ROLES } from "@/lib/auth/attendance";
 import { getCurrentUser, hasAnyRole, hasRole, isStaff, type CurrentUser } from "@/lib/auth/session";
 import { visibleNavItems } from "@/lib/auth/nav-items";
 import { createClient } from "@/lib/supabase/server";
@@ -66,9 +67,9 @@ const QUICK_ACTIONS: QuickAction[] = [
   },
   {
     href: "/check-in",
-    label: "Check-in de servicio",
+    label: "Registrar asistencia",
     icon: QrCode,
-    allowed: (u) => hasAnyRole(u, PEOPLE_WRITE),
+    allowed: (u) => hasAnyRole(u, ATTENDANCE_AREA_ROLES),
   },
   {
     href: "/actividades/nueva",

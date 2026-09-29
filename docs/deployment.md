@@ -46,6 +46,10 @@ supabase db push --db-url "postgresql://postgres.<ref>:<password>@aws-0-<region>
   otras iglesias. Cada iglesia real tiene su propio proyecto (arranca
   vacío; se aplican todas las migraciones en orden). Ver "Alta de una
   iglesia nueva" abajo.
+- **0031–0033 (cultos recurrentes y ujieres, 2026-09-28)**: aplicar y
+  desplegar la app **en el mismo paso** (0032 elimina
+  `services.is_checkin_open`). 0033 activa pg_cron. Pasos exactos y
+  consultas de verificación en `docs/services-schedule.md` §6.
 - Después de aplicar, verificar en el dashboard de Supabase que **todas**
   las tablas nuevas tengan RLS habilitado (checklist en
   `docs/security.md`).

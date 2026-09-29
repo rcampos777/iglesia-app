@@ -138,14 +138,35 @@ abajo sin necesidad de configurar una secuencia.
   matrícula a partir de las sesiones y la asistencia registrada. Usa
   `security_invoker = on` para heredar RLS de las tablas base.
 
-## 5. Servicios y check-in
+## 5. Servicios (cultos) y check-in
 
-- `services`: cultos/eventos con fecha, tipo y bandera
-  `is_checkin_open`.
-- `service_checkins`: un check-in por `(service, person)`, con `method`
-  (`qr | manual`). El check-in por QR se resuelve en un Route Handler que
-  valida un token firmado de corta vida (ver `docs/security.md`), nunca
-  confiando en el `person_id` enviado en crudo por el cliente.
+Ver [`docs/services-schedule.md`](services-schedule.md) (0032).
+
+- `service_schedule_settings` (fila única): `timezone`
+  (`America/Puerto_Rico`) y `horizon_weeks` (4).
+- `service_series`: serie lógica ("Culto dominical").
+- `service_series_rules`: versión de la serie — `weekday` (0 = domingo),
+  `local_time`, `service_type`, `location`,
+  `checkin_opens_minutes_before` (60), `checkin_closes_minutes_after`
+  (NULL = cierre manual), `effective_from`/`effective_until`. Una sola
+  versión abierta por serie (índice único parcial).
+- `services`: **una fila por fecha de culto**. `starts_at` (timestamptz,
+  el instante real); `service_date`/`start_time` se derivan de él en hora
+  de PR por trigger (compatibilidad con reportes). `series_id` +
+  `occurrence_date` (fecha programada original, **única** por serie: la
+  clave de idempotencia del generador). `status` (`programado` /
+  `cancelado`), `is_exception` (cambiada o cancelada a mano: el
+  generador no la toca), `checkin_opens_at`, `checkin_closes_at`,
+  `checkin_manual_state` (NULL = sigue la programación; `abierto` /
+  `cerrado` = decisión manual), y quién/cuándo de cada cambio. La
+  columna `is_checkin_open` se eliminó (0032): se migró a
+  `checkin_manual_state`.
+- `service_checkins`: asistencia de una persona a un culto. `method`
+  (`qr | manual`), `checked_in_at`, `checked_in_by`. **Una vigente por
+  `(service, person)`** (índice único parcial `where voided_at is
+null`). Nunca se borra: `voided_at/voided_by/void_reason` para
+  anulaciones y `is_correction/correction_reason` para altas fuera de
+  la ventana.
 
 ## 6. Visitantes y seguimiento
 

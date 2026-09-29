@@ -2,6 +2,60 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-09-28 — Cultos recurrentes y check-in controlado por ujieres (reemplaza el auto check-in)
+
+**Contexto**: encargo del dueño del producto: que los cultos (domingo
+9:30 a. m., miércoles y viernes 7:30 p. m., hora de PR) aparezcan solos
+y que la asistencia la confirme personal autorizado ("Servidor /
+Ujier") buscando por nombre o escaneando el QR personal. Explícitamente
+**sin** GPS, sin registro por proximidad y sin un QR público que
+confirme asistencia por sí solo.
+
+**Decisiones**:
+
+1. **Se retira el auto check-in** (decisión del 2026-08-17): se elimina
+   la política `service_checkins_insert_self`, la acción
+   `selfCheckinAction`, el botón "Confirmar mi asistencia" y el QR fijo
+   de la entrada. `/check-in/publico` queda como página que solo muestra
+   el QR personal (compatibilidad con QR ya impresos).
+2. **Accesos como valores de `app_role`** (`ujier`, `gestion_cultos`,
+   `control_checkin`, `correccion_asistencia`), no una tabla de
+   permisos nueva: se reutilizan `user_roles`, la pestaña "Cuenta y
+   permisos" y `admin_set_person_roles()` (auditada, detecta ediciones
+   desactualizadas). Las capacidades se exponen como funciones SQL
+   (`can_record_attendance()`, …) que usan las funciones de escritura.
+3. **Reutilizar `services` y `service_checkins`**: cada fecha = una
+   fila de `services`; la recurrencia vive en `service_series_rules`,
+   versionada por fecha de vigencia. Alternativa descartada: calcular
+   las ocurrencias "al vuelo" sin filas — la asistencia necesita una
+   fila estable por fecha, y las cancelaciones/excepciones también.
+4. **pg_cron** para la generación diaria (incluido en Supabase, corre
+   dentro de la base, sin endpoint HTTP que proteger). Alternativa
+   descartada: Vercel Cron → requeriría un Route Handler con secreto
+   compartido y, en plan Hobby, solo corre una vez al día igual. Como
+   respaldo, la página de Asistencia llama a `ensure_service_occurrences()`.
+5. **Sin cierre automático por defecto**: la duración de los cultos no
+   está definida; no se inventa una. Cierre manual (`control_checkin`)
+   hasta que el administrador configure minutos de cierre en la serie.
+6. **Operadores preservados**: `seguimiento`, `coordinador_ministerio`
+   y `pastor` conservan _registrar_ asistencia (ya podían desde 0007),
+   pero ya no crean/abren/cierran/borran cultos ni borran registros.
+7. **Correcciones sin borrar**: anulación con motivo (`voided_*`) y
+   altas fuera de ventana (`is_correction`), ambas en `audit_log`. El
+   índice único pasa a ser parcial (`where voided_at is null`).
+8. **Dependencias nuevas** (justificadas):
+   - `jsqr` (runtime, Apache-2.0, sin dependencias, se carga solo al
+     activar la cámara): Safari/iPhone no tiene `BarcodeDetector`, y
+     muchos ujieres usan iPhone.
+   - `@electric-sql/pglite` (solo desarrollo): Postgres en memoria para
+     probar migraciones, RLS y concurrencia lógica sin Docker (no
+     disponible en este entorno) y sin tocar proyectos remotos
+     (`npm run test:db`).
+
+**Consecuencias**: 0032 elimina `services.is_checkin_open`; la app y la
+migración deben desplegarse juntas (ver `docs/services-schedule.md` §6).
+El QR fijo impreso, si existe, deja de registrar asistencia.
+
 ## 2026-09-06 — Gestión de permisos: de botones inmediatos a guardado transaccional en el perfil
 
 **Contexto**: encargo explícito del usuario de mover la gestión de

@@ -1,57 +1,43 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { QrCode } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/session";
-import { hasCheckedIn, listOpenServices } from "@/lib/data/checkin";
-import { ConfirmCheckinButton } from "./confirm-checkin-button";
+import { MyQrCode } from "../../portal/my-qr-code";
 
-const typeLabels: Record<string, string> = {
-  culto_general: "Culto general",
-  oracion: "Oración",
-  jovenes: "Jóvenes",
-  ninos: "Niños",
-  otro: "Otro",
-};
-
+/**
+ * Destino del antiguo QR fijo de la entrada. Ya no confirma asistencia:
+ * la asistencia la confirma un ujier. Aquí la persona ve su QR personal
+ * para mostrarlo en la puerta.
+ */
 export default async function PublicCheckinPage() {
   const user = await getCurrentUser();
-  const services = await listOpenServices();
-
-  const servicesWithStatus = await Promise.all(
-    services.map(async (s) => ({
-      service: s,
-      alreadyIn: user?.personId ? await hasCheckedIn(s.id, user.personId) : false,
-    })),
-  );
 
   return (
     <div className="mx-auto max-w-md space-y-6">
       <div className="text-center">
         <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Bienvenido</h1>
-        <p className="text-muted-foreground">Confirma tu asistencia al servicio de hoy.</p>
+        <p className="text-muted-foreground">
+          Tu asistencia la confirma un ujier en la entrada. Muéstrale este código o dile tu nombre.
+        </p>
       </div>
-
-      {servicesWithStatus.length === 0 && (
-        <Card>
-          <CardContent className="text-muted-foreground py-8 text-center">
-            No hay ningún servicio abierto para check-in en este momento. Pregunta al equipo de
-            bienvenida.
-          </CardContent>
-        </Card>
-      )}
-
-      {servicesWithStatus.map(({ service, alreadyIn }) => (
-        <Card key={service.id}>
-          <CardHeader>
-            <CardTitle>{service.name}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm">
-              {typeLabels[service.service_type]}
-              {service.location ? ` · ${service.location}` : ""}
-            </p>
-            <ConfirmCheckinButton serviceId={service.id} alreadyCheckedIn={alreadyIn} />
-          </CardContent>
-        </Card>
-      ))}
+      <section className="bg-card ring-foreground/10 rounded-xl p-5 shadow-xs ring-1">
+        <h2 className="mb-2 flex items-center justify-center gap-2 font-semibold">
+          <QrCode className="text-muted-foreground size-[18px]" aria-hidden />
+          Tu código personal
+        </h2>
+        {user?.personId ? (
+          <MyQrCode />
+        ) : (
+          <p className="text-muted-foreground text-center text-sm">
+            Tu cuenta no tiene un perfil de persona asociado. Dile tu nombre al ujier.
+          </p>
+        )}
+      </section>
+      <div className="text-center">
+        <Button asChild variant="ghost">
+          <Link href="/portal">Ir a Mi portal</Link>
+        </Button>
+      </div>
     </div>
   );
 }

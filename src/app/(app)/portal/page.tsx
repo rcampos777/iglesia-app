@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   BookOpen,
@@ -11,7 +10,6 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui-brand/page-header";
 import { StatusBadge } from "@/components/ui-brand/status-badge";
 import { activityTone, prayerTone } from "@/lib/status-tones";
@@ -96,12 +94,9 @@ export default async function PortalPage() {
                   Asistencia al servicio
                 </h2>
                 <p className="text-muted-foreground text-[15px]">
-                  Si el check-in del servicio está abierto, confirma tu asistencia con un toque. O
-                  muestra tu código al equipo de bienvenida.
+                  Al llegar al culto, muestra este código a un ujier (o dile tu nombre) y él
+                  confirma tu asistencia.
                 </p>
-                <Button asChild className="w-full sm:w-auto">
-                  <Link href="/check-in/publico">Confirmar mi asistencia</Link>
-                </Button>
               </div>
               <div className="border-t pt-4 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5">
                 <MyQrCode />

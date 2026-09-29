@@ -1,5 +1,8 @@
 import type {
   AppRole,
+  CheckinMethod,
+  CheckinState,
+  ServiceType,
   FollowupStatus,
   GenderType,
   MembershipStatus,
@@ -31,6 +34,10 @@ export const roleLabels: Record<AppRole, string> = {
   coordinador_ministerio: "Coordinador de ministerio",
   pastor: "Pastor",
   administrador: "Administrador",
+  ujier: "Servidor / Ujier",
+  gestion_cultos: "Gestionar cultos",
+  control_checkin: "Controlar check-in",
+  correccion_asistencia: "Corregir asistencia",
 };
 
 export const roleDescriptions: Record<AppRole, string> = {
@@ -41,7 +48,45 @@ export const roleDescriptions: Record<AppRole, string> = {
   coordinador_ministerio: "Gestiona personas, cursos, clases y ministerios de su área.",
   pastor: "Gestiona las clases que imparte y los ministerios que lidera (no es acceso global).",
   administrador: "Acceso completo: gestión de roles, configuración y todos los módulos.",
+  ujier:
+    "Registrar asistencia (check-in): ve los cultos, busca personas con datos mínimos y confirma asistencia o escanea su QR. No da acceso a administración, oración ni edición de personas.",
+  gestion_cultos:
+    "Crear cultos especiales, reprogramar o cancelar fechas y configurar las recurrencias semanales.",
+  control_checkin: "Abrir o cerrar el registro de asistencia de un culto.",
+  correccion_asistencia:
+    "Anular o agregar asistencias fuera de la ventana, siempre con motivo y queda auditado.",
 };
+
+export const serviceTypeLabels: Record<ServiceType, string> = {
+  culto_general: "Culto general",
+  oracion: "Oración",
+  jovenes: "Jóvenes",
+  ninos: "Niños",
+  otro: "Otro",
+};
+
+export const checkinStateLabels: Record<CheckinState, string> = {
+  abierto: "Registro abierto",
+  pendiente: "Aún no abre",
+  cerrado: "Registro cerrado",
+  cancelado: "Cancelado",
+};
+
+export const checkinMethodLabels: Record<CheckinMethod, string> = {
+  manual: "Búsqueda",
+  qr: "QR",
+};
+
+/** Índice = extract(dow): 0 = domingo. */
+export const weekdayLabels = [
+  "Domingo",
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
+] as const;
 
 export const followupStatusLabels: Record<FollowupStatus, string> = {
   pendiente: "Pendiente",

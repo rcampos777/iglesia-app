@@ -76,8 +76,9 @@ src/app/
     personas/                          # directorio (lista, detalle, alta, edición)
     cursos/, cursos/clases/[id]/         # categorías, cursos, clases, matrícula+asistencia
     visitantes/                            # seguimiento de visitantes
-    check-in/                                # panel staff: servicios, QR fijo, toggle abierto/cerrado
-    check-in/publico/                          # auto check-in (cualquier persona autenticada)
+    check-in/                                # "Asistencia": consola del ujier (búsqueda + QR)
+    check-in/programacion/                     # series semanales, excepciones, cultos especiales
+    check-in/publico/                          # antiguo QR fijo: ahora solo muestra el QR personal
     oracion/                                     # bandeja de peticiones (intercesor+)
     importar/                                      # asistente de importación (CSV + manual)
     portal/                                          # portal del miembro (self-service)
@@ -93,34 +94,31 @@ proyecto — un Route Handler solo se justifica para webhooks externos o
 respuestas que no son HTML/RSC (ninguno existe todavía en el MVP salvo
 `auth/callback`, que Supabase requiere como redirect URL).
 
-## 5. Check-in: dos flujos complementarios
+## 5. Cultos recurrentes y check-in por ujieres
 
-**(a) QR fijo en la entrada (auto check-in, flujo principal).** La
-iglesia imprime un único QR estático que apunta a `/check-in/publico`
-(no codifica ningún token ni cambia nunca). Cada persona lo escanea con
-su propio celular, inicia sesión si hace falta (con `?next=` de vuelta a
-esa página), y confirma su propia asistencia a cualquier servicio con
-`is_checkin_open = true`. La autorización real vive en RLS
-(`service_checkins_insert_self`: `person_id = current_person_id()` y el
-servicio debe estar abierto) — la Server Action (`selfCheckinAction`)
-es la primera barrera, no la única. Staff abre/cierra el check-in por
-servicio con un switch en `/check-in`.
+Detalle completo en [`docs/services-schedule.md`](services-schedule.md).
 
-**(b) QR personal + operador (check-in asistido).** El QR de una persona
-(visible en su portal) codifica un **token firmado (HMAC,
-`QR_CHECKIN_SECRET`) de corta vigencia** con su `person_id`, no el
-`person_id` en texto plano permanente, para evitar que una foto del
-carnet permita check-in indefinido de terceros si se comparte. (Ver
-`docs/security.md`.) Un operador (rol `seguimiento` o superior) escanea
-ese código (o lo pega/lee con un lector físico) en `/check-in/[servicio]`,
-que valida la firma en el servidor (`scanCheckinAction`) y crea el
-`service_checkin` con la sesión del operador (no el cliente admin),
-respetando RLS. Útil para niños, visitantes sin cuenta, o cuando alguien
-prefiere que lo registren en la puerta.
-
-Ambos flujos escriben en la misma tabla `service_checkins`
-(`method: 'qr'` para ambos — se distinguen por quién quedó como
-`checked_in_by`, no hay un método separado "auto").
+- **Un solo sistema de asistencia**: cada fecha de culto es una fila de
+  `services` (con su propio `starts_at` en UTC, mostrado siempre en hora
+  de Puerto Rico) y cada asistencia una fila de `service_checkins`.
+- **Programación**: `service_series` + `service_series_rules`
+  (versionadas por fecha de vigencia). `generate_service_occurrences()`
+  crea las fechas que falten hasta el horizonte (4 semanas por
+  defecto); la ejecuta **pg_cron** a diario (0033) y, de respaldo, la
+  página de Asistencia al abrirse.
+- **Check-in**: solo personal autorizado. El ujier busca por nombre
+  (búsqueda en el servidor, datos mínimos) o escanea el **QR personal**
+  (token HMAC de 5 minutos, `QR_CHECKIN_SECRET`, validado en el
+  servidor). El QR identifica a la persona; no concede permisos. Ya no
+  existe el auto check-in con QR fijo (retirado 2026-09-28, ver
+  `docs/decisions.md`).
+- **Escrituras**: solo funciones `security definer` que validan
+  capacidad (`can_record_attendance()`, etc.) y ventana
+  (`service_checkin_state()`). Sin políticas de escritura directa.
+- **Pantallas**: Server Components cargan los datos; la consola
+  (`attendance-console.tsx`) es un Client Component que recibe las
+  Server Actions por props, refresca la lista cada 20 s (varios ujieres
+  a la vez) y no muestra éxito hasta que el servidor confirma.
 
 ## 6. Envío de emails
 

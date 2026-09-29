@@ -79,7 +79,10 @@ sin una decisión explícita registrada en `docs/decisions.md`:
 ## 4. Roles mínimos (RBAC)
 
 `miembro`, `maestro`, `seguimiento`, `intercesor`, `coordinador_ministerio`,
-`pastor`, `administrador`.
+`pastor`, `administrador`. Accesos de asistencia a cultos (mismo enum,
+2026-09-28): `ujier` ("Servidor / Ujier"), `gestion_cultos`,
+`control_checkin`, `correccion_asistencia` — ver
+`docs/roles-and-permissions.md` §6.
 
 - Un usuario puede tener **múltiples roles** simultáneamente.
 - **`pastor` NO equivale a administrador.** En esta iglesia hay muchos
@@ -225,4 +228,5 @@ docs/                                # documentación del proyecto
 | [`docs/deployment.md`](docs/deployment.md)                       | Despliegue en Vercel + Supabase                |
 | [`docs/assumptions.md`](docs/assumptions.md)                     | Supuestos tomados sin confirmar con el usuario |
 | [`docs/decisions.md`](docs/decisions.md)                         | Registro de decisiones técnicas (ADR ligero)   |
+| [`docs/services-schedule.md`](docs/services-schedule.md)         | Cultos recurrentes, ventana y check-in         |
 | [`docs/progress.md`](docs/progress.md)                           | Estado actual, próxima tarea                   |

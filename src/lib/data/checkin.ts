@@ -1,84 +1,87 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { ServiceRow } from "@/types/database";
-import { fetchAllPages, fetchInChunks } from "./paging";
+import type {
+  ServiceAttendanceEntry,
+  ServiceScheduleSettingsRow,
+  ServiceSeriesRuleRow,
+  ServiceSeriesRow,
+  ServiceWithState,
+} from "@/types/database";
+import { churchDateKey } from "@/lib/datetime";
 
-export async function listServices(): Promise<ServiceRow[]> {
+/**
+ * Respaldo del trabajo programado (pg_cron): crea las ocurrencias que
+ * falten. Idempotente; si falla (p. ej. sin permiso) no bloquea la página.
+ */
+export async function ensureServiceOccurrences(): Promise<void> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("services")
-    .select("*")
-    .order("service_date", { ascending: false })
-    .limit(20);
-  if (error) throw new Error(error.message);
-  return data ?? [];
+  await supabase.rpc("ensure_service_occurrences");
 }
 
-export async function getService(id: string): Promise<ServiceRow | null> {
+export async function listServicesWithState(opts: {
+  from?: string;
+  to?: string;
+}): Promise<ServiceWithState[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("services").select("*").eq("id", id).maybeSingle();
-  if (error) throw new Error(error.message);
-  return data;
-}
-
-/** Servicios abiertos para auto check-in en este momento (staff los abre/cierra). */
-export async function listOpenServices(): Promise<ServiceRow[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("services")
-    .select("*")
-    .eq("is_checkin_open", true)
-    .order("service_date", { ascending: false });
-  if (error) throw new Error(error.message);
-  return data ?? [];
-}
-
-export async function hasCheckedIn(serviceId: string, personId: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("service_checkins")
-    .select("id")
-    .eq("service_id", serviceId)
-    .eq("person_id", personId)
-    .maybeSingle();
-  return !!data;
-}
-
-export interface CheckinWithPerson {
-  id: string;
-  checkedInAt: string;
-  method: string;
-  personFirstName: string;
-  personLastName: string;
-}
-
-export async function listServiceCheckins(serviceId: string): Promise<CheckinWithPerson[]> {
-  const supabase = await createClient();
-  const checkins = await fetchAllPages((from, to) =>
-    supabase
-      .from("service_checkins")
-      .select("*")
-      .eq("service_id", serviceId)
-      .order("checked_in_at", { ascending: false })
-      .order("id")
-      .range(from, to),
-  );
-  if (checkins.length === 0) return [];
-
-  const people = await fetchInChunks(
-    checkins.map((c) => c.person_id),
-    (ids) => supabase.from("people").select("id, first_name, last_name").in("id", ids),
-  );
-  const peopleById = new Map(people.map((p) => [p.id, p]));
-
-  return checkins.map((c) => {
-    const p = peopleById.get(c.person_id);
-    return {
-      id: c.id,
-      checkedInAt: c.checked_in_at,
-      method: c.method,
-      personFirstName: p?.first_name ?? "?",
-      personLastName: p?.last_name ?? "?",
-    };
+  const { data, error } = await supabase.rpc("list_services_with_state", {
+    p_from: opts.from ?? null,
+    p_to: opts.to ?? null,
   });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function getServiceWithState(id: string): Promise<ServiceWithState | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("list_services_with_state", { p_service_id: id });
+  if (error) throw new Error(error.message);
+  return data?.[0] ?? null;
+}
+
+export async function listServiceAttendance(
+  serviceId: string,
+  includeVoided = false,
+): Promise<ServiceAttendanceEntry[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("list_service_attendance", {
+    p_service_id: serviceId,
+    p_include_voided: includeVoided,
+  });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export type SeriesWithRule = {
+  series: ServiceSeriesRow;
+  current: ServiceSeriesRuleRow | null;
+  upcoming: ServiceSeriesRuleRow | null;
+  history: ServiceSeriesRuleRow[];
+};
+
+/** Series con su versión vigente hoy, una versión futura (si se programó) y el historial. */
+export async function listSeriesWithRules(): Promise<SeriesWithRule[]> {
+  const supabase = await createClient();
+  const [{ data: series, error: e1 }, { data: rules, error: e2 }] = await Promise.all([
+    supabase.from("service_series").select("*").order("created_at"),
+    supabase.from("service_series_rules").select("*").order("effective_from"),
+  ]);
+  if (e1) throw new Error(e1.message);
+  if (e2) throw new Error(e2.message);
+
+  const today = churchDateKey();
+  return (series ?? []).map((s) => {
+    const own = (rules ?? []).filter((r) => r.series_id === s.id);
+    const current =
+      own.find(
+        (r) => r.effective_from <= today && (!r.effective_until || r.effective_until >= today),
+      ) ?? null;
+    const upcoming = own.find((r) => r.effective_from > today) ?? null;
+    return { series: s, current, upcoming, history: own };
+  });
+}
+
+export async function getScheduleSettings(): Promise<ServiceScheduleSettingsRow | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("service_schedule_settings").select("*").maybeSingle();
+  return data;
 }
