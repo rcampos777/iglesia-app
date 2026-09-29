@@ -209,31 +209,26 @@
   }
 }
 
-/* Tamaños de controles de la app. Van fuera de capas (@layer) a
+/* Alturas de controles de la app. Van fuera de capas (@layer) a
    propósito: así se imponen a las utilidades del núcleo de shadcn
-   (h-8 / h-7), que no se edita a mano (CLAUDE.md §10). Ningún uso en
-   la app sobrescribe la altura de estos controles por clase. */
+   (h-8 / h-7), que no se edita a mano (CLAUDE.md §10). SOLO alturas:
+   un padding aquí pisaría clases de las páginas (p. ej. el `pl-8` que
+   deja espacio al icono de los buscadores). Ninguna página sobrescribe
+   la altura de estos controles por clase. */
 [data-slot="button"][data-size="default"] {
   height: 2.25rem;
-  padding-inline: 0.875rem;
 }
 [data-slot="button"][data-size="sm"] {
   height: 2rem;
-  padding-inline: 0.75rem;
-  font-size: 0.875rem;
 }
 [data-slot="button"][data-size="lg"] {
   height: 2.5rem;
-  padding-inline: 1rem;
 }
 [data-slot="button"][data-size="icon"] {
   width: 2.25rem;
   height: 2.25rem;
 }
-[data-slot="input"] {
-  height: 2.25rem;
-  padding-inline: 0.75rem;
-}
+[data-slot="input"],
 [data-slot="select-trigger"][data-size="default"] {
   height: 2.25rem;
 }
