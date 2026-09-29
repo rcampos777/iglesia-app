@@ -109,6 +109,21 @@ null`: impide duplicar una membresía activa, pero permite que una
   propósito**: quién dijo que iba vs. quién fue es justo lo que la
   iglesia quiere seguir. Un trigger mantiene `attended_at` coherente con
   `attended`. Único `(activity_id, person_id)` — CLAUDE.md §3.1.
+- Inscripción en línea (0040, `docs/registrations.md`): `activities`
+  suma `end_date`, `registration_open`, `registration_slug` (único),
+  `registration_closes_on`, `price_cents`, `deposit_cents`,
+  `payment_instructions`, `what_to_bring`, `contact_info`,
+  `flyer_media_id` → `site_media`, `notify_emails[]`.
+- `activity_registrations`: lo que envió el público (datos de contacto,
+  emergencia, iglesia, condición médica, aceptación), `person_id`
+  (nullable), `match_status` (`vinculado | posible_duplicado`),
+  `candidate_person_ids[]`, `amount_paid_cents` (por trigger),
+  `cancelled_at`. Único `(activity_id, email)` entre las no canceladas.
+- `activity_registration_payments`: pagos manuales (monto, método
+  `ath_movil | efectivo | cheque | otro`, fecha, referencia).
+- Funciones: `public_registration_activity(slug)` y
+  `submit_activity_registration(...)` (anon), `link_activity_registration`
+  (organizador), `activity_taken_spots(activity_id)` (cupo ocupado).
 
 ## 3.d Trayectoria de la persona (sin tabla nueva)
 

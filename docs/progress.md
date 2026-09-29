@@ -1,8 +1,29 @@
 # Progreso del proyecto
 
-Última actualización: 2026-09-28.
+Última actualización: 2026-09-29.
 
 ## Estado general: MVP verificado de punta a punta ✅
+
+### 2026-09-29 — Inscripción en línea a actividades (Retiro de Hombres 2026)
+
+Forma pública `/inscripcion/<dirección>` para cualquier actividad, con los
+campos de la forma del retiro, creación/vinculación con Personas (con
+revisión humana de duplicados), pagos manuales (ATH Móvil/efectivo) y
+emails automáticos: confirmación, aviso a organizadores, recordatorio de
+pago (10 días antes) y del evento (3 días antes). Ver
+`docs/registrations.md`.
+
+- Pruebas: `tests/db/registrations.test.ts` (9, PGlite: RLS, cupo,
+  cierre, menores, duplicados, pagos) y `tests/unit/registrations.test.ts`.
+- Verificado en el navegador (escritorio y 375 px) con una página de
+  demostración temporal: validación, mensajes y que no se borre lo
+  escrito. Encontrado y corregido: el anti-spam comparaba el reloj del
+  teléfono con el del servidor y descartaba inscripciones reales.
+- **Pendiente**: aplicar `0040` en Supabase, definir `CRON_SECRET` en
+  Vercel, desplegar, y configurar el retiro (pasos en
+  `docs/registrations.md`). El envío de punta a punta contra Supabase real
+  y los emails de Resend no se probaron aquí (la migración no está
+  aplicada).
 
 ### 2026-09-05 — Auditoría de identidad/autorización/auditoría (Fase 1 completa, código; verificación en vivo pendiente)
 

@@ -237,5 +237,6 @@ docs/                                # documentación del proyecto
 | [`docs/decisions.md`](docs/decisions.md)                         | Registro de decisiones técnicas (ADR ligero)   |
 | [`docs/services-schedule.md`](docs/services-schedule.md)         | Cultos recurrentes, ventana y check-in         |
 | [`docs/site.md`](docs/site.md)                                   | Sitio web público y su editor                  |
+| [`docs/registrations.md`](docs/registrations.md)                 | Inscripción en línea, pagos y recordatorios    |
 | [`docs/finance.md`](docs/finance.md)                             | Donaciones, cartas y acceso financiero         |
 | [`docs/progress.md`](docs/progress.md)                           | Estado actual, próxima tarea                   |

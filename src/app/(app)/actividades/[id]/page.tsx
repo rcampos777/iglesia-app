@@ -14,6 +14,10 @@ import { activityStatusLabels } from "@/lib/labels";
 import { ActivityForm } from "../activity-form";
 import { ParticipantRow } from "./attendance-toggle";
 import { RegisterForm } from "./register-form";
+import { RegistrationSettingsForm } from "./registration-settings-form";
+import { RegistrationsList } from "./registrations-list";
+import { listActivityRegistrations, listSiteMediaOptions } from "@/lib/data/registrations";
+import { formatDateKey } from "@/lib/datetime";
 
 export default async function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -39,9 +43,15 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
 
   const full = activity.capacity != null && participants.length >= activity.capacity;
 
-  const [people, ministries] = canManage
-    ? await Promise.all([listPeopleForMinistryPicker(), listMinistries({ includeInactive: true })])
-    : [[], []];
+  const [people, ministries, registrations, media] = canManage
+    ? await Promise.all([
+        listPeopleForMinistryPicker(),
+        listMinistries({ includeInactive: true }),
+        listActivityRegistrations(activity.id),
+        listSiteMediaOptions(),
+      ])
+    : [[], [], [], []];
+  const publicBaseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ciudaddeavivamiento.org";
 
   const alreadyIn = new Set(participants.map((p) => p.person_id));
   const availablePeople = people.filter((p) => !alreadyIn.has(p.id));
@@ -61,7 +71,10 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
             {activity.name}
           </h1>
           <p className="text-muted-foreground">
-            {activity.activity_date}
+            {formatDateKey(activity.activity_date)}
+            {activity.end_date && activity.end_date !== activity.activity_date
+              ? ` al ${formatDateKey(activity.end_date)}`
+              : ""}
             {activity.start_time ? ` · ${activity.start_time.slice(0, 5)}` : ""}
             {activity.end_time ? ` a ${activity.end_time.slice(0, 5)}` : ""}
             {activity.location ? ` · ${activity.location}` : ""}
@@ -121,6 +134,44 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
           )}
         </CardContent>
       </Card>
+
+      {canManage && (activity.registration_slug || registrations.length > 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Inscripciones en línea</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RegistrationsList
+              activityId={activity.id}
+              priceCents={activity.price_cents}
+              depositCents={activity.deposit_cents}
+              registrations={registrations}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {canManage && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Inscripción en línea (sitio web)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4 max-w-2xl text-sm">
+              Crea una forma pública para que la gente se inscriba sola. Cada inscrito recibe un
+              email de confirmación, los organizadores reciben un aviso, y salen recordatorios
+              automáticos de pago (10 días antes) y de la actividad (3 días antes).
+            </p>
+            <div className="max-w-2xl">
+              <RegistrationSettingsForm
+                activity={activity}
+                media={media}
+                publicBaseUrl={publicBaseUrl}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {canManage && (
         <Card>

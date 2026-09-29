@@ -95,6 +95,24 @@ security;` en la misma migración donde se crean.
   `ensure_service_occurrences()`, que exige una capacidad de asistencia
   y es idempotente.
 
+## 5.a Inscripción en línea (0040)
+
+- El público (`anon`) no tiene políticas sobre las tablas: solo ejecuta
+  `public_registration_activity` (campos públicos) y
+  `submit_activity_registration` (valida fecha, cupo con bloqueo de fila,
+  mayoría de edad, términos y email duplicado).
+- `activity_registrations` contiene datos de salud: lectura y cambios solo
+  con `can_manage_activity`; borrar solo `is_admin()`. Los emails nunca
+  llevan datos médicos.
+- Crear una persona desde el público solo ocurre si no hay coincidencia;
+  si la hay, un organizador confirma (`link_activity_registration`,
+  auditado). Un organizador sin rol de staff solo puede vincular a las
+  personas sugeridas.
+- Envíos sin sesión (forma pública y cron) usan `service_role` solo para
+  leer esa inscripción/actividad y escribir `notification_log`.
+- `/api/cron/*` exige `Authorization: Bearer $CRON_SECRET`.
+- Pruebas: `tests/db/registrations.test.ts`.
+
 ## 5.b Donaciones y Finanzas
 
 Detalle en `docs/finance.md` y matriz en `docs/roles-and-permissions.md` §7.

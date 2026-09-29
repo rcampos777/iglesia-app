@@ -1,6 +1,8 @@
 import "server-only";
 import { Resend } from "resend";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/types/database";
 
 let resendClient: Resend | null = null;
 
@@ -20,15 +22,23 @@ export interface SendEmailInput {
   relatedEntityId?: string;
   templateCode?: string;
   createdBy?: string;
+  replyTo?: string[];
 }
 
 /**
  * Envía un email vía Resend y registra el intento en notification_log
  * (antes y después de enviar). Nunca pasar contenido confidencial de
  * peticiones de oración a `html` — ver docs/security.md.
+ *
+ * `logClient`: cliente con el que se escribe el registro. Por defecto el
+ * de la sesión (staff); los envíos sin sesión (sitio público, cron) pasan
+ * el cliente de servicio.
  */
-export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await createClient();
+export async function sendEmail(
+  input: SendEmailInput,
+  logClient?: SupabaseClient<Database>,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = logClient ?? (await createClient());
   const fromEmail = process.env.RESEND_FROM_EMAIL ?? "Iglesia <notificaciones@example.org>";
 
   const { data: logRow } = await supabase
@@ -54,6 +64,7 @@ export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; e
       to: input.to,
       subject: input.subject,
       html: input.html,
+      ...(input.replyTo?.length ? { replyTo: input.replyTo } : {}),
     });
 
     if (error) throw new Error(error.message);

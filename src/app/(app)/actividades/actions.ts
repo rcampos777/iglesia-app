@@ -37,6 +37,7 @@ function parseActivity(formData: FormData) {
     description: formData.get("description"),
     ministryId: optionalId(formData, "ministryId"),
     activityDate: formData.get("activityDate"),
+    endDate: formData.get("endDate") ?? "",
     startTime: formData.get("startTime"),
     endTime: formData.get("endTime"),
     location: formData.get("location"),
@@ -97,6 +98,7 @@ export async function createActivityAction(formData: FormData): Promise<ActionRe
       name: parsed.data.name,
       description: parsed.data.description || null,
       activity_date: parsed.data.activityDate,
+      end_date: parsed.data.endDate || null,
       start_time: parsed.data.startTime || null,
       end_time: parsed.data.endTime || null,
       location: parsed.data.location || null,
@@ -141,6 +143,7 @@ export async function updateActivityAction(
       name: parsed.data.name,
       description: parsed.data.description || null,
       activity_date: parsed.data.activityDate,
+      end_date: parsed.data.endDate || null,
       start_time: parsed.data.startTime || null,
       end_time: parsed.data.endTime || null,
       location: parsed.data.location || null,
@@ -187,11 +190,11 @@ export async function registerParticipantAction(
     .maybeSingle();
 
   if (activity?.capacity != null) {
-    const { count } = await supabase
-      .from("activity_participants")
-      .select("id", { count: "exact", head: true })
-      .eq("activity_id", activityId);
-    if ((count ?? 0) >= activity.capacity) {
+    // Cuenta también las inscripciones en línea aún sin vincular.
+    const { data: taken } = await supabase.rpc("activity_taken_spots", {
+      p_activity_id: activityId,
+    });
+    if ((taken ?? 0) >= activity.capacity) {
       return actionError(`La actividad ya alcanzó su cupo de ${activity.capacity} personas.`);
     }
   }

@@ -2,6 +2,38 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-09-29 — Inscripción en línea a actividades (retiro de hombres)
+
+**Contexto**: el dueño del producto pidió una forma pública para el Retiro
+de Hombres 2026 (como la de Microsoft Forms que usaban) y automatizar lo
+que pasa después: confirmación, aviso a organizadores, recordatorios de
+pago y del evento, y que el inscrito quede en Personas. Pagos por ATH
+Móvil o en persona (elección del dueño; sin cobro en línea).
+
+**Decisión**: se extiende `activities` (0024) en vez de un módulo nuevo:
+una actividad puede abrir inscripción pública (`0040`). Detalle en
+`docs/registrations.md`.
+
+- Lo enviado se guarda tal cual en `activity_registrations`. Sin
+  coincidencias → se crea la persona (visitante) y se inscribe; con
+  coincidencias (email, teléfono o nombre) → "posible_duplicado" y decide
+  un organizador (§3.1, §3.5).
+- Solo mayores de 18 en la forma pública (§3.13).
+- Se piden nombre y apellidos por separado (la forma original tenía un
+  solo campo): así la persona se crea bien en `people`.
+- Los pagos de la actividad los registra quien la organiza, **no** el rol
+  `finanzas`: son cuotas de logística del evento, no donaciones. No
+  aparecen en Finanzas ni en cartas de donativos.
+- Emails sin datos médicos. Recordatorios por Vercel Cron diario (no
+  pg_cron: hay que llamar a Resend) con `CRON_SECRET`; idempotentes vía
+  `notification_log`.
+- Anti-spam sin servicios externos: campo trampa + tiempo mínimo de
+  llenado medido en el navegador (no comparar relojes: un teléfono con la
+  hora mal descartaba inscripciones reales — encontrado al probar).
+
+**Alternativas descartadas**: Stripe (requiere cuenta/credenciales y no
+lo pidieron); vincular automáticamente por email exacto (viola §3.5).
+
 ## 2026-09-29 — Sitio público dentro de la app, editable desde "Sitio web"
 
 **Contexto**: el dueño del producto quiere agregar fotos, álbumes, eventos,

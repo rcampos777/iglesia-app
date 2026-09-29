@@ -714,6 +714,58 @@ export type ActivityRow = {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  end_date: string | null;
+  registration_open: boolean;
+  registration_slug: string | null;
+  registration_closes_on: string | null;
+  price_cents: number | null;
+  deposit_cents: number | null;
+  payment_instructions: string | null;
+  what_to_bring: string | null;
+  contact_info: string | null;
+  confirmation_message: string | null;
+  flyer_media_id: string | null;
+  notify_emails: string[];
+};
+
+export type RegistrationMatchStatus = "vinculado" | "posible_duplicado";
+export type RegistrationPaymentMethod = "ath_movil" | "efectivo" | "cheque" | "otro";
+
+export type ActivityRegistrationRow = {
+  id: string;
+  activity_id: string;
+  first_name: string;
+  last_name: string;
+  address: string;
+  age: number;
+  phone: string;
+  email: string;
+  emergency_name: string;
+  emergency_phone: string;
+  attends_church: boolean;
+  church_name: string | null;
+  has_medical_condition: boolean;
+  medical_details: string | null;
+  terms_accepted_at: string;
+  person_id: string | null;
+  match_status: RegistrationMatchStatus;
+  candidate_person_ids: string[];
+  amount_paid_cents: number;
+  created_at: string;
+  cancelled_at: string | null;
+  cancelled_by: string | null;
+  notes: string | null;
+};
+
+export type ActivityRegistrationPaymentRow = {
+  id: string;
+  registration_id: string;
+  amount_cents: number;
+  method: RegistrationPaymentMethod;
+  paid_on: string;
+  reference: string | null;
+  created_at: string;
+  created_by: string | null;
 };
 
 export type ActivityParticipantRow = {
@@ -792,6 +844,8 @@ export interface Database {
       import_rows: TableDef<ImportRowRow>;
       activities: TableDef<ActivityRow>;
       activity_participants: TableDef<ActivityParticipantRow>;
+      activity_registrations: TableDef<ActivityRegistrationRow>;
+      activity_registration_payments: TableDef<ActivityRegistrationPaymentRow>;
       ministries: TableDef<MinistryRow>;
       ministry_memberships: TableDef<MinistryMembershipRow>;
       audit_log: TableDef<AuditLogRow>;
@@ -812,6 +866,54 @@ export interface Database {
       is_ministry_leader: { Args: { p_ministry_id: string }; Returns: boolean };
       is_prayer_reader: { Args: Record<string, never>; Returns: boolean };
       can_manage_activity: { Args: { p_ministry_id: string | null }; Returns: boolean };
+      activity_taken_spots: { Args: { p_activity_id: string }; Returns: number };
+      public_registration_activity: {
+        Args: { p_slug: string };
+        Returns: {
+          name: string;
+          description: string | null;
+          activity_date: string;
+          end_date: string | null;
+          start_time: string | null;
+          end_time: string | null;
+          location: string | null;
+          price_cents: number | null;
+          deposit_cents: number | null;
+          payment_instructions: string | null;
+          contact_info: string | null;
+          flyer_path: string | null;
+          flyer_alt: string | null;
+          is_open: boolean;
+          is_full: boolean;
+        }[];
+      };
+      submit_activity_registration: {
+        Args: {
+          p_slug: string;
+          p_first_name: string;
+          p_last_name: string;
+          p_address: string;
+          p_age: number;
+          p_phone: string;
+          p_email: string;
+          p_emergency_name: string;
+          p_emergency_phone: string;
+          p_attends_church: boolean;
+          p_church_name: string | null;
+          p_has_medical_condition: boolean;
+          p_medical_details: string | null;
+          p_accept_terms: boolean;
+        };
+        Returns: {
+          registration_id: string;
+          person_id: string | null;
+          match_status: RegistrationMatchStatus;
+        }[];
+      };
+      link_activity_registration: {
+        Args: { p_registration_id: string; p_person_id: string | null };
+        Returns: string;
+      };
       set_prayer_ministry: {
         Args: { p_ministry_id: string; p_enabled: boolean };
         Returns: undefined;

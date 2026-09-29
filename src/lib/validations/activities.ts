@@ -14,6 +14,7 @@ export const activitySchema = z
       .string()
       .min(1, "La fecha es requerida.")
       .refine((v) => !Number.isNaN(Date.parse(v)), "Fecha inválida."),
+    endDate: z.string().optional().or(z.literal("")),
     startTime: z.string().optional().or(z.literal("")),
     endTime: z.string().optional().or(z.literal("")),
     location: z.string().trim().max(150).optional().or(z.literal("")),
@@ -28,10 +29,21 @@ export const activitySchema = z
     responsiblePersonId: z.string().uuid().optional().or(z.literal("")),
     status: z.enum(activityStatusValues),
   })
-  .refine((data) => !data.startTime || !data.endTime || data.endTime > data.startTime, {
-    message: "La hora de fin debe ser posterior a la de inicio.",
-    path: ["endTime"],
-  });
+  .refine((data) => !data.endDate || data.endDate >= data.activityDate, {
+    message: "La fecha de fin no puede ser antes de la de inicio.",
+    path: ["endDate"],
+  })
+  .refine(
+    (data) =>
+      !data.startTime ||
+      !data.endTime ||
+      (Boolean(data.endDate) && data.endDate! > data.activityDate) ||
+      data.endTime > data.startTime,
+    {
+      message: "La hora de fin debe ser posterior a la de inicio.",
+      path: ["endTime"],
+    },
+  );
 export type ActivityInput = z.infer<typeof activitySchema>;
 
 export const activityParticipantSchema = z.object({

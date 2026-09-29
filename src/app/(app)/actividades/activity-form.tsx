@@ -94,7 +94,7 @@ export function ActivityForm({
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-2">
           <Label htmlFor="activityDate">Fecha *</Label>
           <Input
@@ -106,6 +106,13 @@ export function ActivityForm({
           />
           {fieldError("activityDate") && (
             <p className="text-destructive text-sm">{fieldError("activityDate")}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="endDate">Hasta (si dura varios días)</Label>
+          <Input id="endDate" name="endDate" type="date" defaultValue={activity?.end_date ?? ""} />
+          {fieldError("endDate") && (
+            <p className="text-destructive text-sm">{fieldError("endDate")}</p>
           )}
         </div>
         <div className="space-y-2">

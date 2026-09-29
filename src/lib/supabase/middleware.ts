@@ -10,6 +10,8 @@ function isPublicPath(pathname: string): boolean {
     PUBLIC_PATHS.some((path) => pathname.startsWith(path)) ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/checkin") ||
+    // Los cron validan su propio secreto (CRON_SECRET).
+    pathname.startsWith("/api/cron/") ||
     pathname === "/favicon.ico"
   );
 }

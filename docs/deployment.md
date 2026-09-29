@@ -69,6 +69,17 @@ supabase db push --db-url "postgresql://postgres.<ref>:<password>@aws-0-<region>
 - Node version: la que fije `package.json`/`.nvmrc` si se agrega; usar
   una LTS reciente compatible con la versión de Next.js instalada.
 
+### Variables adicionales
+
+- `CRON_SECRET`: valor aleatorio largo. Vercel lo manda al cron de
+  recordatorios de inscripciones (`vercel.json`, diario 13:00 UTC = 9:00
+  a. m. en PR). Sin él, el cron responde 401 y no salen recordatorios.
+- `NEXT_PUBLIC_SITE_URL` (opcional): dominio público para mostrar el
+  enlace de las formas de inscripción. Por defecto
+  `https://ciudaddeavivamiento.org`.
+- Orden: aplicar la migración `0040` **antes** de desplegar el código que
+  la usa (la página de actividades lee sus columnas nuevas).
+
 ## 4. Primer administrador
 
 No hay UI de "crear administrador" (por seguridad, no se expone
