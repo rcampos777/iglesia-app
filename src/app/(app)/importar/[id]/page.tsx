@@ -26,7 +26,9 @@ export default async function ImportBatchPage({ params }: { params: Promise<{ id
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{batch.file_name || "Lote"}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+          {batch.file_name || "Lote"}
+        </h1>
         <p className="text-muted-foreground">
           {rows.length} filas · {pending} pendientes de revisión
         </p>

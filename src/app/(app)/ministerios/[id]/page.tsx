@@ -54,14 +54,16 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
         <Link href="/ministerios">
-          <ArrowLeft className="mr-2 size-4" />
+          <ArrowLeft className="size-4" aria-hidden />
           Ministerios
         </Link>
       </Button>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{ministry.name}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+            {ministry.name}
+          </h1>
           <p className="text-muted-foreground">
             {ministry.activeMemberCount}{" "}
             {ministry.activeMemberCount === 1 ? "persona sirviendo" : "personas sirviendo"}
@@ -73,7 +75,7 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
 
       {(ministry.description || ministry.meeting_schedule_text || ministry.location) && (
         <Card>
-          <CardContent className="space-y-2 py-4 text-sm">
+          <CardContent className="space-y-2 text-sm">
             {ministry.description && <p>{ministry.description}</p>}
             {ministry.meeting_schedule_text && (
               <p className="text-muted-foreground">Reunión: {ministry.meeting_schedule_text}</p>

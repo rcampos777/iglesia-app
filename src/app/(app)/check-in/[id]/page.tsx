@@ -26,7 +26,7 @@ export default async function ServiceCheckinPage({ params }: { params: Promise<{
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{service.name}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">{service.name}</h1>
         <p className="text-muted-foreground">
           {new Date(service.service_date + "T00:00:00").toLocaleDateString("es")} ·{" "}
           {checkins.length} check-ins

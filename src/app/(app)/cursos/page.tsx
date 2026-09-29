@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listClassOfferings } from "@/lib/data/courses";
 import { redirect } from "next/navigation";
 import { getCurrentUser, hasAnyRole, hasRole, isStaff } from "@/lib/auth/session";
+import { classTone } from "@/lib/status-tones";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
 
 const MANAGE_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
 
@@ -42,7 +43,9 @@ export default async function CoursesPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Cursos y clases</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+            Cursos y clases
+          </h1>
           <p className="text-muted-foreground">
             {scopedToOwn
               ? "Las clases que impartes."
@@ -53,13 +56,13 @@ export default async function CoursesPage() {
           <div className="flex gap-2">
             <Button asChild variant="outline">
               <Link href="/cursos/nuevo">
-                <Plus className="mr-2 size-4" />
+                <Plus className="size-4" aria-hidden />
                 Curso
               </Link>
             </Button>
             <Button asChild>
               <Link href="/cursos/clases/nueva">
-                <Plus className="mr-2 size-4" />
+                <Plus className="size-4" aria-hidden />
                 Clase
               </Link>
             </Button>
@@ -85,7 +88,9 @@ export default async function CoursesPage() {
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="text-base">{offering.label}</CardTitle>
-                      <Badge variant="outline">{statusLabels[offering.status]}</Badge>
+                      <StatusBadge tone={classTone[offering.status]}>
+                        {statusLabels[offering.status]}
+                      </StatusBadge>
                     </div>
                   </CardHeader>
                   <CardContent className="text-muted-foreground space-y-1 text-sm">

@@ -315,6 +315,30 @@ su email.
 
 ## Bitácora
 
+### 2026-09-28 — Rediseño visual (Geist, navegación, panel, listas, portal)
+
+- Corregida la fuente: `--font-sans` era circular y toda la app caía en
+  serif. Ahora Geist en todo. Detalle en `docs/design.md` §7–§11.
+- Menú con iconos, grupos, desplazamiento propio y `aria-current`;
+  menú fijo desde `lg`. Panel con métricas compactas y accesos rápidos
+  según permisos. Personas con buscador etiquetado, estados semánticos,
+  vista móvil apilada y **paginación** (antes mostraba solo las
+  primeras 25 sin forma de avanzar). Portal reorganizado. Formularios
+  de creación en tarjeta. Estados crudos traducidos en el detalle de
+  clase.
+- Verificado con capturas Playwright a 375/768/1440 contra el proyecto
+  demo (datos sintéticos, `npm run seed`), sesión por enlace mágico de
+  un solo uso generado con la service role (sin contraseñas). Sin
+  desbordamiento horizontal en ninguna pantalla. Permisos de menú y
+  accesos rápidos comprobados con los 7 roles de prueba. Tema oscuro
+  revisado forzando `.dark`. `npm run check`, `build` y E2E (12/12)
+  pasan.
+- **Pendiente de verificar visualmente**: `/personas/[id]` y `/admin`
+  dan 500 en el proyecto demo porque le faltan las migraciones
+  0026–0030 (producción sí las tiene). Aplicarlas al demo y revisar
+  esas dos pantallas. El proyecto demo aún contiene las 3 cuentas
+  reales de la iglesia además de los datos sintéticos.
+
 ### 2026-09-27 — Proyecto de producción de Ciudad de Avivamiento
 
 - Modelo: un proyecto Supabase por iglesia; `jlmabwnbtwjrtqaxfafx`

@@ -20,13 +20,13 @@ export default async function SurveysPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Encuestas</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Encuestas</h1>
           <p className="text-muted-foreground">Comparte tu opinión con la congregación.</p>
         </div>
         {canManage && (
           <Button asChild>
             <Link href="/encuestas/nueva">
-              <Plus className="mr-2 size-4" />
+              <Plus className="size-4" aria-hidden />
               Nueva encuesta
             </Link>
           </Button>
@@ -38,7 +38,7 @@ export default async function SurveysPage() {
         {surveys.map((s) => (
           <Link key={s.id} href={`/encuestas/${s.id}`}>
             <Card className="transition-shadow hover:shadow-md">
-              <CardContent className="flex items-center justify-between py-4">
+              <CardContent className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{s.title}</p>
                   {s.description && (

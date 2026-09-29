@@ -1,6 +1,7 @@
 import type { StatusTone } from "@/components/ui-brand/status-badge";
 import type {
   ActivityStatus,
+  ClassStatus,
   EnrollmentStatus,
   FollowupStatus,
   MembershipStatus,
@@ -45,4 +46,11 @@ export const prayerTone: Record<PrayerStatus, StatusTone> = {
   en_oracion: "tracking",
   respondida: "active",
   cerrada: "idle",
+};
+
+export const classTone: Record<ClassStatus, StatusTone> = {
+  planificada: "neutral",
+  activa: "active",
+  completada: "tracking",
+  cancelada: "idle",
 };

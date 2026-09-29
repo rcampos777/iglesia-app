@@ -25,16 +25,18 @@ export default async function NewActivityPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Nueva actividad</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Nueva actividad</h1>
         <p className="text-muted-foreground">
           Un evento puntual: retiro, campaña, convivencia, jornada. Después podrás inscribir gente y
           pasar lista.
         </p>
       </div>
-      <ActivityForm
-        people={people}
-        ministries={ministries.map((m) => ({ id: m.id, name: m.name }))}
-      />
+      <div className="bg-card ring-foreground/10 rounded-xl p-4 shadow-xs ring-1 sm:p-6">
+        <ActivityForm
+          people={people}
+          ministries={ministries.map((m) => ({ id: m.id, name: m.name }))}
+        />
+      </div>
     </div>
   );
 }

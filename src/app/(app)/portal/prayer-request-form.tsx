@@ -5,6 +5,7 @@ import { submitPrayerRequestAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ActionResult } from "@/lib/action-result";
 
@@ -22,20 +23,30 @@ export function PrayerRequestForm() {
   );
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-3 border-b pb-4">
+    <form ref={formRef} action={formAction} className="space-y-3">
       {!state.ok && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}
-      <Textarea name="content" placeholder="Escribe tu petición de oración..." rows={3} required />
-      <label className="text-muted-foreground flex items-center gap-2 text-sm">
+      <div className="space-y-1.5">
+        <Label htmlFor="prayer-content">Nueva petición</Label>
+        <Textarea
+          id="prayer-content"
+          name="content"
+          placeholder="Escribe por qué quieres que oremos…"
+          rows={3}
+          required
+          aria-describedby="prayer-privacy"
+        />
+      </div>
+      <label className="flex items-center gap-2 text-sm">
         <Checkbox name="isAnonymous" />
         Enviar de forma anónima
       </label>
-      <p className="text-muted-foreground text-xs">
-        Solo los intercesores, pastores y administradores pueden ver el contenido de tu petición.
-        Nunca se envía por email.
+      <p id="prayer-privacy" className="text-muted-foreground text-sm">
+        Solo el equipo de intercesión y la administración pueden leer tu petición. Nunca se envía
+        por email.
       </p>
       <Button type="submit" disabled={isPending}>
         {isPending ? "Enviando..." : "Enviar petición"}

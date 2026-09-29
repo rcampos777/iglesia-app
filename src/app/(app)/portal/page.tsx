@@ -1,25 +1,65 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { StatusBadge } from "@/components/ui-brand/status-badge";
-import { activityTone } from "@/lib/status-tones";
+import {
+  BookOpen,
+  CalendarDays,
+  ChevronDown,
+  HandHeart,
+  HeartHandshake,
+  QrCode,
+  UserRound,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui-brand/page-header";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
+import { activityTone, prayerTone } from "@/lib/status-tones";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getMyEnrollments, getMyPerson, getMyPrayerRequests } from "@/lib/data/portal";
 import { listMinistriesForPerson } from "@/lib/data/ministries";
 import { listActivitiesForPerson } from "@/lib/data/activities";
-import { activityStatusLabels, ministryMemberRoleLabels } from "@/lib/labels";
+import { activityStatusLabels, ministryMemberRoleLabels, prayerStatusLabels } from "@/lib/labels";
 import { ContactForm } from "./contact-form";
 import { PrayerRequestForm } from "./prayer-request-form";
 import { MyQrCode } from "./my-qr-code";
 
-const prayerStatusLabels: Record<string, string> = {
-  nueva: "Nueva",
-  en_oracion: "En oración",
-  respondida: "Respondida",
-  cerrada: "Cerrada",
-};
+function Section({
+  id,
+  icon: Icon,
+  title,
+  count,
+  children,
+}: {
+  id: string;
+  icon: LucideIcon;
+  title: string;
+  count?: number;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      aria-labelledby={id}
+      className="bg-card ring-foreground/10 rounded-xl p-4 shadow-xs ring-1 sm:p-5"
+    >
+      <h2 id={id} className="mb-3 flex items-center gap-2 text-base font-semibold">
+        <Icon className="text-muted-foreground size-[18px]" aria-hidden />
+        {title}
+        {count !== undefined && count > 0 ? (
+          <span className="text-muted-foreground text-sm font-normal">({count})</span>
+        ) : null}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function Empty({ children }: { children: ReactNode }) {
+  return <p className="text-muted-foreground text-[15px]">{children}</p>;
+}
+
+const rowClass =
+  "flex items-center justify-between gap-3 border-b py-3 first:pt-0 last:border-b-0 last:pb-0";
 
 export default async function PortalPage() {
   const user = await getCurrentUser();
@@ -34,126 +74,169 @@ export default async function PortalPage() {
     listActivitiesForPerson(user.personId),
   ]);
 
+  const firstName = person?.preferred_name || person?.first_name;
+
   return (
-    <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Mi portal</h1>
-        <p className="text-muted-foreground">Tu información, tus cursos y tus peticiones.</p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title={firstName ? `Hola, ${firstName}` : "Mi portal"}
+        description="Tu asistencia, tus actividades y tus cursos en un solo lugar."
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Check-in</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button asChild variant="outline" className="w-full">
-            <Link href="/check-in/publico">Confirmar mi asistencia a un servicio abierto</Link>
-          </Button>
-          <div className="border-t pt-4">
-            <p className="text-muted-foreground mb-2 text-sm">
-              O muestra este código para que alguien del equipo te registre:
-            </p>
-            <MyQrCode />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Mi información de contacto</CardTitle>
-        </CardHeader>
-        <CardContent>{person && <ContactForm person={person} />}</CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Donde sirvo</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {ministries.length === 0 && (
-            <p className="text-muted-foreground">
-              Todavía no sirves en ningún ministerio. Si te interesa servir, habla con un
-              coordinador o con tu pastor.
-            </p>
-          )}
-          {ministries.map((m) => (
-            <div key={m.id} className="flex items-center justify-between border-b pb-2">
-              <div>
-                <p className="font-medium">{m.ministryName}</p>
-                <p className="text-muted-foreground text-sm">Desde {m.joined_at}</p>
-              </div>
-              <Badge variant="outline">{ministryMemberRoleLabels[m.role_in_ministry]}</Badge>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Mis actividades</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {activities.length === 0 && (
-            <p className="text-muted-foreground">No estás inscrito en ninguna actividad todavía.</p>
-          )}
-          {activities.map((a) => (
-            <div key={a.id} className="flex items-center justify-between border-b pb-2">
-              <div>
-                <p className="font-medium">{a.activityName}</p>
-                <p className="text-muted-foreground text-sm">
-                  {a.activityDate}
-                  {a.activityLocation ? ` · ${a.activityLocation}` : ""}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
+        <div className="space-y-4 lg:col-span-2">
+          <section
+            aria-labelledby="checkin"
+            className="bg-card ring-foreground/10 rounded-xl p-4 shadow-xs ring-1 sm:p-5"
+          >
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+              <div className="flex-1 space-y-3">
+                <h2 id="checkin" className="flex items-center gap-2 text-base font-semibold">
+                  <QrCode className="text-muted-foreground size-[18px]" aria-hidden />
+                  Asistencia al servicio
+                </h2>
+                <p className="text-muted-foreground text-[15px]">
+                  Si el check-in del servicio está abierto, confirma tu asistencia con un toque. O
+                  muestra tu código al equipo de bienvenida.
                 </p>
+                <Button asChild className="w-full sm:w-auto">
+                  <Link href="/check-in/publico">Confirmar mi asistencia</Link>
+                </Button>
               </div>
-              <StatusBadge tone={a.attended ? "active" : activityTone[a.activityStatus]}>
-                {a.attended ? "Asististe" : activityStatusLabels[a.activityStatus]}
-              </StatusBadge>
+              <div className="border-t pt-4 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5">
+                <MyQrCode />
+              </div>
             </div>
-          ))}
-        </CardContent>
-      </Card>
+          </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Mis cursos</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {enrollments.length === 0 && (
-            <p className="text-muted-foreground">No estás matriculado en ningún curso todavía.</p>
-          )}
-          {enrollments.map((e) => (
-            <div key={e.enrollmentId} className="flex items-center justify-between border-b pb-2">
-              <div>
-                <p className="font-medium">{e.classLabel}</p>
-                <p className="text-muted-foreground text-sm">{e.courseName}</p>
-              </div>
-              <Badge variant="outline">{e.attendancePercent}% asistencia</Badge>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Section
+              id="actividades"
+              icon={CalendarDays}
+              title="Mis actividades"
+              count={activities.length}
+            >
+              {activities.length === 0 ? (
+                <Empty>No estás inscrito en ninguna actividad todavía.</Empty>
+              ) : (
+                <ul>
+                  {activities.map((a) => (
+                    <li key={a.id} className={rowClass}>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{a.activityName}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {a.activityDate}
+                          {a.activityLocation ? ` · ${a.activityLocation}` : ""}
+                        </p>
+                      </div>
+                      <StatusBadge tone={a.attended ? "active" : activityTone[a.activityStatus]}>
+                        {a.attended ? "Asististe" : activityStatusLabels[a.activityStatus]}
+                      </StatusBadge>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Peticiones de oración</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <PrayerRequestForm />
-          <div className="space-y-2">
-            {prayerRequests.map((p) => (
-              <div key={p.id} className="rounded-md border p-3">
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline">{prayerStatusLabels[p.status]}</Badge>
-                  <span className="text-muted-foreground text-xs">
-                    {new Date(p.created_at).toLocaleDateString("es")}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm">{p.content}</p>
-              </div>
-            ))}
+            <Section id="cursos" icon={BookOpen} title="Mis cursos" count={enrollments.length}>
+              {enrollments.length === 0 ? (
+                <Empty>No estás matriculado en ningún curso todavía.</Empty>
+              ) : (
+                <ul>
+                  {enrollments.map((e) => (
+                    <li key={e.enrollmentId} className={rowClass}>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{e.classLabel}</p>
+                        <p className="text-muted-foreground text-sm">{e.courseName}</p>
+                      </div>
+                      <StatusBadge tone="neutral">{e.attendancePercent}% asistencia</StatusBadge>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Section>
           </div>
-        </CardContent>
-      </Card>
+
+          <Section
+            id="ministerios"
+            icon={HeartHandshake}
+            title="Donde sirvo"
+            count={ministries.length}
+          >
+            {ministries.length === 0 ? (
+              <Empty>
+                Todavía no sirves en ningún ministerio. Si te interesa servir, habla con un
+                coordinador o con tu pastor.
+              </Empty>
+            ) : (
+              <ul>
+                {ministries.map((m) => (
+                  <li key={m.id} className={rowClass}>
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{m.ministryName}</p>
+                      <p className="text-muted-foreground text-sm">Desde {m.joined_at}</p>
+                    </div>
+                    <StatusBadge tone="neutral">
+                      {ministryMemberRoleLabels[m.role_in_ministry]}
+                    </StatusBadge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+        </div>
+
+        <div className="space-y-4">
+          <Section id="oracion" icon={HandHeart} title="Peticiones de oración">
+            <PrayerRequestForm />
+            {prayerRequests.length > 0 ? (
+              <div className="mt-5 border-t pt-4">
+                <h3 className="text-muted-foreground mb-2 text-sm font-medium">
+                  Tus peticiones ({prayerRequests.length})
+                </h3>
+                <ul className="space-y-2">
+                  {prayerRequests.map((p) => (
+                    <li key={p.id} className="bg-muted/40 rounded-lg p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <StatusBadge tone={prayerTone[p.status]}>
+                          {prayerStatusLabels[p.status]}
+                        </StatusBadge>
+                        <time dateTime={p.created_at} className="text-muted-foreground text-sm">
+                          {new Date(p.created_at).toLocaleDateString("es")}
+                        </time>
+                      </div>
+                      <p className="mt-2 text-[15px] break-words">{p.content}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </Section>
+
+          {person ? (
+            <details className="group bg-card ring-foreground/10 rounded-xl shadow-xs ring-1">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-xl p-4 sm:p-5 [&::-webkit-details-marker]:hidden">
+                <span className="flex items-center gap-2">
+                  <UserRound className="text-muted-foreground size-[18px]" aria-hidden />
+                  <span>
+                    <span className="block text-base font-semibold">Mis datos de contacto</span>
+                    <span className="text-muted-foreground block text-sm">
+                      Teléfono, email y dirección
+                    </span>
+                  </span>
+                </span>
+                <ChevronDown
+                  className="text-muted-foreground size-4 transition-transform group-open:rotate-180"
+                  aria-hidden
+                />
+              </summary>
+              <div className="border-t p-4 sm:p-5">
+                <ContactForm person={person} />
+              </div>
+            </details>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }

@@ -90,7 +90,7 @@ export default async function PersonDetailPage({
     <div className="max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
             {person.first_name} {person.last_name}
           </h1>
           <p className="text-muted-foreground">

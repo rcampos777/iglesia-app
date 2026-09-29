@@ -2,7 +2,19 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { isStaff, type CurrentUser } from "@/lib/auth/session";
 
+export type DashboardCountKey =
+  | "my_courses"
+  | "my_activities"
+  | "my_ministries"
+  | "people"
+  | "visitors"
+  | "ministries"
+  | "activities"
+  | "classes"
+  | "prayer";
+
 export interface DashboardCount {
+  key: DashboardCountKey;
   label: string;
   value: number | null;
 }
@@ -17,30 +29,34 @@ export async function getDashboardCounts(user: CurrentUser | null): Promise<Dash
 
   const supabase = await createClient();
 
-  const countQuery = async (label: string, run: () => PromiseLike<{ count: number | null }>) => {
+  const countQuery = async (
+    key: DashboardCountKey,
+    label: string,
+    run: () => PromiseLike<{ count: number | null }>,
+  ): Promise<DashboardCount> => {
     try {
       const { count } = await run();
-      return { label, value: count ?? 0 };
+      return { key, label, value: count ?? 0 };
     } catch {
-      return { label, value: null };
+      return { key, label, value: null };
     }
   };
 
   if (!isStaff(user)) {
     return Promise.all([
-      countQuery("Mis cursos", () =>
+      countQuery("my_courses", "Mis cursos", () =>
         supabase
           .from("enrollments")
           .select("id", { count: "exact", head: true })
           .eq("person_id", user.personId ?? ""),
       ),
-      countQuery("Mis actividades", () =>
+      countQuery("my_activities", "Mis actividades", () =>
         supabase
           .from("activity_participants")
           .select("id", { count: "exact", head: true })
           .eq("person_id", user.personId ?? ""),
       ),
-      countQuery("Ministerios donde sirvo", () =>
+      countQuery("my_ministries", "Ministerios donde sirvo", () =>
         supabase
           .from("ministry_memberships")
           .select("id", { count: "exact", head: true })
@@ -51,34 +67,34 @@ export async function getDashboardCounts(user: CurrentUser | null): Promise<Dash
   }
 
   return Promise.all([
-    countQuery("Personas registradas", () =>
+    countQuery("people", "Personas registradas", () =>
       supabase.from("people").select("id", { count: "exact", head: true }),
     ),
-    countQuery("Visitantes en seguimiento", () =>
+    countQuery("visitors", "Visitantes en seguimiento", () =>
       supabase
         .from("visitor_follow_ups")
         .select("id", { count: "exact", head: true })
         .in("status", ["pendiente", "en_progreso"]),
     ),
-    countQuery("Ministerios activos", () =>
+    countQuery("ministries", "Ministerios activos", () =>
       supabase
         .from("ministries")
         .select("id", { count: "exact", head: true })
         .eq("is_active", true),
     ),
-    countQuery("Actividades próximas", () =>
+    countQuery("activities", "Actividades próximas", () =>
       supabase
         .from("activities")
         .select("id", { count: "exact", head: true })
         .in("status", ["planificada", "abierta"]),
     ),
-    countQuery("Clases activas", () =>
+    countQuery("classes", "Clases activas", () =>
       supabase
         .from("class_offerings")
         .select("id", { count: "exact", head: true })
         .eq("status", "activa"),
     ),
-    countQuery("Peticiones de oración abiertas", () =>
+    countQuery("prayer", "Peticiones de oración abiertas", () =>
       supabase
         .from("prayer_requests")
         .select("id", { count: "exact", head: true })

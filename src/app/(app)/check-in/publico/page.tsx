@@ -25,7 +25,7 @@ export default async function PublicCheckinPage() {
   return (
     <div className="mx-auto max-w-md space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Bienvenido</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Bienvenido</h1>
         <p className="text-muted-foreground">Confirma tu asistencia al servicio de hoy.</p>
       </div>
 

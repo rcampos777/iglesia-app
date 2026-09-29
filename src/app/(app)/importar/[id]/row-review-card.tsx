@@ -50,7 +50,7 @@ export function RowReviewCard({
 
   return (
     <Card>
-      <CardContent className="space-y-3 py-4">
+      <CardContent className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="font-medium">

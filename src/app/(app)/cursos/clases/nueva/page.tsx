@@ -15,10 +15,12 @@ export default async function NewClassOfferingPage() {
   return (
     <div className="max-w-lg space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Nueva clase</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Nueva clase</h1>
         <p className="text-muted-foreground">Crea una cohorte/instancia de un curso existente.</p>
       </div>
-      <NewClassOfferingForm courses={courses} people={peopleResult.people} />
+      <div className="bg-card ring-foreground/10 rounded-xl p-4 shadow-xs ring-1 sm:p-6">
+        <NewClassOfferingForm courses={courses} people={peopleResult.people} />
+      </div>
     </div>
   );
 }

@@ -5,6 +5,9 @@ import type {
   MembershipStatus,
   MinistryMemberRole,
   ActivityStatus,
+  ClassStatus,
+  EnrollmentStatus,
+  PrayerStatus,
 } from "@/types/database";
 
 export const membershipStatusLabels: Record<MembershipStatus, string> = {
@@ -58,4 +61,25 @@ export const activityStatusLabels: Record<ActivityStatus, string> = {
   abierta: "Inscripciones abiertas",
   realizada: "Realizada",
   cancelada: "Cancelada",
+};
+
+export const classStatusLabels: Record<ClassStatus, string> = {
+  planificada: "Planificada",
+  activa: "Activa",
+  completada: "Completada",
+  cancelada: "Cancelada",
+};
+
+export const enrollmentStatusLabels: Record<EnrollmentStatus, string> = {
+  inscrito: "Inscrito",
+  en_progreso: "En progreso",
+  completado: "Completado",
+  retirado: "Retirado",
+};
+
+export const prayerStatusLabels: Record<PrayerStatus, string> = {
+  nueva: "Nueva",
+  en_oracion: "En oración",
+  respondida: "Respondida",
+  cerrada: "Cerrada",
 };

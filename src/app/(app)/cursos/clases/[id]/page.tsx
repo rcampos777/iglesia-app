@@ -1,5 +1,4 @@
 import { notFound, redirect } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -15,6 +14,9 @@ import { getCurrentUser, hasAnyRole, hasRole, isStaff } from "@/lib/auth/session
 import { EnrollForm } from "./enroll-form";
 import { AttendancePanel } from "./attendance-panel";
 import { AddSessionForm } from "./add-session-form";
+import { classTone, enrollmentTone } from "@/lib/status-tones";
+import { classStatusLabels, enrollmentStatusLabels } from "@/lib/labels";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
 
 const TEACH_ROLES = ["administrador", "pastor", "coordinador_ministerio", "maestro"] as const;
 const ENROLL_ROLES = [
@@ -64,12 +66,16 @@ export default async function ClassOfferingPage({ params }: { params: Promise<{ 
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{offering.label}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+            {offering.label}
+          </h1>
           <p className="text-muted-foreground">
             {offering.courseName} · {offering.categoryName}
           </p>
         </div>
-        <Badge variant="outline">{offering.status}</Badge>
+        <StatusBadge tone={classTone[offering.status]}>
+          {classStatusLabels[offering.status]}
+        </StatusBadge>
       </div>
 
       <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
@@ -129,7 +135,9 @@ export default async function ClassOfferingPage({ params }: { params: Promise<{ 
                         {e.personFirstName} {e.personLastName}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{e.status}</Badge>
+                        <StatusBadge tone={enrollmentTone[e.status]}>
+                          {enrollmentStatusLabels[e.status]}
+                        </StatusBadge>
                       </TableCell>
                       <TableCell className="text-right">{pct}%</TableCell>
                     </TableRow>

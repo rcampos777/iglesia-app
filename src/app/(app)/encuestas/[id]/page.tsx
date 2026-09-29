@@ -25,7 +25,9 @@ export default async function SurveyDetailPage({ params }: { params: Promise<{ i
     return (
       <div className="max-w-2xl space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{survey.title}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+            {survey.title}
+          </h1>
           <p className="text-muted-foreground">{results.responseCount} respuestas</p>
         </div>
         {results.questions.map((q) => (
@@ -65,7 +67,7 @@ export default async function SurveyDetailPage({ params }: { params: Promise<{ i
   return (
     <div className="max-w-xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{survey.title}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">{survey.title}</h1>
         {survey.description && <p className="text-muted-foreground">{survey.description}</p>}
       </div>
 

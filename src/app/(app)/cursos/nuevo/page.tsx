@@ -14,10 +14,12 @@ export default async function NewCoursePage() {
   return (
     <div className="max-w-lg space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Nuevo curso</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Nuevo curso</h1>
         <p className="text-muted-foreground">Agrega un curso al catálogo de una categoría.</p>
       </div>
-      <NewCourseForm categories={categories} />
+      <div className="bg-card ring-foreground/10 rounded-xl p-4 shadow-xs ring-1 sm:p-6">
+        <NewCourseForm categories={categories} />
+      </div>
     </div>
   );
 }

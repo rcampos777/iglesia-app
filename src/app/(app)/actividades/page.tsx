@@ -51,7 +51,7 @@ export default async function ActivitiesPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Actividades</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Actividades</h1>
           <p className="text-muted-foreground">
             {scopedToOwn
               ? "Las actividades de los ministerios que lideras."
@@ -61,7 +61,7 @@ export default async function ActivitiesPage({
         {canCreate && (
           <Button asChild>
             <Link href="/actividades/nueva">
-              <Plus className="mr-2 size-4" />
+              <Plus className="size-4" aria-hidden />
               Nueva actividad
             </Link>
           </Button>
@@ -98,7 +98,7 @@ export default async function ActivitiesPage({
         {activities.map((a) => (
           <Link key={a.id} href={`/actividades/${a.id}`} className="block">
             <Card className="transition-shadow hover:shadow-md">
-              <CardContent className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <CardContent className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="font-medium">{a.name}</p>
                   <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">

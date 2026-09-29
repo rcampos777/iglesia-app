@@ -14,13 +14,17 @@ export default async function NewMinistryPage() {
   return (
     <div className="max-w-lg space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Nuevo ministerio</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+          Nuevo ministerio
+        </h1>
         <p className="text-muted-foreground">
           Registra un área de servicio de la iglesia. Después podrás agregar a las personas que
           sirven en ella.
         </p>
       </div>
-      <MinistryForm people={people} />
+      <div className="bg-card ring-foreground/10 rounded-xl p-4 shadow-xs ring-1 sm:p-6">
+        <MinistryForm people={people} />
+      </div>
     </div>
   );
 }

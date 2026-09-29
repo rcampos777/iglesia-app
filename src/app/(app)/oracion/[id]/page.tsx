@@ -31,7 +31,7 @@ export default async function PrayerRequestDetailPage({
     <div className="max-w-xl space-y-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
             {request.requesterName ?? "Petición anónima"}
           </h1>
           <p className="text-muted-foreground">
@@ -43,7 +43,7 @@ export default async function PrayerRequestDetailPage({
       </div>
 
       <Card>
-        <CardContent className="py-4">
+        <CardContent>
           <p className="whitespace-pre-wrap">{request.content}</p>
         </CardContent>
       </Card>

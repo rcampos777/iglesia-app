@@ -27,7 +27,7 @@ export default async function FollowUpDetailPage({ params }: { params: Promise<{
     <div className="max-w-2xl space-y-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
             <Link href={`/personas/${followUp.person_id}`} className="hover:underline">
               {followUp.personFirstName} {followUp.personLastName}
             </Link>

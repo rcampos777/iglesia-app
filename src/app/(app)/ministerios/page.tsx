@@ -35,7 +35,7 @@ export default async function MinistriesPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Ministerios</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Ministerios</h1>
           <p className="text-muted-foreground">
             {ministries.length} {ministries.length === 1 ? "ministerio" : "ministerios"}
             {scopedToOwn ? " que lideras" : ""}
@@ -45,7 +45,7 @@ export default async function MinistriesPage({
         {canManage && (
           <Button asChild>
             <Link href="/ministerios/nuevo">
-              <Plus className="mr-2 size-4" />
+              <Plus className="size-4" aria-hidden />
               Nuevo ministerio
             </Link>
           </Button>
@@ -71,7 +71,7 @@ export default async function MinistriesPage({
         {ministries.map((m) => (
           <Link key={m.id} href={`/ministerios/${m.id}`} className="block">
             <Card className="h-full transition-shadow hover:shadow-md">
-              <CardContent className="space-y-2 py-4">
+              <CardContent className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium">{m.name}</p>
                   {!m.is_active && <StatusBadge tone="idle">Inactivo</StatusBadge>}

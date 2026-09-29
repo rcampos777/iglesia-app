@@ -49,7 +49,9 @@ export default async function AdminPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Administración de usuarios</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+          Administración de usuarios
+        </h1>
         <p className="text-muted-foreground">
           {total} cuentas. Abre &quot;Ver permisos&quot; para revisar o cambiar los accesos de una
           cuenta — los cambios se preparan y se aplican desde ahí.

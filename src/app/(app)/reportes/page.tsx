@@ -48,7 +48,7 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Reportes</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Reportes</h1>
         <p className="text-muted-foreground">Vista general de la congregación.</p>
       </div>
 

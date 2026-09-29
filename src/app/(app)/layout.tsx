@@ -23,9 +23,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const items = visibleNavItems(user.roles, { isPrayerReader: Boolean(isPrayerReader) });
 
   return (
-    <div className="min-h-screen md:pl-60">
+    <div className="min-h-screen lg:pl-64">
       <AppNav items={items} userLabel={user.email ?? "Usuario"} />
-      <main className="mx-auto max-w-5xl px-4 py-6 md:px-8 md:py-8">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 md:px-8 md:py-10">
+        {children}
+      </main>
     </div>
   );
 }

@@ -14,6 +14,8 @@ import { listPrayerRequests } from "@/lib/data/prayer";
 import { getCurrentUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import type { PrayerStatus } from "@/types/database";
+import { prayerTone } from "@/lib/status-tones";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
 
 /**
  * Quién lee peticiones de oración ya NO es una lista fija de roles: es
@@ -46,7 +48,9 @@ export default async function PrayerInboxPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Peticiones de oración</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+          Peticiones de oración
+        </h1>
         <p className="text-muted-foreground">
           {requests.length} peticiones. El contenido solo se muestra al abrir el detalle (acceso
           auditado).
@@ -77,7 +81,7 @@ export default async function PrayerInboxPage({
         {requests.map((r) => (
           <Link key={r.id} href={`/oracion/${r.id}`}>
             <Card className="transition-shadow hover:shadow-md">
-              <CardContent className="flex items-center justify-between py-4">
+              <CardContent className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{r.requesterName ?? "Anónimo"}</p>
                   <p className="text-muted-foreground text-sm">
@@ -87,7 +91,7 @@ export default async function PrayerInboxPage({
                 </div>
                 <div className="flex gap-2">
                   {r.urgency === "urgente" && <Badge variant="destructive">Urgente</Badge>}
-                  <Badge variant="outline">{statusLabels[r.status]}</Badge>
+                  <StatusBadge tone={prayerTone[r.status]}>{statusLabels[r.status]}</StatusBadge>
                 </div>
               </CardContent>
             </Card>

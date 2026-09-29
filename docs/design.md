@@ -95,3 +95,77 @@ Los tokens de `.dark` están definidos. Sobre fondo oscuro el rojo de
 marca se aclara a `#D57676` (5.6:1) porque `#9E3030` sobre `#1B1F20` solo
 llegaría a 2.4:1. El menú lateral se oscurece a `#14181A` para seguir
 separándose del contenido, y el activo mantiene el rojo de marca.
+
+## 7. Tipografía y escala (rediseño 2026-09-28)
+
+- **Geist** (`next/font/google`, variable `--font-geist-sans`) es la
+  fuente de toda la app. En `globals.css` el `@theme` decía
+  `--font-sans: var(--font-sans)` — una referencia circular que dejaba
+  la fuente sin resolver y el navegador caía en su serif por defecto.
+  Ahora `--font-sans` y `--font-heading` apuntan a
+  `--font-geist-sans` con respaldo `system-ui`.
+- Título de página: 24 px en móvil, 28 px desde `md`
+  (`text-2xl … md:text-[1.75rem]`, semibold). Todas las páginas usan la
+  misma clase; las nuevas usan `PageHeader`.
+- Texto principal 16 px; menú 15 px; tablas y controles 14–16 px; texto
+  pequeño (13–14 px) solo para información complementaria.
+- Pesos: regular, medium (etiquetas, enlaces activos) y semibold
+  (títulos, cifras). Sin negritas sueltas.
+
+## 8. Controles y superficies
+
+- Botones y campos a 36 px de alto (40 px `lg`, 32 px `sm`). Se define
+  en `globals.css` sobre los atributos `data-slot` / `data-size` de
+  shadcn, fuera de `@layer` para imponerse a sus utilidades sin editar
+  el núcleo. Ninguna página sobrescribe esas alturas por clase.
+- Tarjetas: blanco puro, borde fino (`ring-foreground/10`), radio
+  `rounded-xl` y una sombra muy discreta (desactivada en oscuro).
+- Formularios de creación van dentro de una tarjeta con ancho de
+  lectura (`max-w-lg` / `max-w-2xl`).
+- Se eliminó el relleno vertical doble (`CardContent py-4` dentro de
+  `Card`, que ya trae su propio espaciado).
+
+## 9. Componentes propios (`src/components/ui-brand/`)
+
+| Componente    | Uso                                                        |
+| ------------- | ---------------------------------------------------------- |
+| `PageHeader`  | Título, descripción, antetítulo opcional y acciones.       |
+| `TableCard`   | Contenedor de tablas; el scroll horizontal queda adentro.  |
+| `EmptyState`  | Estado vacío con icono + texto (no depende del color).     |
+| `StatusBadge` | Estados semánticos (ya existía); ahora también clases,     |
+|               | matrícula y oración (`classTone`, `enrollmentTone`, etc.). |
+
+Las etiquetas de estado viven en `src/lib/labels.ts`
+(`classStatusLabels`, `enrollmentStatusLabels`, `prayerStatusLabels`):
+el detalle de una clase mostraba el valor crudo (`en_progreso`).
+
+## 10. Navegación
+
+- Iconos de Lucide y grupos (General · Congregación · Formación y
+  eventos · Cuidado pastoral · Gestión). La agrupación es solo
+  presentación en `app-nav.tsx`: **qué enlaces ve cada usuario sigue
+  decidiéndolo `visibleNavItems`** en el servidor. Un grupo sin enlaces
+  no se muestra; una ruta nueva sin grupo cae en "Otros".
+- Activo: fondo rojo + texto blanco cálido (6.54:1) y
+  `aria-current="page"`.
+- Foco en el menú: anillo en el tono claro del menú (7.48:1 sobre
+  carbón). El rojo sobre carbón (2.02:1) no sirve como indicador.
+- El área de enlaces se desplaza sola; el cierre de sesión queda fijo
+  abajo aunque la pantalla sea baja (verificado a 1440×560 y 375×600).
+- Menú lateral fijo desde `lg` (1024 px). En móvil y tablet: barra
+  superior + menú deslizable con la misma estructura.
+
+## 11. Panel y portal
+
+- **Panel**: fecha de hoy, métricas compactas (solo conteos reales de
+  `getDashboardCounts`; sin tendencias ni gráficos inventados) y
+  accesos rápidos. Cada métrica enlaza a su módulo solo si ese módulo
+  está en el menú del usuario. Cada acceso rápido replica exactamente
+  el guard de su página de destino (el guard y RLS siguen siendo la
+  barrera real).
+- **Portal del miembro**: asistencia (confirmar + código QR) arriba,
+  actividades y cursos lado a lado, luego ministerios. Peticiones de
+  oración en la columna lateral; los datos de contacto quedan plegados
+  (`<details>`) para no dominar la página. El texto de privacidad dice
+  "el equipo de intercesión y la administración" (antes decía
+  "pastores", que ya no tienen acceso por rol — decisión 2026-09-02).

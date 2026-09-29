@@ -26,7 +26,7 @@ export default async function ImportPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Importar datos</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">Importar datos</h1>
         <p className="text-muted-foreground">
           Excel/CSV/Access (exportado a CSV) o captura manual de registros en papel. Nada se guarda
           en el directorio final sin revisión humana.
@@ -61,7 +61,7 @@ export default async function ImportPage() {
           {batches.map((batch) => (
             <Link key={batch.id} href={`/importar/${batch.id}`}>
               <Card className="transition-shadow hover:shadow-md">
-                <CardContent className="flex items-center justify-between py-4">
+                <CardContent className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">{batch.file_name || "Sin nombre"}</p>
                     <p className="text-muted-foreground text-sm">

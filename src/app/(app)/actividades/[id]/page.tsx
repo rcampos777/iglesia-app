@@ -50,14 +50,16 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
         <Link href="/actividades">
-          <ArrowLeft className="mr-2 size-4" />
+          <ArrowLeft className="size-4" aria-hidden />
           Actividades
         </Link>
       </Button>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{activity.name}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+            {activity.name}
+          </h1>
           <p className="text-muted-foreground">
             {activity.activity_date}
             {activity.start_time ? ` · ${activity.start_time.slice(0, 5)}` : ""}
@@ -71,7 +73,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
       </div>
 
       <Card>
-        <CardContent className="space-y-2 py-4 text-sm">
+        <CardContent className="space-y-2 text-sm">
           {activity.description && <p>{activity.description}</p>}
           {activity.ministryName && (
             <p className="text-muted-foreground">Organiza: {activity.ministryName}</p>

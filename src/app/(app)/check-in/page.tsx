@@ -28,7 +28,9 @@ export default async function CheckinPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Check-in de servicios</h1>
+        <h1 className="text-2xl font-semibold tracking-tight md:text-[1.75rem]">
+          Check-in de servicios
+        </h1>
         <p className="text-muted-foreground">
           La gente escanea el QR fijo de la entrada y confirma su propia asistencia. También puedes
           escanear el QR personal de alguien o buscarlo manualmente.
@@ -64,7 +66,7 @@ export default async function CheckinPage() {
         )}
         {services.map((s) => (
           <Card key={s.id} className="transition-shadow hover:shadow-md">
-            <CardContent className="flex items-center justify-between gap-3 py-4">
+            <CardContent className="flex items-center justify-between gap-3">
               <Link href={`/check-in/${s.id}`} className="min-w-0 flex-1">
                 <p className="font-medium">{s.name}</p>
                 <p className="text-muted-foreground text-sm">
