@@ -34,7 +34,7 @@
     </p>
     <p style="margin: 0 0 24px">
       <a
-        href="{{ .ConfirmationURL }}"
+        href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/recuperar/nueva-contrasena"
         style="
           display: inline-block;
           background: #9e3030;
