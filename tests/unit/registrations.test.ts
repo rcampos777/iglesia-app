@@ -5,6 +5,7 @@ import {
   registrationSettingsSchema,
 } from "../../src/lib/validations/registrations";
 import { personalizeLetter } from "../../src/lib/registrations/letter";
+import { normalizeFromEmail } from "../../src/lib/email/from";
 
 const valid = {
   firstName: "Nombre",
@@ -65,4 +66,16 @@ test("la carta pone el nombre donde dice {{Nombre}}", () => {
     "Estimado hermano Juan,\n¡Gracias, Juan!",
   );
   assert.equal(personalizeLetter("Sin nombre", "Juan"), "Sin nombre");
+});
+
+test("el remitente tolera comillas y espacios pegados en Vercel", () => {
+  const ok = "Ciudad de Avivamiento <notificaciones@ciudaddeavivamiento.org>";
+  assert.equal(normalizeFromEmail(ok), ok);
+  assert.equal(normalizeFromEmail(`"${ok}"\n`), ok);
+  assert.equal(normalizeFromEmail(`  “${ok}” `), ok);
+  assert.equal(
+    normalizeFromEmail("'notificaciones@ciudaddeavivamiento.org'"),
+    "notificaciones@ciudaddeavivamiento.org",
+  );
+  assert.equal(normalizeFromEmail(undefined), "Iglesia <notificaciones@example.org>");
 });

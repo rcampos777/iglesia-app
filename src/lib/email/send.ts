@@ -3,11 +3,12 @@ import { Resend } from "resend";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
+import { normalizeFromEmail } from "./from";
 
 let resendClient: Resend | null = null;
 
 function getResend(): Resend {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) throw new Error("Falta RESEND_API_KEY en .env.local.");
   if (!resendClient) resendClient = new Resend(apiKey);
   return resendClient;
@@ -39,7 +40,7 @@ export async function sendEmail(
   logClient?: SupabaseClient<Database>,
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = logClient ?? (await createClient());
-  const fromEmail = process.env.RESEND_FROM_EMAIL ?? "Iglesia <notificaciones@example.org>";
+  const fromEmail = normalizeFromEmail(process.env.RESEND_FROM_EMAIL);
 
   const { data: logRow } = await supabase
     .from("notification_log")
