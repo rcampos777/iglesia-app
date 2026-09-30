@@ -19,11 +19,16 @@ pago (10 días antes) y del evento (3 días antes). Ver
   demostración temporal: validación, mensajes y que no se borre lo
   escrito. Encontrado y corregido: el anti-spam comparaba el reloj del
   teléfono con el del servidor y descartaba inscripciones reales.
-- **Pendiente**: aplicar `0040` en Supabase, definir `CRON_SECRET` en
-  Vercel, desplegar, y configurar el retiro (pasos en
-  `docs/registrations.md`). El envío de punta a punta contra Supabase real
-  y los emails de Resend no se probaron aquí (la migración no está
-  aplicada).
+- **Aplicado (2026-09-29)**: `0027`–`0040` en el proyecto de **desarrollo**
+  (`jlmabwnbtwjrtqaxfafx`, el de `.env.local`) y `0040` en **producción**
+  (`ccempuwuefjnaarmxbkz`, "ciudad-de-avivamiento", us-west-1 — el que usa
+  Vercel; ya tenía hasta `0039`). Ojo: `.env.local` NO apunta a producción.
+  Retiro creado en producción y forma en vivo:
+  `/sitio/inscripcion/retiro-hombres-2026`. `CRON_SECRET` definido en Vercel.
+- **Pendiente**: Resend (dominio `ciudaddeavivamiento.org` verificado +
+  `RESEND_API_KEY`/`RESEND_FROM_EMAIL` en Vercel) — sin eso no salen la
+  carta ni los recordatorios (se pueden reenviar luego desde la app). Subir
+  el flyer. Probar una inscripción real de punta a punta.
 
 ### 2026-09-05 — Auditoría de identidad/autorización/auditoría (Fase 1 completa, código; verificación en vivo pendiente)
 
