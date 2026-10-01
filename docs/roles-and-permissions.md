@@ -230,6 +230,7 @@ Desde 2026-09-28 (0034–0035). Ver [`finance.md`](finance.md).
 | Leer la auditoría financiera y de lecturas del sobre            | ✔       | ✘        | ✘             | ✘      | ✘          | ✘                       |
 | Certificaciones: ver, registrar, editar, abrir documento (0042) | ✔       | ✔        | ✘             | ✘      | ✘          | ✘                       |
 | Certificaciones: borrar                                         | ✔       | ✘        | ✘             | ✘      | ✘          | ✘                       |
+| Borrar personas sin nada ligado (y su cuenta) (0046)            | ✔       | ✘        | ✘             | ✘      | ✘          | ✘                       |
 
 (\*) Salvo que además tengan un rol de oración por su cuenta. Intercesión
 nunca ve monto, forma de pago ni la donación.

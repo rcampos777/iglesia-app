@@ -331,3 +331,42 @@ export async function savePersonRolesAction(
   revalidatePath("/admin");
   return actionOk({ roles: sortRoles(cleanNew) });
 }
+
+/**
+ * Borra a una persona creada por error y su cuenta de acceso. Solo
+ * SuperAdmin; la base (delete_person, 0046) rechaza si tiene algo ligado.
+ */
+export async function deletePersonAction(personId: string, reason: string): Promise<ActionResult> {
+  try {
+    await requireRole(["apostol"]);
+  } catch (err) {
+    if (err instanceof AuthError) return actionError("Solo un SuperAdmin puede borrar personas.");
+    throw err;
+  }
+  if (!z.string().uuid().safeParse(personId).success) return actionError("Persona inválida.");
+  const motive = z.string().trim().min(5, "Escribe el motivo (mínimo 5 caracteres).").max(300);
+  const parsed = motive.safeParse(reason);
+  if (!parsed.success) return actionError(parsed.error.issues[0]?.message ?? "Escribe el motivo.");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_person", {
+    p_person_id: personId,
+    p_reason: parsed.data,
+  });
+  if (error) {
+    if (/tiene_registros/.test(error.message)) {
+      return actionError(
+        "No se puede borrar: tiene registros ligados en la app. Recarga la página para ver cuáles.",
+      );
+    }
+    if (/propia cuenta|SuperAdmin o Finanzas|motivo|no encontrada/i.test(error.message)) {
+      return actionError(error.message);
+    }
+    if (/No autorizado|42501/.test(error.message)) {
+      return actionError("Solo un SuperAdmin puede borrar personas.");
+    }
+    return actionError("No se pudo borrar. Intenta de nuevo.");
+  }
+  revalidatePath("/personas");
+  return actionOk(undefined);
+}

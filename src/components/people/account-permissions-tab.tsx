@@ -51,16 +51,20 @@ export function AccountPermissionsTab({
   personId,
   account,
   responsibilities,
+  canGrantFinance = false,
 }: {
   personId: string;
   account: PersonAccount | null;
   responsibilities: PersonResponsibilities;
+  /** El que mira es SuperAdmin: puede conceder SuperAdmin/Finanzas. */
+  canGrantFinance?: boolean;
 }) {
   return (
     <div className="space-y-6">
       <AccountSection account={account} />
       <ResponsibilitiesSection responsibilities={responsibilities} />
       {account && <PermissionsSection personId={personId} account={account} />}
+      {account && <FinanceAccessSection account={account} canGrant={canGrantFinance} />}
       {!account && (
         <Card>
           <CardHeader>
@@ -75,6 +79,41 @@ export function AccountPermissionsTab({
         </Card>
       )}
     </div>
+  );
+}
+
+// Los accesos SuperAdmin y Finanzas no se cambian aquí (0035): solo un
+// SuperAdmin los concede en Finanzas → Acceso. Esta tarjeta dice dónde.
+function FinanceAccessSection({
+  account,
+  canGrant,
+}: {
+  account: PersonAccount;
+  canGrant: boolean;
+}) {
+  const current = account.roles.filter((r) => r === "apostol" || r === "finanzas");
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>SuperAdmin y Finanzas</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <p>
+          {current.length > 0
+            ? `Tiene: ${current.map((r) => roleLabels[r]).join(", ")}.`
+            : "No tiene acceso a Finanzas."}
+        </p>
+        <p className="text-muted-foreground">
+          Finanzas permite registrar y ver donaciones, cartas, exportaciones y certificaciones. Solo
+          un SuperAdmin lo concede o lo quita, desde Finanzas → Acceso.
+        </p>
+        {canGrant ? (
+          <Button asChild variant="outline" size="sm">
+            <Link href="/finanzas/acceso">Ir a Finanzas → Acceso</Link>
+          </Button>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -221,21 +260,6 @@ function PermissionsSection({ personId, account }: { personId: string; account: 
           </Alert>
         )}
 
-        {account.roles.some((r) => r === "apostol" || r === "finanzas") ? (
-          <div className="bg-muted/40 rounded-md border p-3 text-sm">
-            <p className="font-medium">
-              Acceso financiero:{" "}
-              {account.roles
-                .filter((r) => r === "apostol" || r === "finanzas")
-                .map((r) => roleLabels[r])
-                .join(", ")}
-            </p>
-            <p className="text-muted-foreground text-xs">
-              Solo un SuperAdmin lo concede o revoca (Finanzas → Acceso). No se cambia desde aquí.
-              {account.roles.includes("apostol") ? " SuperAdmin tiene todos los permisos." : ""}
-            </p>
-          </div>
-        ) : null}
         {ROLE_GROUPS.map((group) => (
           <div key={group.label} className="space-y-2">
             <div>

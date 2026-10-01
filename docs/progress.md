@@ -4,6 +4,23 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-01 — Borrar personas creadas por error; acceso a Finanzas visible
+
+- **Borrar persona** (solo SuperAdmin): tarjeta al final de la ficha de la
+  persona. Si no tiene nada ligado, se borra con su cuenta de acceso
+  (motivo obligatorio, confirmación, bitácora). Si tiene algo, dice qué y
+  no deja. Migración `0046_delete_person.sql`; pruebas
+  `tests/db/delete-person.test.ts` (5).
+- **Acceso a Finanzas**: ya existía en Finanzas → Acceso (solo
+  SuperAdmin), pero no se veía desde la persona. Ahora "Cuenta y
+  permisos" muestra la tarjeta "SuperAdmin y Finanzas" con un botón a
+  Finanzas → Acceso.
+- `test:db` 77/77, check y build limpios. Verificado en el navegador
+  (desarrollo, `apostol@iglesia.test`): crear persona de prueba → borrar
+  → desaparece; persona con historial → "No se puede borrar" con la
+  lista; tarjeta y botón de Finanzas.
+- **Aplicado**: `0046` en **desarrollo**. **Pendiente**: producción.
+
 ### 2026-10-01 — Pastor y maestro: solo las personas a su cargo
 
 Migración `0045_pastor_teacher_scope.sql` + app. El pastor ve y trabaja

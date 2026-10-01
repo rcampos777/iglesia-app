@@ -2,6 +2,17 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-10-01 — Borrar personas creadas por error (solo SuperAdmin)
+
+**Contexto**: el dueño del producto quiere "borrar cuentas que no tengan
+nada atachado o fueron creadas por error, para no tener basura".
+
+**Decisión** (`0046`): un SuperAdmin puede borrar a una persona **solo si
+no tiene nada ligado**; se borra también su cuenta de acceso. Con
+cualquier registro (incluidas donaciones) no se puede: la ficha dice qué
+tiene. Motivo obligatorio y bitácora. Así se conserva el historial real
+(regla §3.1: una persona = un registro) y las cartas de donativos.
+
 ## 2026-10-01 — Pastor y maestro: solo lo que les toca
 
 **Contexto**: el dueño del producto: "que el pastor de ministerio solo vea

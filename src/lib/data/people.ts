@@ -142,3 +142,14 @@ export async function findDuplicateCandidates(input: {
     phone: p.phone,
   }));
 }
+
+/**
+ * Qué impide borrar a una persona (0046), por tipo y cantidad. Vacío =
+ * se puede borrar. Solo SuperAdmin; para cualquier otro devuelve null.
+ */
+export async function getPersonDeleteBlockers(id: string): Promise<Record<string, number> | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("person_delete_blockers", { p_person_id: id });
+  if (error) return null;
+  return (data ?? {}) as Record<string, number>;
+}

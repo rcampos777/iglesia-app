@@ -468,6 +468,21 @@ que un miembro edite sus propios roles o su `person_id` (ver `0015` y
   líderes para agregar miembros.
 - Pruebas: `tests/db/scope.test.ts`.
 
+## 8.l Borrar personas creadas por error (2026-10-01, 0046)
+
+- Solo `apostol` (`delete_person`, `person_delete_blockers`, security
+  definer con `is_apostol()`); motivo obligatorio; `audit_log`
+  `person.delete` con nombre y motivo.
+- Rechaza si la persona tiene cualquier registro ligado (matrícula,
+  asistencia, ministerios, actividades, inscripciones, check-ins,
+  seguimiento, oración, donaciones, cartas, certificaciones, encuestas, o
+  es maestro/líder/responsable). Bitácoras que solo la mencionan (emails,
+  filas de importación) se desligan; invitaciones caen en cascada.
+- Borra su cuenta (`auth.users` → profile y roles en cascada) en la misma
+  transacción. No permite la propia cuenta ni cuentas con SuperAdmin o
+  Finanzas (primero se revocan en Finanzas → Acceso). Cualquier otra
+  referencia no prevista (FK) aborta todo con "tiene registros".
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

@@ -961,6 +961,14 @@ export interface Database {
         Args: { p_ministry_id: string; p_enabled: boolean };
         Returns: undefined;
       };
+      person_delete_blockers: {
+        Args: { p_person_id: string };
+        Returns: Record<string, number>;
+      };
+      delete_person: {
+        Args: { p_person_id: string; p_reason: string };
+        Returns: undefined;
+      };
       list_people_for_class_enrollment: {
         Args: { p_class_offering_id: string };
         Returns: { id: string; first_name: string; last_name: string }[];

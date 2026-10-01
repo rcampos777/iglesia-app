@@ -142,6 +142,14 @@ Nada de esto corre en producción todavía. Pasos:
 4. Finanzas → Configuración: completar los datos confirmados. Aprobar la
    plantilla (Apóstol) solo después de revisarla.
 
+## 7.b Dar acceso de Finanzas
+
+Solo un SuperAdmin, en **Finanzas → Acceso** (busca la cuenta por nombre o
+email; la persona debe tener cuenta de acceso). Desde 2026-10-01, la
+pestaña "Cuenta y permisos" de cada persona muestra la tarjeta
+"SuperAdmin y Finanzas" con lo que tiene y, para un SuperAdmin, el botón
+"Ir a Finanzas → Acceso".
+
 ## 8. Certificaciones de ministros (`/certificaciones`)
 
 Desde 2026-10-01 (`0042`, `0043`). Mismo acceso que Finanzas: Apóstol

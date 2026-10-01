@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import { PersonForm } from "@/components/people/person-form";
 import { SendEmailForm } from "@/components/people/send-email-form";
 import { updatePersonAction } from "../actions";
-import { getActivityName, getPerson } from "@/lib/data/people";
+import { getActivityName, getPerson, getPersonDeleteBlockers } from "@/lib/data/people";
+import { isApostol } from "@/lib/auth/finance";
+import { DeletePersonCard } from "@/components/people/delete-person-card";
 import { getPersonJourney } from "@/lib/data/journey";
 import { PersonJourneyCard } from "@/components/people/person-journey";
 import { getPortalAccountStatus } from "@/lib/data/portal-invitations";
@@ -42,10 +44,12 @@ export default async function PersonDetailPage({
     : null;
   const canWrite = hasAnyRole(user, [...WRITE_ROLES]);
   const userIsAdmin = isAdmin(user);
-  const [portalStatus, account, responsibilities] = await Promise.all([
+  const [portalStatus, account, responsibilities, deleteBlockers] = await Promise.all([
     canWrite ? getPortalAccountStatus(id) : Promise.resolve(null),
     userIsAdmin ? getAccountForPerson(id) : Promise.resolve(null),
     userIsAdmin ? getResponsibilitiesForPerson(id) : Promise.resolve(null),
+    // Borrar personas creadas por error: solo SuperAdmin (0046).
+    isApostol(user) ? getPersonDeleteBlockers(id) : Promise.resolve(null),
   ]);
 
   async function updateThisPerson(formData: FormData) {
@@ -86,6 +90,13 @@ export default async function PersonDetailPage({
           </CardContent>
         </Card>
       )}
+      {deleteBlockers && (
+        <DeletePersonCard
+          personId={person.id}
+          personName={`${person.first_name} ${person.last_name}`}
+          blockers={deleteBlockers}
+        />
+      )}
     </div>
   );
 
@@ -120,6 +131,7 @@ export default async function PersonDetailPage({
               personId={person.id}
               account={account}
               responsibilities={responsibilities ?? { ministriesLed: [], classesTaught: [] }}
+              canGrantFinance={isApostol(user)}
             />
           </TabsContent>
         </Tabs>
