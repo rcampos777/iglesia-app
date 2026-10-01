@@ -76,13 +76,19 @@ export function MinistryForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="leaderPersonId">Líder</Label>
+        <Label htmlFor="leaderPersonId">Pastor del ministerio{ministry ? "" : " *"}</Label>
         <Select name="leaderPersonId" defaultValue={ministry?.leader_person_id ?? NO_LEADER_VALUE}>
-          <SelectTrigger id="leaderPersonId" className="w-full">
-            <SelectValue placeholder="Sin líder asignado" />
+          <SelectTrigger
+            id="leaderPersonId"
+            className="w-full"
+            aria-invalid={Boolean(!state.ok && state.fieldErrors?.leaderPersonId)}
+          >
+            <SelectValue placeholder="Elige al pastor" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={NO_LEADER_VALUE}>Sin líder asignado</SelectItem>
+            <SelectItem value={NO_LEADER_VALUE}>
+              {ministry ? "Sin pastor asignado" : "Elige al pastor"}
+            </SelectItem>
             {people.map((p) => (
               <SelectItem key={p.id} value={p.id}>
                 {p.first_name} {p.last_name}
@@ -90,8 +96,11 @@ export function MinistryForm({
             ))}
           </SelectContent>
         </Select>
+        {!state.ok && state.fieldErrors?.leaderPersonId && (
+          <p className="text-destructive text-sm">{state.fieldErrors.leaderPersonId[0]}</p>
+        )}
         <p className="text-muted-foreground text-sm">
-          El líder puede gestionar por sí mismo a quién sirve en este ministerio.
+          El pastor gestiona por sí mismo a quién sirve en este ministerio y trabaja con esa gente.
         </p>
       </div>
 

@@ -84,7 +84,7 @@ export default async function MinistriesPage({
                     <Users className="size-4" aria-hidden="true" />
                     {m.activeMemberCount} sirviendo
                   </span>
-                  {m.leaderName && <span>Líder: {m.leaderName}</span>}
+                  {m.leaderName && <span>Pastor: {m.leaderName}</span>}
                   {m.meeting_schedule_text && <span>{m.meeting_schedule_text}</span>}
                 </div>
               </CardContent>
