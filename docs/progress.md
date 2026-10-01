@@ -19,8 +19,11 @@ token.
 - **Publicado (2026-10-01)**: código de la auditoría y del CAPTCHA en
   Vercel (`e7ee905`, despliegue "Ready"); cabeceras de seguridad
   verificadas en vivo. El CAPTCHA aún no aparece en producción hasta que
-  se pongan las claves de Turnstile en Vercel. `0047` y `0048` **todavía
-  no** se han aplicado en producción.
+  se pongan las claves de Turnstile en Vercel. `0047` y `0048` aplicadas en
+  producción el mismo día (script del dueño); `SUPABASE_SERVICE_ROLE_KEY`
+  confirmada en Vercel (la inscripción pública la usa desde `0048`).
+  Falta: claves de Turnstile en Vercel y activar el CAPTCHA en Supabase
+  Auth.
 - **Pendiente para producción** (el dueño): (1) crear el sitio en
   Cloudflare Turnstile (dominios de la app y del sitio) y poner
   `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY` en Vercel;
