@@ -16,6 +16,11 @@ token.
 
 - **Aplicado**: `0048` en **desarrollo**. En local se usan las claves de
   **prueba** de Cloudflare (`.env.local`).
+- **Publicado (2026-10-01)**: código de la auditoría y del CAPTCHA en
+  Vercel (`e7ee905`, despliegue "Ready"); cabeceras de seguridad
+  verificadas en vivo. El CAPTCHA aún no aparece en producción hasta que
+  se pongan las claves de Turnstile en Vercel. `0047` y `0048` **todavía
+  no** se han aplicado en producción.
 - **Pendiente para producción** (el dueño): (1) crear el sitio en
   Cloudflare Turnstile (dominios de la app y del sitio) y poner
   `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY` en Vercel;
