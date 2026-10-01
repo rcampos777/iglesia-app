@@ -17,9 +17,16 @@ existente; el origen no se puede editar).
 - Pruebas: `tests/db/registrations.test.ts` (origen al inscribirse,
   inmutable, alta manual = "manual"). `npm run test:db` 59/59.
 - Verificado en el navegador (escritorio y 375 px).
-- **Aplicado**: `0041` en **desarrollo**. **Pendiente**: aplicarla en
-  **producción** (`ccempuwuefjnaarmxbkz`) junto con el despliegue — el
-  código nuevo lee `people.source`, así que la migración va primero.
+- **Aplicado (2026-10-01)**: `0041` en **desarrollo** y en **producción**
+  (`ccempuwuefjnaarmxbkz`; verificado con
+  `select source, count(*) from people group by source` → 4
+  `registro_cuenta`, 2 `inscripcion_actividad`). Código publicado en Vercel
+  (push de `9983d6b` a `main`, despliegue Production "Ready").
+- Cómo aplicar migraciones a producción desde esta red (sin IPv6): Session
+  pooler `aws-0-us-west-1.pooler.supabase.com:5432`, usuario
+  `postgres.ccempuwuefjnaarmxbkz`, con
+  `npx supabase db push --db-url ...` (la contraseña la escribe el
+  usuario; nunca en el comando ni en el historial).
 
 ### 2026-09-29 — Inscripción en línea a actividades (Retiro de Hombres 2026)
 
