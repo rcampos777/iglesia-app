@@ -19,7 +19,8 @@
   (desarrollo, `apostol@iglesia.test`): crear persona de prueba → borrar
   → desaparece; persona con historial → "No se puede borrar" con la
   lista; tarjeta y botón de Finanzas.
-- **Aplicado**: `0046` en **desarrollo**. **Pendiente**: producción.
+- **Aplicado (2026-10-01)**: `0046` en **desarrollo** y en **producción**
+  (ejecutado por el usuario); código publicado en Vercel.
 
 ### 2026-10-01 — Pastor y maestro: solo las personas a su cargo
 
