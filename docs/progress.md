@@ -26,8 +26,9 @@ fecha), búsqueda y filtros; tipos editables. Solo el apóstol borra. Todo
   tipos, móvil 375 px; administrador redirigido y sin el menú. Encontrado y
   corregido: "Ver documento" con `window.open` tras un `await` lo bloquea el
   navegador → ahora es un enlace a `/certificaciones/[id]/documento`.
-- **Aplicado**: `0042`–`0043` en **desarrollo**. **Pendiente**: aplicarlas
-  en **producción** antes de publicar el código.
+- **Aplicado (2026-10-01)**: `0042`–`0043` en **desarrollo** y en
+  **producción** (`db push` por Session pooler, ejecutado por el usuario);
+  código publicado en Vercel (push a `main`).
 
 ### 2026-10-01 — Origen de cada persona
 
