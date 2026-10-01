@@ -30,6 +30,17 @@ async function asAnon<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
+// Desde 0048 la inscripción solo la llama el servidor de la app
+// (service_role), después de verificar el CAPTCHA.
+async function asServer<T>(fn: () => Promise<T>): Promise<T> {
+  await db.exec(`select set_config('request.jwt.claim.sub', '', false); set role service_role;`);
+  try {
+    return await fn();
+  } finally {
+    await db.exec(`reset role;`);
+  }
+}
+
 interface Submit {
   slug?: string;
   first?: string;
@@ -102,7 +113,7 @@ describe("inscripción en línea", () => {
   });
 
   test("una persona nueva queda creada, inscrita y vinculada", async () => {
-    const { rows } = await asAnon(() => submit());
+    const { rows } = await asServer(() => submit());
     assert.equal(rows[0]!.match_status, "vinculado");
     const personId = rows[0]!.person_id!;
     const { rows: p } = await db.query<{
@@ -146,11 +157,14 @@ describe("inscripción en línea", () => {
   });
 
   test("el mismo email no se inscribe dos veces", async () => {
-    await rejects(() => asAnon(() => submit({ email: "UNO@example.test" })), /already_registered/);
+    await rejects(
+      () => asServer(() => submit({ email: "UNO@example.test" })),
+      /already_registered/,
+    );
   });
 
   test("un posible duplicado NO se vincula solo", async () => {
-    const { rows } = await asAnon(() =>
+    const { rows } = await asServer(() =>
       // Mismo teléfono que la persona anterior, otro email.
       submit({ first: "Otro", last: "Nombre", email: "dos@example.test", phone: "(787) 555-0100" }),
     );
@@ -164,15 +178,15 @@ describe("inscripción en línea", () => {
   });
 
   test("menores, sin aceptar términos, cupo lleno y cerrada se rechazan", async () => {
-    await rejects(() => asAnon(() => submit({ age: 16, email: "m@example.test" })), /minor/);
-    await rejects(() => asAnon(() => submit({ terms: false, email: "t@example.test" })), /terms/);
+    await rejects(() => asServer(() => submit({ age: 16, email: "m@example.test" })), /minor/);
+    await rejects(() => asServer(() => submit({ terms: false, email: "t@example.test" })), /terms/);
 
-    await asAnon(() =>
+    await asServer(() =>
       submit({ first: "Tercero", last: "Prueba", email: "tres@example.test", phone: "7875550300" }),
     );
     await rejects(
       () =>
-        asAnon(() =>
+        asServer(() =>
           submit({
             first: "Cuarto",
             last: "Prueba",
@@ -188,7 +202,7 @@ describe("inscripción en línea", () => {
       [activityId],
     );
     await rejects(
-      () => asAnon(() => submit({ email: "cerrado@example.test" })),
+      () => asServer(() => submit({ email: "cerrado@example.test" })),
       /registration_closed/,
     );
     await db.query(`update activities set registration_closes_on = null where id = $1`, [
@@ -271,6 +285,13 @@ describe("inscripción en línea", () => {
           ),
         ),
       /row-level security/,
+    );
+  });
+
+  test("el público no puede llamar la inscripción directo (sin pasar por el CAPTCHA)", async () => {
+    await rejects(
+      () => asAnon(() => submit({ email: "directo@example.test" })),
+      /permission denied/,
     );
   });
 

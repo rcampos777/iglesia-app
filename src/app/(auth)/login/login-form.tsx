@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ActionResult } from "@/lib/action-result";
+import { Turnstile } from "@/components/captcha/turnstile";
 
 const initialState: ActionResult = { ok: true, data: undefined };
 
@@ -84,6 +85,7 @@ export function LoginForm({
               <p className="text-destructive text-sm">{state.fieldErrors.password[0]}</p>
             )}
           </div>
+          <Turnstile resetKey={state} />
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending ? "Ingresando..." : "Ingresar"}
           </Button>

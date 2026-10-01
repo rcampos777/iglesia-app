@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ActionResult } from "@/lib/action-result";
+import { Turnstile } from "@/components/captcha/turnstile";
 
 const initialState: ActionResult = { ok: true, data: undefined };
 
@@ -103,6 +104,7 @@ export function RegisterForm() {
               <p className="text-destructive text-sm">{state.fieldErrors.confirmPassword[0]}</p>
             )}
           </div>
+          <Turnstile resetKey={state} />
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending ? "Creando cuenta..." : "Crear cuenta"}
           </Button>

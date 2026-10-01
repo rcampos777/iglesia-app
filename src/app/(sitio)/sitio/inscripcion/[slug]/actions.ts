@@ -1,6 +1,7 @@
 "use server";
 
-import { createPublicClient } from "@/lib/supabase/public";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { CAPTCHA_MISSING, captchaTokenFrom, verifyCaptcha } from "@/lib/captcha";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
 import { publicRegistrationSchema } from "@/lib/validations/registrations";
 import { notifyOrganizers, sendRegistrationConfirmation } from "@/lib/registrations/automations";
@@ -38,6 +39,13 @@ export async function submitRegistrationAction(
     return actionOk({ firstName: str("firstName").trim(), email: str("email").trim() });
   }
 
+  // CAPTCHA verificado en el servidor (Turnstile). La función de la base ya
+  // no la puede llamar el público directo con la llave anónima (0048):
+  // solo esta acción, después de verificar.
+  if (!(await verifyCaptcha(captchaTokenFrom(formData)))) {
+    return actionError(CAPTCHA_MISSING);
+  }
+
   const parsed = publicRegistrationSchema.safeParse({
     firstName: str("firstName"),
     lastName: str("lastName"),
@@ -63,7 +71,7 @@ export async function submitRegistrationAction(
 
   // El público no escribe en tablas: la función valida cupo, fechas y
   // duplicados, y decide si crear la persona o dejarla para revisión.
-  const db = createPublicClient();
+  const db = createAdminClient();
   const { data, error } = await db.rpc("submit_activity_registration", {
     p_slug: slug,
     p_first_name: d.firstName,

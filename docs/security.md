@@ -496,6 +496,27 @@ Pendientes: política de privacidad, retención, exportación de datos,
 anonimización y baja de iglesia, registro público, MFA, contratos (DPA)
 y plan de incidentes.
 
+## 8.n CAPTCHA (Cloudflare Turnstile, 2026-10-01)
+
+- Widget en login, registro, recuperar contraseña y la forma pública de
+  inscripción (`src/components/captcha/turnstile.tsx`). Token de un solo
+  uso; el widget se reinicia después de cada envío.
+- **Auth** (login, registro, recuperar): el token se pasa a Supabase
+  (`captchaToken`), que lo verifica **si** su CAPTCHA está activo en el
+  panel (Authentication → Attack Protection). Solo así se protegen
+  también las llamadas directas a la API de Auth.
+- **Inscripción pública**: el servidor verifica el token
+  (`src/lib/captcha.ts`, `siteverify`) y luego llama a
+  `submit_activity_registration` con la llave de servicio; `0048` le
+  quitó el permiso a `anon` y `authenticated` (ya no se puede llamar
+  directo con la llave pública).
+- Sin `NEXT_PUBLIC_TURNSTILE_SITE_KEY` el CAPTCHA no aparece (solo
+  desarrollo). Con site key pero sin secreto, la inscripción **falla
+  cerrada**.
+- Pruebas: `tests/db/registrations.test.ts` (anon ya no puede inscribir
+  directo). Navegador: login con token, envío sin token rechazado y
+  widget reiniciado.
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

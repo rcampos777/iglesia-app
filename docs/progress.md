@@ -4,6 +4,25 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-01 — CAPTCHA (Cloudflare Turnstile)
+
+Login, registro, recuperar contraseña y la forma pública de inscripción
+piden la verificación de Turnstile (casi siempre invisible). Auth la
+verifica Supabase; la inscripción la verifica el servidor, y `0048` impide
+llamar la inscripción directo con la llave pública. Ver
+`docs/security.md` §8.n. Pruebas: `test:db` 81/81, unitarias 16/16, E2E
+34/34, check y build limpios; navegador: login con token y rechazo sin
+token.
+
+- **Aplicado**: `0048` en **desarrollo**. En local se usan las claves de
+  **prueba** de Cloudflare (`.env.local`).
+- **Pendiente para producción** (el dueño): (1) crear el sitio en
+  Cloudflare Turnstile (dominios de la app y del sitio) y poner
+  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY` en Vercel;
+  (2) activar el CAPTCHA en Supabase → Authentication → Attack
+  Protection con el mismo secreto; (3) aplicar `0047`–`0048` y publicar.
+  El orden importa: ver el resumen en la conversación del 2026-10-01.
+
 ### 2026-10-01 — Auditoría de privacidad y seguridad (Nexo)
 
 Informe: `docs/audit/2026-10-privacidad-seguridad.md`. La app se llama

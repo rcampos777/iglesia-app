@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
+import { CAPTCHA_MISSING, captchaEnabled, captchaTokenFrom } from "@/lib/captcha";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -32,10 +33,17 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     return actionError("Revisa los datos ingresados.", zodFieldErrors(parsed.error));
   }
 
+  const captchaToken = captchaTokenFrom(formData);
+  if (captchaEnabled() && !captchaToken) return actionError(CAPTCHA_MISSING);
+
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { error } = await supabase.auth.signInWithPassword({
+    ...parsed.data,
+    options: { captchaToken: captchaToken || undefined },
+  });
 
   if (error) {
+    if (/captcha/i.test(error.message)) return actionError(CAPTCHA_MISSING);
     return actionError("Email o contraseña incorrectos.");
   }
 
@@ -63,11 +71,15 @@ export async function registerAction(formData: FormData): Promise<ActionResult> 
     return actionError("Revisa los datos ingresados.", zodFieldErrors(parsed.error));
   }
 
+  const captchaToken = captchaTokenFrom(formData);
+  if (captchaEnabled() && !captchaToken) return actionError(CAPTCHA_MISSING);
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
+      captchaToken: captchaToken || undefined,
       data: {
         first_name: parsed.data.firstName,
         last_name: parsed.data.lastName,
@@ -77,6 +89,7 @@ export async function registerAction(formData: FormData): Promise<ActionResult> 
   });
 
   if (error) {
+    if (/captcha/i.test(error.message)) return actionError(CAPTCHA_MISSING);
     if (error.message.toLowerCase().includes("already registered")) {
       return actionError("Ya existe una cuenta con ese email.");
     }
@@ -93,12 +106,17 @@ export async function forgotPasswordAction(formData: FormData): Promise<ActionRe
     return actionError("Revisa los datos ingresados.", zodFieldErrors(parsed.error));
   }
 
+  const captchaToken = captchaTokenFrom(formData);
+  if (captchaEnabled() && !captchaToken) return actionError(CAPTCHA_MISSING);
+
   const supabase = await createClient();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${appUrl}/auth/callback?next=/recuperar/nueva-contrasena`,
+    captchaToken: captchaToken || undefined,
   });
+  if (error && /captcha/i.test(error.message)) return actionError(CAPTCHA_MISSING);
 
   // Siempre respondemos "ok" exista o no la cuenta, para no filtrar qué
   // emails están registrados.

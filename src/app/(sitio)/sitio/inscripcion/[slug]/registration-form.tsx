@@ -5,6 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 import type { ActionResult } from "@/lib/action-result";
 import { formatCents } from "@/lib/money";
 import { submitRegistrationAction, type RegistrationDone } from "./actions";
+import { Turnstile } from "@/components/captcha/turnstile";
 
 type State = ActionResult<RegistrationDone> | null;
 
@@ -309,6 +310,8 @@ export function RegistrationForm({
         confirmación y recordatorios de esta actividad. Para consultar, corregir o pedir que se
         borren tus datos, escribe a la iglesia.
       </p>
+
+      <Turnstile resetKey={state} />
 
       <button
         type="submit"
