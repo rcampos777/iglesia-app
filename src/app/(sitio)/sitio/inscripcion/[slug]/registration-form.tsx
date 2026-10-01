@@ -299,6 +299,17 @@ export function RegistrationForm({
         ) : null}
       </div>
 
+      {/* Aviso en el punto de recogida (auditoría 2026-10-01, H-08). Solo
+          describe lo que el sistema hace hoy; no promete plazos. */}
+      <p className="text-[15px] leading-[22px] text-[#1D191A]/75">
+        <b>Sobre tus datos:</b> los recibe la iglesia para organizar esta actividad y comunicarse
+        contigo. Si todavía no estás en su directorio, se crea tu registro como visitante. La
+        información médica y el contacto de emergencia solo los ven quienes organizan o administran
+        las actividades de la iglesia, y no se incluyen en los emails. Recibirás por email la
+        confirmación y recordatorios de esta actividad. Para consultar, corregir o pedir que se
+        borren tus datos, escribe a la iglesia.
+      </p>
+
       <button
         type="submit"
         disabled={pending}

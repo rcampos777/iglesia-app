@@ -4,6 +4,24 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-01 — Auditoría de privacidad y seguridad (Nexo)
+
+Informe: `docs/audit/2026-10-privacidad-seguridad.md`. La app se llama
+**Nexo** desde hoy (producto); "Ciudad de Avivamiento" es la primera
+iglesia.
+
+- **Corregido (sin desplegar)**: Next.js 16.3.1 → 16.3.8 y `npm audit` en
+  0; cabeceras de seguridad; `0047_audit_logs_surveys_scope.sql`; escapado
+  de HTML en emails del personal; `CRON_SECRET` en tiempo constante; aviso
+  de datos en la forma pública de inscripción.
+- Pruebas: `tests/db/audit-scope.test.ts` (3), `tests/unit/email-escape.test.ts`
+  (1). `test:db` 80/80, unitarias 16/16, E2E 34/34, check y build limpios.
+- **Aplicado**: `0047` en **desarrollo**. **Pendiente**: producción y
+  publicar el código (con autorización del dueño).
+- **Pendientes de decisión o revisión legal**: ver §6 y §10 del informe
+  (política de privacidad, retención, exportación de datos, anonimización,
+  baja de iglesia, registro público, MFA, DPA, plan de incidentes).
+
 ### 2026-10-01 — Borrar personas creadas por error; acceso a Finanzas visible
 
 - **Borrar persona** (solo SuperAdmin): tarjeta al final de la ficha de la

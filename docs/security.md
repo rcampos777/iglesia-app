@@ -483,6 +483,19 @@ que un miembro edite sus propios roles o su `person_id` (ver `0015` y
   Finanzas (primero se revocan en Finanzas → Acceso). Cualquier otra
   referencia no prevista (FK) aborta todo con "tiene registros".
 
+## 8.m Auditoría de privacidad y seguridad (2026-10-01)
+
+Informe completo: `docs/audit/2026-10-privacidad-seguridad.md` (inventario,
+proveedores, marco legal con fuentes, hallazgos H-01–H-20, pruebas y
+preguntas para revisión legal). Corregido: Next.js 16.3.8 (RCE
+críticos), cabeceras de seguridad (`next.config.ts`), `0047` (bitácora
+de emails y respuestas de encuestas ya no visibles a todo el staff),
+escapado de HTML en emails del personal, secreto de cron en tiempo
+constante, aviso de datos en la forma pública de inscripción.
+Pendientes: política de privacidad, retención, exportación de datos,
+anonimización y baja de iglesia, registro público, MFA, contratos (DPA)
+y plan de incidentes.
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

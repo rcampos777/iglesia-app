@@ -1,4 +1,5 @@
 import "server-only";
+import { esc, para } from "./escape";
 import { formatDateKeyInline, formatLocalTime } from "@/lib/datetime";
 import { formatCents } from "@/lib/money";
 import { personalizeLetter } from "@/lib/registrations/letter";
@@ -29,19 +30,6 @@ export type RegistrationEmailPerson = Pick<
   ActivityRegistrationRow,
   "first_name" | "last_name" | "amount_paid_cents"
 >;
-
-function esc(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-/** Texto libre con saltos de línea → HTML seguro. */
-function para(text: string): string {
-  return esc(text).replace(/\n/g, "<br>");
-}
 
 export function activityDateText(a: Pick<ActivityRow, "activity_date" | "end_date">): string {
   if (!a.end_date || a.end_date === a.activity_date) return formatDateKeyInline(a.activity_date);

@@ -8,6 +8,7 @@ import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
 import { personSchema } from "@/lib/validations/people";
 import { findDuplicateCandidates, getPerson, type DuplicateCandidate } from "@/lib/data/people";
 import { sendEmail } from "@/lib/email/send";
+import { para } from "@/lib/email/escape";
 import type { AppRole, PersonInsert } from "@/types/database";
 import { z } from "zod";
 
@@ -165,7 +166,9 @@ export async function sendPersonEmailAction(
   const result = await sendEmail({
     to: person.email,
     subject,
-    html: `<p>${message.replace(/\n/g, "<br>")}</p>`,
+    // Texto del personal escapado: no se puede inyectar HTML (enlaces o
+    // formularios ocultos) en un email que sale con el remitente de la iglesia.
+    html: `<p>${para(message)}</p>`,
     recipientPersonId: personId,
     relatedEntityType: "people",
     relatedEntityId: personId,
