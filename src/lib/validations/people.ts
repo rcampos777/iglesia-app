@@ -7,6 +7,31 @@ export const membershipStatusValues = [
   "inactivo",
 ] as const;
 
+export const personSourceValues = [
+  "manual",
+  "importacion",
+  "inscripcion_actividad",
+  "registro_cuenta",
+] as const;
+
+/**
+ * Filtro "Origen" del directorio: un origen, o una actividad concreta
+ * ("actividad:<uuid>"). Cualquier otro valor equivale a "todos".
+ */
+export function parsePersonSourceFilter(raw: string | undefined): {
+  source?: (typeof personSourceValues)[number];
+  activityId?: string;
+} {
+  if (!raw) return {};
+  const source = z.enum(personSourceValues).safeParse(raw);
+  if (source.success) return { source: source.data };
+  if (raw.startsWith("actividad:")) {
+    const id = z.string().uuid().safeParse(raw.slice("actividad:".length));
+    if (id.success) return { source: "inscripcion_actividad", activityId: id.data };
+  }
+  return {};
+}
+
 export const genderValues = ["masculino", "femenino", "no_especifica"] as const;
 
 export const personSchema = z.object({

@@ -18,13 +18,13 @@ registro se guarda sola.
 
 ## Automatizaciones
 
-| Cuándo                          | Qué pasa                                                                                                                                                                        |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Al inscribirse                  | Si no se parece a nadie en Personas: se crea la persona (visitante) y queda en la lista de inscritos. Si se parece (mismo email, teléfono o nombre): queda "Revisar duplicado". |
-| Al inscribirse                  | Email de confirmación a la persona: la **carta de bienvenida** (editable; `{{Nombre}}` → su nombre) y debajo fechas, lugar, costo, depósito, cómo pagar, contacto.              |
-| Al inscribirse                  | Email a los organizadores (correos configurados + responsable de la actividad) con los datos básicos y un enlace a la app. **Sin datos médicos.**                               |
-| 10 días antes (si debe balance) | Recordatorio de pago con el balance y cómo pagar.                                                                                                                               |
-| 3 días antes                    | Recordatorio de la actividad: fecha, lugar, qué llevar y balance si queda.                                                                                                      |
+| Cuándo                          | Qué pasa                                                                                                                                                                                                               |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Al inscribirse                  | Si no se parece a nadie en Personas: se crea la persona (visitante, con origen "Inscripción: <actividad>") y queda en la lista de inscritos. Si se parece (mismo email, teléfono o nombre): queda "Revisar duplicado". |
+| Al inscribirse                  | Email de confirmación a la persona: la **carta de bienvenida** (editable; `{{Nombre}}` → su nombre) y debajo fechas, lugar, costo, depósito, cómo pagar, contacto.                                                     |
+| Al inscribirse                  | Email a los organizadores (correos configurados + responsable de la actividad) con los datos básicos y un enlace a la app. **Sin datos médicos.**                                                                      |
+| 10 días antes (si debe balance) | Recordatorio de pago con el balance y cómo pagar.                                                                                                                                                                      |
+| 3 días antes                    | Recordatorio de la actividad: fecha, lugar, qué llevar y balance si queda.                                                                                                                                             |
 
 Los recordatorios salen de un cron diario (Vercel Cron, 9:00 a. m. de PR →
 `/api/cron/recordatorios-inscripciones`). Cada recordatorio sale **una vez**

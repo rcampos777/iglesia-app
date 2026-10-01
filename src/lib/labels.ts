@@ -10,6 +10,7 @@ import type {
   FollowupStatus,
   GenderType,
   MembershipStatus,
+  PersonSource,
   MinistryMemberRole,
   ActivityStatus,
   ClassStatus,
@@ -22,6 +23,13 @@ export const membershipStatusLabels: Record<MembershipStatus, string> = {
   asistente_habitual: "Asistente habitual",
   miembro: "Miembro",
   inactivo: "Inactivo",
+};
+
+export const personSourceLabels: Record<PersonSource, string> = {
+  manual: "Alta manual",
+  importacion: "Importación",
+  inscripcion_actividad: "Inscripción en línea",
+  registro_cuenta: "Registro de cuenta",
 };
 
 export const genderLabels: Record<GenderType, string> = {

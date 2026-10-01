@@ -1,8 +1,25 @@
 # Progreso del proyecto
 
-Última actualización: 2026-09-29.
+Última actualización: 2026-10-01.
 
 ## Estado general: MVP verificado de punta a punta ✅
+
+### 2026-10-01 — Origen de cada persona
+
+Quien llena la forma de inscripción sigue entrando como **Visitante**
+(estatus = relación con la iglesia; así también llega a Seguimiento), pero
+ahora cada persona tiene un **origen**: alta manual, importación,
+inscripción en línea (con la actividad) o registro de cuenta. Columna
+"Origen" y filtro en `/personas` (por origen o por actividad), y en la
+ficha de la persona. Migración `0041_people_source.sql` (rellena lo
+existente; el origen no se puede editar).
+
+- Pruebas: `tests/db/registrations.test.ts` (origen al inscribirse,
+  inmutable, alta manual = "manual"). `npm run test:db` 59/59.
+- Verificado en el navegador (escritorio y 375 px).
+- **Aplicado**: `0041` en **desarrollo**. **Pendiente**: aplicarla en
+  **producción** (`ccempuwuefjnaarmxbkz`) junto con el despliegue — el
+  código nuevo lee `people.source`, así que la migración va primero.
 
 ### 2026-09-29 — Inscripción en línea a actividades (Retiro de Hombres 2026)
 

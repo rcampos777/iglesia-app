@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { PersonForm } from "@/components/people/person-form";
 import { SendEmailForm } from "@/components/people/send-email-form";
 import { updatePersonAction } from "../actions";
-import { getPerson } from "@/lib/data/people";
+import { getActivityName, getPerson } from "@/lib/data/people";
 import { getPersonJourney } from "@/lib/data/journey";
 import { PersonJourneyCard } from "@/components/people/person-journey";
 import { getPortalAccountStatus } from "@/lib/data/portal-invitations";
@@ -14,7 +14,7 @@ import { getCurrentUser, hasAnyRole, isAdmin, isStaff } from "@/lib/auth/session
 import { StatusBadge } from "@/components/ui-brand/status-badge";
 import { membershipTone } from "@/lib/status-tones";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { membershipStatusLabels } from "@/lib/labels";
+import { membershipStatusLabels, personSourceLabels } from "@/lib/labels";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const WRITE_ROLES = ["administrador", "pastor", "coordinador_ministerio", "seguimiento"] as const;
@@ -37,6 +37,9 @@ export default async function PersonDetailPage({
     notFound();
   }
 
+  const sourceActivityName = person.source_activity_id
+    ? await getActivityName(person.source_activity_id)
+    : null;
   const canWrite = hasAnyRole(user, [...WRITE_ROLES]);
   const userIsAdmin = isAdmin(user);
   const [portalStatus, account, responsibilities] = await Promise.all([
@@ -94,7 +97,10 @@ export default async function PersonDetailPage({
             {person.first_name} {person.last_name}
           </h1>
           <p className="text-muted-foreground">
-            Registrado el {new Date(person.created_at).toLocaleDateString("es")}
+            Registrado el {new Date(person.created_at).toLocaleDateString("es")} ·{" "}
+            {sourceActivityName
+              ? `Inscripción: ${sourceActivityName}`
+              : personSourceLabels[person.source]}
           </p>
         </div>
         <StatusBadge tone={membershipTone[person.membership_status]}>

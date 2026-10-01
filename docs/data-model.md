@@ -53,6 +53,14 @@ función `is_minor(birth_date)` — no se guarda como columna, porque
 "menor de edad" es una función del tiempo, no un hecho fijo de la fila
 (y Postgres no permite `current_date` en columnas generadas).
 
+`source` (0041) guarda **cómo llegó** la persona al directorio, separado
+del estatus: `manual | importacion | inscripcion_actividad |
+registro_cuenta`, más `source_activity_id` cuando vino de la inscripción
+en línea de una actividad. Lo fijan las funciones que crean personas; un
+trigger impide cambiarlo después (es un hecho histórico). En `/personas`
+se muestra como columna "Origen" y se puede filtrar por origen o por
+actividad concreta (`?origen=actividad:<uuid>`).
+
 ### `profiles`
 
 1:1 entre `auth.users` y `people` (`person_id` es `unique`). Se crea

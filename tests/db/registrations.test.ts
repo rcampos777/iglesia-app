@@ -105,17 +105,44 @@ describe("inscripción en línea", () => {
     const { rows } = await asAnon(() => submit());
     assert.equal(rows[0]!.match_status, "vinculado");
     const personId = rows[0]!.person_id!;
-    const { rows: p } = await db.query<{ membership_status: string; email: string }>(
-      `select membership_status, email from people where id = $1`,
-      [personId],
-    );
+    const { rows: p } = await db.query<{
+      membership_status: string;
+      email: string;
+      source: string;
+      source_activity_id: string;
+    }>(`select membership_status, email, source, source_activity_id from people where id = $1`, [
+      personId,
+    ]);
     assert.equal(p[0]!.membership_status, "visitante");
     assert.equal(p[0]!.email, "uno@example.test");
+    assert.equal(p[0]!.source, "inscripcion_actividad");
+    assert.equal(p[0]!.source_activity_id, activityId);
     const { rows: part } = await db.query(
       `select 1 from activity_participants where activity_id = $1 and person_id = $2`,
       [activityId, personId],
     );
     assert.equal(part.length, 1);
+  });
+
+  test("el origen no se puede cambiar, ni siquiera un administrador", async () => {
+    const { rows } = await db.query<{ id: string }>(
+      `select id from people where source = 'inscripcion_actividad' limit 1`,
+    );
+    await rejects(
+      () =>
+        asUser(db, admin, () =>
+          db.query(`update people set source = 'manual', source_activity_id = null where id = $1`, [
+            rows[0]!.id,
+          ]),
+        ),
+      /origen/,
+    );
+    const { rows: created } = await asUser(db, admin, () =>
+      db.query<{ source: string }>(
+        `insert into people (first_name, last_name) values ('Alta', 'Manual') returning source`,
+      ),
+    );
+    assert.equal(created[0]!.source, "manual");
   });
 
   test("el mismo email no se inscribe dos veces", async () => {

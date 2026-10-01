@@ -22,6 +22,7 @@ export type AppRole =
   | "sitio_web";
 
 export type MembershipStatus = "visitante" | "asistente_habitual" | "miembro" | "inactivo";
+export type PersonSource = "manual" | "importacion" | "inscripcion_actividad" | "registro_cuenta";
 
 export type GenderType = "masculino" | "femenino" | "no_especifica";
 
@@ -86,6 +87,8 @@ export type PersonRow = {
   joined_at: string | null;
   notes: string | null;
   photo_url: string | null;
+  source: PersonSource;
+  source_activity_id: string | null;
   created_at: string;
   updated_at: string;
   created_by: string | null;
