@@ -4,6 +4,31 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-01 — Certificaciones de ministros (antecedentes penales, Ley 300)
+
+Nuevo módulo **Certificaciones** (`/certificaciones`, menú Gestión), solo
+para SuperAdmin (apóstoles) y Finanzas: registrar por persona el tipo,
+fechas de emisión y vencimiento, notas y el documento (PDF o foto);
+resumen por estado (vencida / vence pronto ≤ 30 días / vigente / sin
+fecha), búsqueda y filtros; tipos editables. Solo el apóstol borra. Todo
+(incluido abrir el documento) queda en la bitácora financiera. Ver
+`docs/finance.md` §8, `docs/security.md` §5.c, `docs/decisions.md`.
+
+- Migraciones `0042_certifications.sql` (tablas, RLS, auditoría,
+  funciones) y `0043_certifications_storage.sql` (bucket privado).
+- Pruebas: `tests/db/certifications.test.ts` (5: acceso apóstol/finanzas,
+  administrador y pastor bloqueados, auditoría, validaciones, borrar solo
+  apóstol) y `tests/unit/certifications.test.ts` (estado por vencimiento).
+  `test:db` 64/64, unitarias 15/15, check y build limpios.
+- Verificado en el navegador (desarrollo, cuenta sintética
+  `apostol@iglesia.test`): registrar con PDF sintético, subida real al
+  bucket, estado "Vence pronto", abrir documento (redirige al PDF), borrar,
+  tipos, móvil 375 px; administrador redirigido y sin el menú. Encontrado y
+  corregido: "Ver documento" con `window.open` tras un `await` lo bloquea el
+  navegador → ahora es un enlace a `/certificaciones/[id]/documento`.
+- **Aplicado**: `0042`–`0043` en **desarrollo**. **Pendiente**: aplicarlas
+  en **producción** antes de publicar el código.
+
 ### 2026-10-01 — Origen de cada persona
 
 Quien llena la forma de inscripción sigue entrando como **Visitante**

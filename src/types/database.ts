@@ -792,6 +792,44 @@ export type AuditLogRow = {
   created_at: string;
 };
 
+export type CertificationTypeRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  active: boolean;
+  created_at: string;
+  created_by: string | null;
+};
+
+export type PersonCertificationRow = {
+  id: string;
+  person_id: string;
+  type_id: string;
+  issued_on: string | null;
+  expires_on: string | null;
+  file_path: string | null;
+  file_name: string | null;
+  notes: string | null;
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
+  updated_by: string | null;
+};
+
+export type CertificationListRow = {
+  id: string;
+  person_id: string;
+  person_name: string;
+  type_id: string;
+  type_name: string;
+  issued_on: string | null;
+  expires_on: string | null;
+  has_file: boolean;
+  file_name: string | null;
+  notes: string | null;
+  updated_at: string;
+};
+
 /**
  * Forma genérica usada por `@supabase/supabase-js` /
  * `@supabase/ssr` (`createClient<Database>`). Solo cubre lo que el
@@ -828,6 +866,8 @@ export interface Database {
       site_album_photos: TableDef<SiteAlbumPhotoRow>;
       site_posts: TableDef<SitePostRow>;
       site_videos: TableDef<SiteVideoRow>;
+      certification_types: TableDef<CertificationTypeRow>;
+      person_certifications: TableDef<PersonCertificationRow>;
       site_ministries: TableDef<SiteMinistryRow>;
       site_team: TableDef<SiteTeamRow>;
       finance_settings: TableDef<FinanceSettingsRow>;
@@ -1115,6 +1155,14 @@ export interface Database {
           email: string | null;
           roles: AppRole[];
         }[];
+      };
+      certifications_list: {
+        Args: { p_person_id?: string | null };
+        Returns: CertificationListRow[];
+      };
+      certification_log_file_view: {
+        Args: { p_certification_id: string };
+        Returns: string;
       };
       finance_get_person: {
         Args: { p_person_id: string };

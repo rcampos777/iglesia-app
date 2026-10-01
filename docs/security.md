@@ -141,6 +141,23 @@ Detalle en `docs/finance.md` y matriz en `docs/roles-and-permissions.md` §7.
   mencionaría `donations`. (3) La búsqueda de personas para Finanzas
   expone nombre y una pista, como la de check-in.
 
+## 5.c Certificaciones de ministros (0042–0043)
+
+- Mismo acceso que Finanzas (`has_finance_access()`): RLS en
+  `certification_types` y `person_certifications`; borrar solo
+  `is_apostol()`. El listado con nombres sale de `certifications_list()`
+  (security definer, valida acceso) porque Finanzas no lee `people`.
+- Documentos en el bucket **privado** `certificaciones` (PDF/JPG/PNG/WebP,
+  10 MB) con políticas de `storage.objects` solo para
+  `has_finance_access()`. Ruta `<persona>/<uuid>.<ext>`, validada por
+  `CHECK` en la base y por Zod en el servidor.
+- Abrir un documento: `GET /certificaciones/[id]/documento` → guard de rol
+  → `certification_log_file_view()` (registra en `finance_audit_log`) →
+  redirect a URL firmada de 60 s con `no-store` y `no-referrer`. Es un
+  enlace normal, sin prefetch, para que no se registren aperturas falsas.
+- Crear/cambiar/borrar se auditan por trigger en `finance_audit_log`, sin
+  el contenido del documento.
+
 ## 6. Importación de datos
 
 Ver `docs/import-process.md` para el flujo completo. Resumen de

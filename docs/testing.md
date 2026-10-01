@@ -132,3 +132,9 @@ ver `docs/progress.md`): toda la lista de la sección 3 que requiere
 datos/sesión reales. Cuando haya credenciales, sembrar con
 `npm run seed` (crea cuentas de prueba, una por rol, contraseña
 `Iglesia2026!Dev` — ver `scripts/seed.ts`) y escribir esas pruebas.
+
+**Cuenta SuperAdmin de desarrollo** (2026-10-01): el seed no puede dar
+`apostol`/`finanzas` (solo `bootstrap_first_apostol()` como `postgres`).
+En el proyecto de **desarrollo** se creó `apostol@iglesia.test` (misma
+contraseña de prueba) con `bootstrap_first_apostol` para probar Finanzas y
+Certificaciones. No existe en producción.

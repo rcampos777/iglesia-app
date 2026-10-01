@@ -209,6 +209,16 @@ null`). Nunca se borra: `voided_at/voided_by/void_reason` para
 - `finance_audit_log`: cartas, descargas, exportaciones, configuración y
   envíos a intercesión. Inmutable; solo `apostol`.
 
+## 5.c Certificaciones (0042)
+
+- `certification_types` — catálogo editable (`name` único, `active`).
+- `person_certifications` — `person_id` → `people`, `type_id`,
+  `issued_on`, `expires_on` (≥ emisión), `file_path` (bucket privado
+  `certificaciones`, patrón `<persona>/<uuid>.<ext>`), `file_name`,
+  `notes`. Estado (vencida/vence pronto/vigente) se calcula en la app con
+  `certificationStatus()` (`src/lib/certifications.ts`).
+- RLS: solo `has_finance_access()`; borrar solo `is_apostol()`.
+
 ## 6. Visitantes y seguimiento
 
 - `visitor_follow_ups`: una "tarjeta" de seguimiento por persona con

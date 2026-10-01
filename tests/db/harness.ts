@@ -15,6 +15,7 @@ const MIGRATIONS_DIR = path.join(import.meta.dirname, "../../supabase/migrations
 const SKIP = new Set([
   "0033_schedule_service_generation.sql",
   "0039_site_storage.sql", // storage.* no existe en PGlite
+  "0043_certifications_storage.sql",
 ]);
 
 const PRELUDE = `

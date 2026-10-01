@@ -141,3 +141,24 @@ Nada de esto corre en producción todavía. Pasos:
 3. El Apóstol entra a Finanzas → Acceso y concede Finanzas a quien corresponda.
 4. Finanzas → Configuración: completar los datos confirmados. Aprobar la
    plantilla (Apóstol) solo después de revisarla.
+
+## 8. Certificaciones de ministros (`/certificaciones`)
+
+Desde 2026-10-01 (`0042`, `0043`). Mismo acceso que Finanzas: Apóstol
+(SuperAdmin) y Finanzas; el administrador no. Decisión en
+`docs/decisions.md` (2026-10-01).
+
+- **Qué guarda**: persona, tipo (antecedentes penales, Registro de
+  Ofensores Sexuales — Ley 300, credencial ministerial, y los que se
+  añadan en _Tipos_), fecha de emisión, fecha de vencimiento (opcional),
+  notas y el documento (PDF o foto, hasta 10 MB).
+- **Pantallas**: lista con resumen por estado (vencida, vence pronto en
+  ≤ 30 días, vigente, sin fecha), búsqueda por nombre y filtros por estado
+  y tipo; "Nueva certificación" (busca a la persona igual que en
+  Donaciones); ficha para editar, reemplazar o quitar el documento, y
+  "Ver documento"; _Tipos_ para añadir o desactivar tipos.
+- **Borrar**: solo el apóstol (se borra también el archivo).
+- **Auditoría**: crear, actualizar, borrar y abrir el documento quedan en
+  `finance_audit_log`.
+- **Pendiente**: aviso por email cuando una certificación está por vencer;
+  qué ministerios exigen qué certificación.

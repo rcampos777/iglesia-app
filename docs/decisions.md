@@ -2,6 +2,32 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-10-01 — Certificaciones de ministros (antecedentes penales, Ley 300)
+
+**Contexto**: el dueño del producto pidió guardar las certificaciones que
+la iglesia debe tener de quienes sirven (p. ej. la certificación del
+Registro de Ofensores Sexuales para trabajar con jóvenes) y que solo las
+vean los apóstoles y Finanzas.
+
+**Decisión**: módulo `/certificaciones` (`0042` + bucket `0043`). Detalle
+en `docs/finance.md` §8.
+
+- Acceso **igual que Finanzas**: solo `apostol` (SuperAdmin) y `finanzas`
+  (`has_finance_access()`). `administrador` **no**, ni pastores ni la
+  propia persona (por ahora no ve las suyas en Mi portal).
+- Registran y editan ambos; **solo el apóstol borra**.
+- Documento en bucket **privado**; se abre con URL firmada de 60 s después
+  de registrar la apertura. Crear, cambiar, borrar y abrir quedan en
+  `finance_audit_log` (solo apóstol).
+- Estado calculado por vencimiento: vencida / vence pronto (≤ 30 días) /
+  vigente / sin fecha.
+- Tipos editables (se pueden desactivar, no borrar). Iniciales:
+  antecedentes penales, Registro de Ofensores Sexuales (Ley 300) y
+  credencial ministerial.
+
+**Pendiente/futuro**: avisos por email antes del vencimiento; marcar qué
+ministerios exigen qué certificación.
+
 ## 2026-09-29 — Inscripción en línea a actividades (retiro de hombres)
 
 **Contexto**: el dueño del producto pidió una forma pública para el Retiro

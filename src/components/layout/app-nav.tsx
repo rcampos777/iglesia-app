@@ -17,6 +17,7 @@ import {
   Menu,
   QrCode,
   Settings,
+  ShieldCheck,
   Upload,
   UserPlus,
   UserRound,
@@ -47,6 +48,7 @@ const ICONS: Record<string, LucideIcon> = {
   "/reportes": BarChart3,
   "/importar": Upload,
   "/finanzas": HandCoins,
+  "/certificaciones": ShieldCheck,
   "/sitio-web": Globe,
   "/admin": Settings,
 };
@@ -56,7 +58,10 @@ const GROUPS: { label: string | null; hrefs: string[] }[] = [
   { label: "Congregación", hrefs: ["/personas", "/visitantes", "/ministerios", "/check-in"] },
   { label: "Formación y eventos", hrefs: ["/cursos", "/actividades", "/encuestas"] },
   { label: "Cuidado pastoral", hrefs: ["/oracion"] },
-  { label: "Gestión", hrefs: ["/finanzas", "/sitio-web", "/reportes", "/importar", "/admin"] },
+  {
+    label: "Gestión",
+    hrefs: ["/finanzas", "/certificaciones", "/sitio-web", "/reportes", "/importar", "/admin"],
+  },
 ];
 
 function groupItems(items: NavItem[]) {
