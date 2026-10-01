@@ -67,7 +67,7 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
           <p className="text-muted-foreground">
             {ministry.activeMemberCount}{" "}
             {ministry.activeMemberCount === 1 ? "persona sirviendo" : "personas sirviendo"}
-            {ministry.leaderName ? ` · Pastor: ${ministry.leaderName}` : ""}
+            {ministry.leaderName ? ` · Líder: ${ministry.leaderName}` : ""}
           </p>
         </div>
         {!ministry.is_active && <StatusBadge tone="idle">Inactivo</StatusBadge>}

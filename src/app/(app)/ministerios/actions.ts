@@ -106,11 +106,11 @@ export async function createMinistryAction(formData: FormData): Promise<ActionRe
     grantsPrayerAccess: formData.get("grantsPrayerAccess") ?? "false",
   });
   if (!parsed.success) return actionError("Revisa los datos.", zodFieldErrors(parsed.error));
-  // Al crear, el pastor del ministerio es obligatorio (decisión 2026-10-01):
+  // Al crear, el líder (pastor) del ministerio es obligatorio (decisión 2026-10-01):
   // es quien después trabaja con su gente.
   if (!parsed.data.leaderPersonId) {
-    return actionError("Elige al pastor del ministerio.", {
-      leaderPersonId: ["Elige al pastor del ministerio."],
+    return actionError("Elige al líder del ministerio.", {
+      leaderPersonId: ["Elige al líder del ministerio."],
     });
   }
 

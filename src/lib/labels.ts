@@ -52,7 +52,7 @@ export const roleLabels: Record<AppRole, string> = {
   correccion_asistencia: "Corregir asistencia",
   apostol: "SuperAdmin",
   finanzas: "Finanzas",
-  sitio_web: "WebMaster (sitio web)",
+  sitio_web: "Editor del sitio web",
 };
 
 export const roleDescriptions: Record<AppRole, string> = {

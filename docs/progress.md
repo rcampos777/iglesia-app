@@ -4,17 +4,15 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
-### 2026-10-01 — Pastor del ministerio obligatorio y acceso "WebMaster"
+### 2026-10-01 — Líder obligatorio al crear un ministerio
 
-- **Ministerios**: el campo "Líder" ahora se llama **"Pastor del
-  ministerio"** y es **obligatorio al crear** un ministerio (al editar se
-  puede dejar vacío para no bloquear ministerios viejos sin pastor). En
-  la lista y la ficha dice "Pastor: …". Validado en el servidor
-  (`createMinistryAction`).
-- **WebMaster**: el acceso `sitio_web` (0037) ya existía y hace justo eso
-  (solo el sitio web, sin datos internos); se renombró lo que se muestra a
-  "WebMaster (sitio web)". Se asigna en Personas → Cuenta y permisos →
-  Sitio web.
+- **Ministerios**: el campo "Líder" (el pastor del ministerio) es
+  **obligatorio al crear** (al editar se puede dejar vacío para no
+  bloquear ministerios viejos). Validado en el servidor
+  (`createMinistryAction`). Sin cambios de nombres en pantalla.
+- **WebMaster**: es el acceso existente "Editor del sitio web"
+  (`sitio_web`, 0037): solo el sitio, sin datos internos. Se asigna en
+  Personas → Cuenta y permisos → Sitio web. No se cambió nada.
 
 ### 2026-10-01 — Registrar asistencia a cultos: solo Ujier y SuperAdmin
 
