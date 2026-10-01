@@ -20,8 +20,10 @@ matricula eligiendo de una lista de solo nombres en su propia clase.
   edición; selector de matrícula con todo el directorio.
   `pastor@iglesia.test` (sin ministerios en dev) solo se ve a sí mismo;
   /visitantes lo redirige; menú sin Visitantes, Asistencia ni Importar.
-- **Aplicado**: `0044` y `0045` en **desarrollo**. **Pendiente**:
-  producción (junto con el líder obligatorio y asistencia solo Ujier).
+- **Aplicado (2026-10-01)**: `0044` y `0045` en **desarrollo** y en
+  **producción** (`db push` por Session pooler, ejecutado por el usuario);
+  código publicado en Vercel junto con el líder obligatorio y asistencia
+  solo Ujier.
 - **Ojo al publicar**: un pastor o maestro que hoy usa la app dejará de
   ver a quien no está en sus ministerios o clases. Para que vean a su
   gente, cada ministerio debe tener su líder y sus miembros, y cada clase
@@ -45,8 +47,7 @@ asistencia (el administrador sigue gestionando cultos, abriendo/cerrando y
 corrigiendo). Prueba actualizada en `tests/db/attendance.test.ts`
 (seguimiento y administrador rechazados).
 
-- **Aplicado**: `0044` en **desarrollo**; producción pendiente (va junto
-  con los permisos de pastor/maestro).
+- **Aplicado (2026-10-01)**: `0044` en desarrollo y producción.
 
 ### 2026-10-01 — Certificaciones de ministros (antecedentes penales, Ley 300)
 
