@@ -22,8 +22,9 @@ token.
   se pongan las claves de Turnstile en Vercel. `0047` y `0048` aplicadas en
   producción el mismo día (script del dueño); `SUPABASE_SERVICE_ROLE_KEY`
   confirmada en Vercel (la inscripción pública la usa desde `0048`).
-  Falta: claves de Turnstile en Vercel y activar el CAPTCHA en Supabase
-  Auth.
+  Claves de Turnstile puestas en Vercel por el dueño y redeploy de
+  producción: el CAPTCHA aparece en vivo en login e inscripción
+  (verificado). Falta: activar el CAPTCHA en Supabase Auth (panel).
 - **Pendiente para producción** (el dueño): (1) crear el sitio en
   Cloudflare Turnstile (dominios de la app y del sitio) y poner
   `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY` en Vercel;
