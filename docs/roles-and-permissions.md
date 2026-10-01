@@ -40,23 +40,27 @@ revisión posterior.
 Leyenda: **C**rear, **L**eer, **A**ctualizar, **E**liminar. `propio` =
 solo sobre registros propios o asignados a uno.
 
-| Módulo                    | miembro        | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor                     | administrador |
-| ------------------------- | -------------- | ------------- | ------------ | --------------------- | ----------------- | -------------------------- | ------------- |
-| Directorio de personas    | L propio       | L             | CLA          | CLA                   | CLA               | CLA                        | CLAE          |
-| Cursos / categorías       | –              | L             | L            | L                     | CLA               | – (sin catálogo propio)    | CLA           |
-| Clases (offerings)        | L              | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
-| Ministerios (catálogo)    | –              | L             | L            | L                     | CLA               | solo los que lidera        | CLA           |
-| Membresía de ministerio   | L propia       | L propia      | L            | L                     | CLA               | solo los que lidera        | CLA           |
-| Matrícula                 | L propio       | CLA propio    | CLA          | L                     | CLA               | CLA                        | CLA           |
-| Asistencia                | L propio       | CLA propio    | L            | L                     | CLA               | CLA                        | CLA           |
-| Visitantes / seguimiento  | –              | –             | CLA propio+  | L                     | CLA               | CLA                        | CLA           |
-| Asistencia a cultos       | – (muestra QR) | –             | C            | –                     | C                 | C                          | todo          |
-| Peticiones de oración     | C, L propio    | –             | –            | CLA asignadas+bandeja | –                 | solo si lidera intercesión | CLA           |
-| Notificaciones/plantillas | –              | –             | –            | –                     | L                 | CLA                        | CLA           |
-| Encuestas                 | responder      | L, responder  | L, responder | L, responder          | CLA               | CLA                        | CLA           |
-| Importación de datos      | –              | –             | CLA          | –                     | CLA               | CLA                        | CLA           |
-| Roles de usuarios         | L propio       | L propio      | L propio     | L propio              | L propio          | L propio                   | CLA           |
-| Reportes/paneles          | propio         | propio+clases | seguimiento  | oración               | su área           | todo                       | todo          |
+| Módulo                     | miembro        | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor                     | administrador |
+| -------------------------- | -------------- | ------------- | ------------ | --------------------- | ----------------- | -------------------------- | ------------- |
+| Directorio de personas     | L propio       | L             | CLA          | CLA                   | CLA               | CLA                        | CLAE          |
+| Cursos / categorías        | –              | L             | L            | L                     | CLA               | – (sin catálogo propio)    | CLA           |
+| Clases (offerings)         | L              | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
+| Ministerios (catálogo)     | –              | L             | L            | L                     | CLA               | solo los que lidera        | CLA           |
+| Membresía de ministerio    | L propia       | L propia      | L            | L                     | CLA               | solo los que lidera        | CLA           |
+| Matrícula                  | L propio       | CLA propio    | CLA          | L                     | CLA               | CLA                        | CLA           |
+| Asistencia                 | L propio       | CLA propio    | L            | L                     | CLA               | CLA                        | CLA           |
+| Visitantes / seguimiento   | –              | –             | CLA propio+  | L                     | CLA               | CLA                        | CLA           |
+| Asistencia a cultos (\*\*) | – (muestra QR) | –             | –            | –                     | –                 | –                          | ver §6        |
+| Peticiones de oración      | C, L propio    | –             | –            | CLA asignadas+bandeja | –                 | solo si lidera intercesión | CLA           |
+| Notificaciones/plantillas  | –              | –             | –            | –                     | L                 | CLA                        | CLA           |
+| Encuestas                  | responder      | L, responder  | L, responder | L, responder          | CLA               | CLA                        | CLA           |
+| Importación de datos       | –              | –             | CLA          | –                     | CLA               | CLA                        | CLA           |
+| Roles de usuarios          | L propio       | L propio      | L propio     | L propio              | L propio          | L propio                   | CLA           |
+| Reportes/paneles           | propio         | propio+clases | seguimiento  | oración               | su área           | todo                       | todo          |
+
+(\*\*) Registrar asistencia a cultos: solo `ujier` y SuperAdmin (0044,
+decisión 2026-10-01). El administrador conserva gestionar cultos, abrir o
+cerrar el registro y corregir asistencias (§6), pero ya no registra.
 
 **El rol `pastor` NO es administrador** (decisión 2026-09-02): en esta
 iglesia hay muchos pastores de áreas distintas y varios sin nada a su
@@ -133,13 +137,13 @@ retiró la política `service_checkins_insert_self` de 0017 y el botón
 
 ### Matriz final
 
-| Capacidad (función SQL)                                     | Roles que la tienen                                                                                 |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Registrar asistencia — `can_record_attendance()`            | `administrador`, `ujier`, y (preservados de 0007) `seguimiento`, `coordinador_ministerio`, `pastor` |
-| Gestionar cultos — `can_manage_services()`                  | `administrador`, `gestion_cultos`                                                                   |
-| Controlar check-in (abrir/cerrar) — `can_control_checkin()` | `administrador`, `control_checkin`                                                                  |
-| Corregir asistencia — `can_correct_attendance()`            | `administrador`, `correccion_asistencia`                                                            |
-| Conceder o revocar cualquiera de los anteriores             | solo `administrador` (`admin_set_person_roles`, auditado)                                           |
+| Capacidad (función SQL)                                     | Roles que la tienen                                             |
+| ----------------------------------------------------------- | --------------------------------------------------------------- |
+| Registrar asistencia — `can_record_attendance()`            | Solo `ujier` y SuperAdmin (`apostol`) — desde 2026-10-01 (0044) |
+| Gestionar cultos — `can_manage_services()`                  | `administrador`, `gestion_cultos`                               |
+| Controlar check-in (abrir/cerrar) — `can_control_checkin()` | `administrador`, `control_checkin`                              |
+| Corregir asistencia — `can_correct_attendance()`            | `administrador`, `correccion_asistencia`                        |
+| Conceder o revocar cualquiera de los anteriores             | solo `administrador` (`admin_set_person_roles`, auditado)       |
 
 Qué incluye **registrar asistencia**:
 

@@ -487,8 +487,9 @@ describe("registro por ujieres", () => {
         /No autorizado/,
       ),
     );
-    // Operadores preexistentes (0007) conservan el registro.
-    assert.equal((await record(seguimiento, id, visitorId)).result, "registrado");
+    // Desde 0044 solo ujier y SuperAdmin registran: ni seguimiento ni administrador.
+    await rejects(() => record(seguimiento, id, visitorId), /No autorizado/);
+    await rejects(() => record(admin, id, visitorId), /No autorizado/);
   });
 });
 

@@ -2,6 +2,18 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-10-01 — Registrar asistencia a cultos: solo Ujier y SuperAdmin
+
+**Contexto**: el dueño del producto: "el registro de cultos es para
+SuperAdmin y Ujieres".
+
+**Decisión**: `can_record_attendance()` = `ujier` (+ `apostol`, implícito)
+(`0044`). Se retira a `administrador`, `seguimiento`,
+`coordinador_ministerio` y `pastor`, que lo tenían desde 0007/0032. No
+cambian gestionar cultos, abrir/cerrar el registro ni corregir
+asistencias. Quien necesite registrar recibe el acceso "Servidor / Ujier"
+en Cuenta y permisos.
+
 ## 2026-10-01 — Certificaciones de ministros (antecedentes penales, Ley 300)
 
 **Contexto**: el dueño del producto pidió guardar las certificaciones que

@@ -4,6 +4,17 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-01 — Registrar asistencia a cultos: solo Ujier y SuperAdmin
+
+Migración `0044_attendance_record_ujier_only.sql` + `RECORD_ATTENDANCE_ROLES`
+y menú: administrador, seguimiento, coordinador y pastor ya no registran
+asistencia (el administrador sigue gestionando cultos, abriendo/cerrando y
+corrigiendo). Prueba actualizada en `tests/db/attendance.test.ts`
+(seguimiento y administrador rechazados).
+
+- **Aplicado**: pendiente en desarrollo y producción (va junto con los
+  permisos de pastor/maestro).
+
 ### 2026-10-01 — Certificaciones de ministros (antecedentes penales, Ley 300)
 
 Nuevo módulo **Certificaciones** (`/certificaciones`, menú Gestión), solo

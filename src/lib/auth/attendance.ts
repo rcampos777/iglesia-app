@@ -8,14 +8,8 @@ import { hasAnyRole, type CurrentUser } from "./session";
  * muestra y cortan temprano en las Server Actions.
  */
 
-/** `seguimiento`, `coordinador_ministerio` y `pastor` ya registraban check-in (0007). */
-export const RECORD_ATTENDANCE_ROLES: AppRole[] = [
-  "administrador",
-  "ujier",
-  "seguimiento",
-  "coordinador_ministerio",
-  "pastor",
-];
+/** Solo ujier (y SuperAdmin, implícito en hasAnyRole). Decisión 2026-10-01, 0044. */
+export const RECORD_ATTENDANCE_ROLES: AppRole[] = ["ujier"];
 export const MANAGE_SERVICES_ROLES: AppRole[] = ["administrador", "gestion_cultos"];
 export const CONTROL_CHECKIN_ROLES: AppRole[] = ["administrador", "control_checkin"];
 export const CORRECT_ATTENDANCE_ROLES: AppRole[] = ["administrador", "correccion_asistencia"];

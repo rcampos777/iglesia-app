@@ -68,16 +68,7 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/check-in",
     label: "Asistencia",
     // = ATTENDANCE_AREA_ROLES (src/lib/auth/attendance.ts, solo servidor).
-    roles: [
-      "ujier",
-      "seguimiento",
-      "coordinador_ministerio",
-      "pastor",
-      "administrador",
-      "gestion_cultos",
-      "control_checkin",
-      "correccion_asistencia",
-    ],
+    roles: ["ujier", "administrador", "gestion_cultos", "control_checkin", "correccion_asistencia"],
   },
   {
     href: "/visitantes",
