@@ -52,6 +52,7 @@ const PEOPLE_WRITE: AppRole[] = [
   "seguimiento",
 ];
 const COURSE_MANAGE: AppRole[] = ["administrador", "pastor", "coordinador_ministerio"];
+const FOLLOWUP_AND_IMPORT: AppRole[] = ["administrador", "coordinador_ministerio", "seguimiento"];
 
 const QUICK_ACTIONS: QuickAction[] = [
   {
@@ -64,7 +65,7 @@ const QUICK_ACTIONS: QuickAction[] = [
     href: "/visitantes/nuevo",
     label: "Nuevo seguimiento",
     icon: UserPlus,
-    allowed: (u) => hasAnyRole(u, PEOPLE_WRITE),
+    allowed: (u) => hasAnyRole(u, FOLLOWUP_AND_IMPORT),
   },
   {
     href: "/check-in",
@@ -89,7 +90,7 @@ const QUICK_ACTIONS: QuickAction[] = [
     href: "/importar",
     label: "Importar datos",
     icon: Upload,
-    allowed: (u) => hasAnyRole(u, PEOPLE_WRITE),
+    allowed: (u) => hasAnyRole(u, FOLLOWUP_AND_IMPORT),
   },
   {
     href: "/finanzas/nueva",

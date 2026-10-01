@@ -4,6 +4,29 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-01 — Pastor y maestro: solo las personas a su cargo
+
+Migración `0045_pastor_teacher_scope.sql` + app. El pastor ve y trabaja
+solo la gente de sus ministerios (y las personas que él crea); el maestro
+ve solo sus clases y todos los alumnos que han pasado por ellas. De esas
+personas ambos ven el historial completo (sin seguimiento, oración ni
+donaciones). El pastor ya no ve Visitantes ni Importación. El maestro
+matricula eligiendo de una lista de solo nombres en su propia clase.
+
+- Pruebas: `tests/db/scope.test.ts` (8). `test:db` 72/72, unitarias
+  15/15, check y build limpios.
+- Verificado en el navegador (desarrollo): `maestro@iglesia.test` ve 19 de
+  51 personas y solo sus 3 clases; historial de un alumno visible y sin
+  edición; selector de matrícula con todo el directorio.
+  `pastor@iglesia.test` (sin ministerios en dev) solo se ve a sí mismo;
+  /visitantes lo redirige; menú sin Visitantes, Asistencia ni Importar.
+- **Aplicado**: `0044` y `0045` en **desarrollo**. **Pendiente**:
+  producción (junto con el líder obligatorio y asistencia solo Ujier).
+- **Ojo al publicar**: un pastor o maestro que hoy usa la app dejará de
+  ver a quien no está en sus ministerios o clases. Para que vean a su
+  gente, cada ministerio debe tener su líder y sus miembros, y cada clase
+  su maestro y alumnos.
+
 ### 2026-10-01 — Líder obligatorio al crear un ministerio
 
 - **Ministerios**: el campo "Líder" (el pastor del ministerio) es
@@ -22,8 +45,8 @@ asistencia (el administrador sigue gestionando cultos, abriendo/cerrando y
 corrigiendo). Prueba actualizada en `tests/db/attendance.test.ts`
 (seguimiento y administrador rechazados).
 
-- **Aplicado**: pendiente en desarrollo y producción (va junto con los
-  permisos de pastor/maestro).
+- **Aplicado**: `0044` en **desarrollo**; producción pendiente (va junto
+  con los permisos de pastor/maestro).
 
 ### 2026-10-01 — Certificaciones de ministros (antecedentes penales, Ley 300)
 

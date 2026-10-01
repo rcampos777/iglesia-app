@@ -6,12 +6,8 @@ import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
 import { StatusSelector } from "./status-selector";
 import { NoteForm } from "./note-form";
 
-const FOLLOWUP_ROLES = [
-  "administrador",
-  "pastor",
-  "coordinador_ministerio",
-  "seguimiento",
-] as const;
+// Sin `pastor` desde 0045: Visitantes es de Seguimiento (decisión 2026-10-01).
+const FOLLOWUP_ROLES = ["administrador", "coordinador_ministerio", "seguimiento"] as const;
 
 export default async function FollowUpDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

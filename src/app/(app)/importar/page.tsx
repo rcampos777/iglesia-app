@@ -7,7 +7,8 @@ import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
 import { UploadForm } from "./upload-form";
 import { ManualEntryForm } from "./manual-entry-form";
 
-const IMPORT_ROLES = ["administrador", "pastor", "coordinador_ministerio", "seguimiento"] as const;
+// Sin `pastor` desde 0045: importar es tarea de directorio completo.
+const IMPORT_ROLES = ["administrador", "coordinador_ministerio", "seguimiento"] as const;
 
 const statusLabels: Record<string, string> = {
   cargando: "Cargando",

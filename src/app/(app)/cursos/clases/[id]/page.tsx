@@ -8,9 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getClassOfferingDetail } from "@/lib/data/courses";
-import { listPeople } from "@/lib/data/people";
-import { getCurrentUser, hasAnyRole, hasRole, isStaff } from "@/lib/auth/session";
+import { getClassOfferingDetail, listPeopleForClassEnrollment } from "@/lib/data/courses";
+import { getCurrentUser, hasAnyRole, hasDirectoryAccess, isStaff } from "@/lib/auth/session";
 import { EnrollForm } from "./enroll-form";
 import { AttendancePanel } from "./attendance-panel";
 import { AddSessionForm } from "./add-session-form";
@@ -34,13 +33,8 @@ export default async function ClassOfferingPage({ params }: { params: Promise<{ 
 
   const detail = await getClassOfferingDetail(id);
 
-  // El pastor solo abre las clases que él imparte.
-  if (
-    detail &&
-    hasRole(user, "pastor") &&
-    !hasRole(user, "administrador") &&
-    detail.offering.teacher_person_id !== user?.personId
-  ) {
+  // Pastor y maestro solo abren las clases que imparten (0045).
+  if (detail && !hasDirectoryAccess(user) && detail.offering.teacher_person_id !== user?.personId) {
     redirect("/cursos");
   }
 
@@ -52,8 +46,10 @@ export default async function ClassOfferingPage({ params }: { params: Promise<{ 
   const { offering, sessions, enrollments, attendance } = detail;
 
   const enrolledPersonIds = new Set(enrollments.map((e) => e.person_id));
-  const peopleResult = canEnroll ? await listPeople({ limit: 200 }) : { people: [] };
-  const availablePeople = peopleResult.people.filter((p) => !enrolledPersonIds.has(p.id));
+  // Solo nombres, de todo el directorio: el maestro matricula a alguien
+  // que todavía no es su alumno (list_people_for_class_enrollment, 0045).
+  const pickerPeople = canEnroll ? await listPeopleForClassEnrollment(id) : [];
+  const availablePeople = pickerPeople.filter((p) => !enrolledPersonIds.has(p.id));
 
   const attendanceByPerson = new Map<string, { attended: number; total: number }>();
   for (const e of enrollments) {

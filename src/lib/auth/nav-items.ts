@@ -73,7 +73,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     href: "/visitantes",
     label: "Visitantes",
-    roles: ["seguimiento", "coordinador_ministerio", "pastor", "administrador"],
+    roles: ["seguimiento", "coordinador_ministerio", "administrador"],
   },
   {
     href: "/oracion",
@@ -86,7 +86,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     href: "/importar",
     label: "Importar datos",
-    roles: ["seguimiento", "coordinador_ministerio", "pastor", "administrador"],
+    roles: ["seguimiento", "coordinador_ministerio", "administrador"],
   },
   { href: "/portal", label: "Mi portal" },
   {

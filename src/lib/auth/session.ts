@@ -58,6 +58,21 @@ export const STAFF_ROLES: AppRole[] = [
 ];
 
 /**
+ * Directorio completo de personas. Espeja `has_directory_access()` (0045):
+ * `pastor` y `maestro` NO — solo ven a las personas a su cargo.
+ */
+export const DIRECTORY_ROLES: AppRole[] = [
+  "administrador",
+  "seguimiento",
+  "intercesor",
+  "coordinador_ministerio",
+];
+
+export function hasDirectoryAccess(user: CurrentUser | null): boolean {
+  return hasAnyRole(user, DIRECTORY_ROLES);
+}
+
+/**
  * Espeja `is_admin()` en la base (0023): solo `administrador`. El rol
  * `pastor` quedó acotado a sus clases y ministerios — en esta iglesia hay
  * muchos pastores de área y varios sin nada a su cargo.

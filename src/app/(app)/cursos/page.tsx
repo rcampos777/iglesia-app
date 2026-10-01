@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listClassOfferings } from "@/lib/data/courses";
 import { redirect } from "next/navigation";
-import { getCurrentUser, hasAnyRole, hasRole, isStaff } from "@/lib/auth/session";
+import { getCurrentUser, hasAnyRole, hasDirectoryAccess, isStaff } from "@/lib/auth/session";
 import { classTone } from "@/lib/status-tones";
 import { StatusBadge } from "@/components/ui-brand/status-badge";
 
@@ -22,9 +22,9 @@ export default async function CoursesPage() {
   // Un miembro ve SUS clases en /portal, no el catálogo completo.
   if (!isStaff(user)) redirect("/portal");
 
-  // El pastor ve solo las clases que él imparte; el administrador ve
-  // todas (decisión 2026-09-02, docs/roles-and-permissions.md).
-  const scopedToOwn = hasRole(user, "pastor") && !hasRole(user, "administrador");
+  // Pastor y maestro ven solo las clases que imparten; quien tiene el
+  // directorio completo ve todas (decisiones 2026-09-02 y 2026-10-01).
+  const scopedToOwn = !hasDirectoryAccess(user);
   const offerings = scopedToOwn
     ? user?.personId
       ? await listClassOfferings({ teacherPersonId: user.personId })

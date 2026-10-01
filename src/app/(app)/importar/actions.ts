@@ -9,7 +9,8 @@ import { createImportBatchFromCsv, promoteImportRow } from "@/lib/data/import";
 import { importedPersonSchema } from "@/lib/validations/import";
 import type { ImportRowDecision } from "@/types/database";
 
-const IMPORT_ROLES = ["administrador", "pastor", "coordinador_ministerio", "seguimiento"] as const;
+// Sin `pastor` desde 0045: importar es tarea de directorio completo.
+const IMPORT_ROLES = ["administrador", "coordinador_ministerio", "seguimiento"] as const;
 
 export async function uploadImportAction(formData: FormData): Promise<ActionResult> {
   const user = await (async () => {

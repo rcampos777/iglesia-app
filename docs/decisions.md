@@ -2,6 +2,27 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-10-01 — Pastor y maestro: solo lo que les toca
+
+**Contexto**: el dueño del producto: "que el pastor de ministerio solo vea
+lo que le toca pastorear y los maestros solo sus clases, pero que tengan
+acceso al historial de la persona". Respuestas: el pastor de ministerio
+trabaja su gente (crea y edita); el maestro sigue viendo a todos los
+alumnos que han pasado por él; registrar cultos es solo de Ujier y
+SuperAdmin; donaciones solo SuperAdmin y Finanzas (ya era así).
+
+**Decisión** (`0045`): concepto "a su cargo" (`is_in_my_care`). Pastor y
+maestro salen del directorio completo; ven y (el pastor) trabajan solo a
+su gente, con historial completo de lectura sin seguimiento, oración ni
+donaciones. El pastor pierde Visitantes e Importación (tareas de
+directorio). Los roles se suman: quien además es coordinador, seguimiento
+o SuperAdmin conserva el directorio. Detalle en
+`docs/roles-and-permissions.md` y `docs/security.md` §8.k.
+
+**Alternativas descartadas**: dar al maestro solo lectura de las clases
+que imparte (perdería el historial que pidieron); mantener al pastor en
+Visitantes (vería a todos los visitantes de la iglesia).
+
 ## 2026-10-01 — Registrar asistencia a cultos: solo Ujier y SuperAdmin
 
 **Contexto**: el dueño del producto: "el registro de cultos es para

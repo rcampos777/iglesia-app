@@ -445,6 +445,29 @@ Action que las llama). `Mi portal` no cambia: sigue sin ninguna vía para
 que un miembro edite sus propios roles o su `person_id` (ver `0015` y
 `0027`).
 
+## 8.k Pastor y maestro: solo personas a su cargo (2026-10-01, 0045)
+
+- `has_directory_access()` (administrador, seguimiento, intercesor,
+  coordinador, + apostol) sustituye a `is_staff()` en la lectura de
+  `people`, `profiles`, `enrollments`, `attendance_records`,
+  `ministry_memberships`, `activities`, `activity_participants`,
+  `service_checkins` y en `list_service_attendance()`.
+- `is_in_my_care(person_id)` (security definer): miembro de un ministerio
+  que lidero o alumno (actual o pasado) de una clase que imparto. Da
+  lectura del historial de esas personas.
+- `class_offerings`/`class_sessions` ya no son legibles por cualquier
+  usuario autenticado: `can_see_class()` (directorio, mi clase, estoy
+  matriculado, o un alumno a mi cargo pasó por ella).
+- `people` UPDATE: el pastor solo sobre su gente o lo que creó; el
+  maestro no edita personas.
+- Visitantes/notas de seguimiento e importación ya no incluyen `pastor`.
+- La lista para matricular (`list_people_for_class_enrollment`) expone
+  solo id y nombre, y solo a quien imparte esa clase (o gestión).
+- **Sin cambio**: encuestas y notificaciones siguen con `is_staff()`;
+  `list_people_for_ministry_picker` (0019) sigue dando nombres a staff y
+  líderes para agregar miembros.
+- Pruebas: `tests/db/scope.test.ts`.
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

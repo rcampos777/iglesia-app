@@ -191,3 +191,21 @@ export interface AttendanceUpsert {
   personId: string;
   status: AttendanceStatus;
 }
+
+export type EnrollmentPickerOption = { id: string; first_name: string; last_name: string };
+
+/** Todo el directorio, solo nombres, para matricular en ESTA clase (0045). */
+export async function listPeopleForClassEnrollment(
+  classOfferingId: string,
+): Promise<EnrollmentPickerOption[]> {
+  const supabase = await createClient();
+  try {
+    return await fetchAllPages((from, to) =>
+      supabase
+        .rpc("list_people_for_class_enrollment", { p_class_offering_id: classOfferingId })
+        .range(from, to),
+    );
+  } catch (e) {
+    throw new Error(`No se pudieron cargar las personas: ${(e as Error).message}`);
+  }
+}

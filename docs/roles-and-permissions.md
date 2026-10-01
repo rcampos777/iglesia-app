@@ -42,25 +42,38 @@ solo sobre registros propios o asignados a uno.
 
 | Módulo                     | miembro        | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor                     | administrador |
 | -------------------------- | -------------- | ------------- | ------------ | --------------------- | ----------------- | -------------------------- | ------------- |
-| Directorio de personas     | L propio       | L             | CLA          | CLA                   | CLA               | CLA                        | CLAE          |
+| Directorio de personas     | L propio       | L a su cargo  | CLA          | CLA                   | CLA               | C; LA a su cargo           | CLAE          |
 | Cursos / categorías        | –              | L             | L            | L                     | CLA               | – (sin catálogo propio)    | CLA           |
-| Clases (offerings)         | L              | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
+| Clases (offerings)         | L propias      | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
 | Ministerios (catálogo)     | –              | L             | L            | L                     | CLA               | solo los que lidera        | CLA           |
 | Membresía de ministerio    | L propia       | L propia      | L            | L                     | CLA               | solo los que lidera        | CLA           |
-| Matrícula                  | L propio       | CLA propio    | CLA          | L                     | CLA               | CLA                        | CLA           |
-| Asistencia                 | L propio       | CLA propio    | L            | L                     | CLA               | CLA                        | CLA           |
-| Visitantes / seguimiento   | –              | –             | CLA propio+  | L                     | CLA               | CLA                        | CLA           |
+| Matrícula                  | L propio       | CLA propio    | CLA          | L                     | CLA               | CLA propio                 | CLA           |
+| Asistencia                 | L propio       | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
+| Visitantes / seguimiento   | –              | –             | CLA propio+  | L                     | CLA               | –                          | CLA           |
 | Asistencia a cultos (\*\*) | – (muestra QR) | –             | –            | –                     | –                 | –                          | ver §6        |
 | Peticiones de oración      | C, L propio    | –             | –            | CLA asignadas+bandeja | –                 | solo si lidera intercesión | CLA           |
 | Notificaciones/plantillas  | –              | –             | –            | –                     | L                 | CLA                        | CLA           |
 | Encuestas                  | responder      | L, responder  | L, responder | L, responder          | CLA               | CLA                        | CLA           |
-| Importación de datos       | –              | –             | CLA          | –                     | CLA               | CLA                        | CLA           |
+| Importación de datos       | –              | –             | CLA          | –                     | CLA               | –                          | CLA           |
 | Roles de usuarios          | L propio       | L propio      | L propio     | L propio              | L propio          | L propio                   | CLA           |
-| Reportes/paneles           | propio         | propio+clases | seguimiento  | oración               | su área           | todo                       | todo          |
+| Reportes/paneles           | propio         | propio+clases | seguimiento  | oración               | su área           | su gente                   | todo          |
 
 (\*\*) Registrar asistencia a cultos: solo `ujier` y SuperAdmin (0044,
 decisión 2026-10-01). El administrador conserva gestionar cultos, abrir o
 cerrar el registro y corregir asistencias (§6), pero ya no registra.
+
+**"A su cargo" (desde 2026-10-01, `0045`)**: `pastor` y `maestro` ya no
+ven el directorio completo. Ven solo a las personas a su cargo
+(`is_in_my_care`): los miembros de los ministerios que lideran y todos los
+alumnos que han pasado por sus clases (también de clases terminadas). De
+ellas ven el **historial completo** (cursos con cualquier maestro,
+ministerios, actividades, asistencia a cultos), de solo lectura para el
+maestro; nunca notas de seguimiento, peticiones de oración ni donaciones.
+El pastor puede crear personas y editar las de su gente y las que creó. El
+directorio completo es de `has_directory_access()`: administrador,
+seguimiento, intercesor y coordinador (+ SuperAdmin). Los roles se suman.
+Para matricular, el maestro elige de una lista de solo nombres
+(`list_people_for_class_enrollment`) en su propia clase.
 
 **El rol `pastor` NO es administrador** (decisión 2026-09-02): en esta
 iglesia hay muchos pastores de áreas distintas y varios sin nada a su

@@ -12,11 +12,17 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ActionResult } from "@/lib/action-result";
-import type { PersonRow } from "@/types/database";
+import type { EnrollmentPickerOption } from "@/lib/data/courses";
 
 const initialState: ActionResult = { ok: true, data: undefined };
 
-export function EnrollForm({ offeringId, people }: { offeringId: string; people: PersonRow[] }) {
+export function EnrollForm({
+  offeringId,
+  people,
+}: {
+  offeringId: string;
+  people: EnrollmentPickerOption[];
+}) {
   const [state, formAction, isPending] = useActionState(
     async (_prev: ActionResult, formData: FormData) => enrollPersonAction(offeringId, formData),
     initialState,

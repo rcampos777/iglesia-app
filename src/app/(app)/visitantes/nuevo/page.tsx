@@ -4,12 +4,8 @@ import { getCurrentUser, hasAnyRole } from "@/lib/auth/session";
 import { listPeople } from "@/lib/data/people";
 import { NewFollowUpForm } from "./new-follow-up-form";
 
-const FOLLOWUP_ROLES = [
-  "administrador",
-  "pastor",
-  "coordinador_ministerio",
-  "seguimiento",
-] as const;
+// Sin `pastor` desde 0045: Visitantes es de Seguimiento (decisión 2026-10-01).
+const FOLLOWUP_ROLES = ["administrador", "coordinador_ministerio", "seguimiento"] as const;
 
 export default async function NewFollowUpPage() {
   const user = await getCurrentUser();

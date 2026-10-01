@@ -19,12 +19,7 @@ import { AttendanceReportFilters } from "./attendance-report-filters";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-const FOLLOWUP_ROLES = [
-  "seguimiento",
-  "coordinador_ministerio",
-  "pastor",
-  "administrador",
-] as const;
+const FOLLOWUP_ROLES = ["seguimiento", "coordinador_ministerio", "administrador"] as const;
 const PRAYER_ROLES = ["intercesor", "pastor", "administrador"] as const;
 
 export default async function ReportsPage({
