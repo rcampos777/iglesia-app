@@ -11,7 +11,10 @@ const contactSchema = z.object({
   phone: z.string().trim().max(30).optional().or(z.literal("")),
   email: z.string().trim().email("Email inválido.").optional().or(z.literal("")),
   addressLine: z.string().trim().max(200).optional().or(z.literal("")),
+  addressLine2: z.string().trim().max(200).optional().or(z.literal("")),
   city: z.string().trim().max(100).optional().or(z.literal("")),
+  postalCode: z.string().trim().max(20).optional().or(z.literal("")),
+  country: z.string().trim().max(100).optional().or(z.literal("")),
   preferredName: z.string().trim().max(100).optional().or(z.literal("")),
 });
 
@@ -27,7 +30,10 @@ export async function updateOwnContactAction(formData: FormData): Promise<Action
     phone: formData.get("phone"),
     email: formData.get("email"),
     addressLine: formData.get("addressLine"),
+    addressLine2: formData.get("addressLine2"),
     city: formData.get("city"),
+    postalCode: formData.get("postalCode"),
+    country: formData.get("country"),
     preferredName: formData.get("preferredName"),
   });
   if (!parsed.success) return actionError("Revisa los datos ingresados.");
@@ -38,6 +44,9 @@ export async function updateOwnContactAction(formData: FormData): Promise<Action
     p_email: parsed.data.email || null,
     p_address_line: parsed.data.addressLine || null,
     p_city: parsed.data.city || null,
+    p_address_line2: parsed.data.addressLine2 || null,
+    p_postal_code: parsed.data.postalCode || null,
+    p_country: parsed.data.country || null,
     p_preferred_name: parsed.data.preferredName || null,
   });
 

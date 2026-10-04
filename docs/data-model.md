@@ -61,6 +61,10 @@ trigger impide cambiarlo después (es un hecho histórico). En `/personas`
 se muestra como columna "Origen" y se puede filtrar por origen o por
 actividad concreta (`?origen=actividad:<uuid>`).
 
+Dirección (0051): `address_line` (línea 1), `address_line2`, `city`,
+`postal_code` y `country`, todas opcionales. Se editan en la ficha y en Mi
+portal (`update_own_contact_info`).
+
 `anonymized_at` y `deletion_requested_at` (0049): la persona borró su
 perfil con historial (datos personales quitados) o lo pidió teniendo
 donaciones/certificaciones (pendiente de revisión). Ver `docs/privacy.md`.

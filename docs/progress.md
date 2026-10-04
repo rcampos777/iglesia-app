@@ -4,6 +4,19 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-04 — Dirección completa en el perfil
+
+Pedido del dueño: dirección en dos líneas y luego ciudad, país y código
+postal. `0051`: `people.address_line2`, `postal_code`, `country`; formulario
+compartido `src/components/people/address-fields.tsx` en la ficha y en Mi
+portal; `update_own_contact_info` acepta los campos nuevos; borrar mi
+perfil también los quita. Pruebas: `test:db` 90/90 (nuevo
+`address.test.ts`); navegador (desarrollo, 375 px): llenar, guardar y
+recargar la ficha.
+
+- **Aplicado**: `0051` en desarrollo. **Pendiente**: `0050` y `0051` en
+  producción (script del dueño) y publicar.
+
 ### 2026-10-04 — Eventos del sitio: hora aparte y opcional
 
 Pedido del dueño: la hora del evento separada de la fecha y no

@@ -47,7 +47,10 @@ export const personSchema = z.object({
   email: z.string().trim().email("Email inválido.").optional().or(z.literal("")),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
   addressLine: z.string().trim().max(200).optional().or(z.literal("")),
+  addressLine2: z.string().trim().max(200).optional().or(z.literal("")),
   city: z.string().trim().max(100).optional().or(z.literal("")),
+  postalCode: z.string().trim().max(20).optional().or(z.literal("")),
+  country: z.string().trim().max(100).optional().or(z.literal("")),
   maritalStatus: z.string().trim().max(50).optional().or(z.literal("")),
   membershipStatus: z.enum(membershipStatusValues),
   joinedAt: z

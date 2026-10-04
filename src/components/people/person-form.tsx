@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AddressFields } from "./address-fields";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -159,14 +160,7 @@ export function PersonForm({
           <Label htmlFor="phone">Teléfono</Label>
           <Input id="phone" name="phone" defaultValue={person?.phone ?? ""} />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="addressLine">Dirección</Label>
-          <Input id="addressLine" name="addressLine" defaultValue={person?.address_line ?? ""} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="city">Ciudad</Label>
-          <Input id="city" name="city" defaultValue={person?.city ?? ""} />
-        </div>
+        <AddressFields person={person} />
         <div className="space-y-2">
           <Label htmlFor="maritalStatus">Estado civil</Label>
           <Input

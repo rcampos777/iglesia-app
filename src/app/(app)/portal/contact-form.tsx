@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { updateOwnContactAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AddressFields } from "@/components/people/address-fields";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ActionResult } from "@/lib/action-result";
@@ -55,14 +56,7 @@ export function ContactForm({ person }: { person: PersonRow }) {
           <Label htmlFor="email">Email</Label>
           <Input id="email" name="email" type="email" defaultValue={person.email ?? ""} />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="city">Ciudad</Label>
-          <Input id="city" name="city" defaultValue={person.city ?? ""} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="addressLine">Dirección</Label>
-          <Input id="addressLine" name="addressLine" defaultValue={person.address_line ?? ""} />
-        </div>
+        <AddressFields person={person} />
       </div>
       <Button type="submit" disabled={isPending}>
         {isPending ? "Guardando..." : "Guardar cambios"}

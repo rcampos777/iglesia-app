@@ -81,7 +81,10 @@ export type PersonRow = {
   email: string | null;
   phone: string | null;
   address_line: string | null;
+  address_line2: string | null;
   city: string | null;
+  postal_code: string | null;
+  country: string | null;
   marital_status: string | null;
   membership_status: MembershipStatus;
   joined_at: string | null;
@@ -1023,6 +1026,9 @@ export interface Database {
           p_address_line?: string | null;
           p_city?: string | null;
           p_preferred_name?: string | null;
+          p_address_line2?: string | null;
+          p_postal_code?: string | null;
+          p_country?: string | null;
         };
         Returns: undefined;
       };
