@@ -14,8 +14,9 @@ perfil también los quita. Pruebas: `test:db` 90/90 (nuevo
 `address.test.ts`); navegador (desarrollo, 375 px): llenar, guardar y
 recargar la ficha.
 
-- **Aplicado**: `0051` en desarrollo. **Pendiente**: `0050` y `0051` en
-  producción (script del dueño) y publicar.
+- **Aplicado**: `0050` y `0051` en desarrollo y en **producción** (script
+  del dueño, 2026-10-04). **Publicado** (despliegue "Ready"); sitio y
+  `/eventos` responden 200 en vivo.
 
 ### 2026-10-04 — Eventos del sitio: hora aparte y opcional
 
@@ -29,9 +30,8 @@ solo horas ("6:00 p. m. – 12:00 p. m.") sin las fechas. Ver
 lista, página del evento, reabrir en el editor y agregar hora; editor en
 375 px.
 
-- **Aplicado**: `0050` en desarrollo. **Pendiente**: `0050` en producción
-  (script del dueño) y publicar. Después, cambiar "Un Encuentro con Dios |
-  Retiro de Hombres" de anuncio a evento en el editor.
+- **Publicado** con `0051` (ver arriba). Pendiente (el dueño): cambiar "Un
+  Encuentro con Dios | Retiro de Hombres" de anuncio a evento en el editor.
 
 ### 2026-10-03 — Aviso de privacidad y borrar mi perfil
 
