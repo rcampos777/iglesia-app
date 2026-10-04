@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { eventSubtitle } from "@/lib/site/event-time";
 
 const dayFmt = new Intl.DateTimeFormat("es-PR", {
   timeZone: "America/Puerto_Rico",
@@ -9,27 +10,13 @@ const monFmt = new Intl.DateTimeFormat("es-PR", {
   timeZone: "America/Puerto_Rico",
   month: "short",
 });
-const timeFmt = new Intl.DateTimeFormat("es-PR", {
-  timeZone: "America/Puerto_Rico",
-  hour: "numeric",
-  minute: "2-digit",
-});
-const weekdayFmt = new Intl.DateTimeFormat("es-PR", {
-  timeZone: "America/Puerto_Rico",
-  weekday: "long",
-});
-
-export function timeRange(startsAt: string, endsAt?: string | null) {
-  return endsAt
-    ? `${timeFmt.format(new Date(startsAt))} – ${timeFmt.format(new Date(endsAt))}`
-    : timeFmt.format(new Date(startsAt));
-}
-
 /** Fila de evento con tarjeta de fecha (68×90), como en el diseño. */
 export function EventRow({
   title,
   startsAt,
   endsAt,
+  startHasTime,
+  endHasTime,
   href,
   cream,
   faded,
@@ -38,6 +25,8 @@ export function EventRow({
   title: string;
   startsAt: string;
   endsAt?: string | null;
+  startHasTime?: boolean;
+  endHasTime?: boolean;
   href?: string;
   cream?: boolean;
   faded?: boolean;
@@ -58,7 +47,7 @@ export function EventRow({
       <span className="min-w-0">
         <span className="block text-[21px] leading-[26px] text-[#1D191A]">{title}</span>
         <span className="mt-1 block text-[17px] text-[#999999] first-letter:uppercase">
-          {subtitle ?? `${weekdayFmt.format(d)} · ${timeRange(startsAt, endsAt)}`}
+          {subtitle ?? eventSubtitle({ startsAt, endsAt, startHasTime, endHasTime })}
         </span>
       </span>
     </>

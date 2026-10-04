@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { partsToRange } from "@/lib/site/event-time";
 import { createClient } from "@/lib/supabase/server";
 import { AuthError, requireRole } from "@/lib/auth/require-role";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
@@ -200,31 +201,26 @@ export async function saveSiteSettingsAction(
 // Eventos y anuncios
 // ---------------------------------------------------------------------
 
-const postSchema = z
-  .object({
-    id: uuid.nullable(),
-    kind: z.enum(["evento", "anuncio"]),
-    title: z.string().trim().min(1, "Escribe el título.").max(150),
-    body: optText(5000),
-    startsAt: z.string().nullable(),
-    endsAt: z.string().nullable(),
-    location: optText(200),
-    mediaId: optMedia,
-    linkUrl: optUrl,
-    linkLabel: optText(60),
-    visibleUntil: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .nullable()
-      .or(z.literal("").transform(() => null)),
-    published: z.boolean(),
-  })
-  .refine((v) => v.kind !== "evento" || Boolean(v.startsAt), {
-    message: "Un evento necesita fecha y hora de inicio.",
-  })
-  .refine((v) => !v.startsAt || !v.endsAt || v.endsAt >= v.startsAt, {
-    message: "La fecha de fin no puede ser antes del inicio.",
-  });
+const postSchema = z.object({
+  id: uuid.nullable(),
+  kind: z.enum(["evento", "anuncio"]),
+  title: z.string().trim().min(1, "Escribe el título.").max(150),
+  body: optText(5000),
+  startDate: z.string().max(10),
+  startTime: z.string().max(5),
+  endDate: z.string().max(10),
+  endTime: z.string().max(5),
+  location: optText(200),
+  mediaId: optMedia,
+  linkUrl: optUrl,
+  linkLabel: optText(60),
+  visibleUntil: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .or(z.literal("").transform(() => null)),
+  published: z.boolean(),
+});
 
 export async function savePostAction(
   input: z.input<typeof postSchema>,
@@ -234,13 +230,21 @@ export async function savePostAction(
   const p = postSchema.safeParse(input);
   if (!p.success) return actionError(first(p.error));
   const d = p.data;
+  // Hora opcional (0050). Los anuncios no llevan fecha de evento.
+  const when =
+    d.kind === "evento"
+      ? partsToRange(d)
+      : { startsAt: null, endsAt: null, startHasTime: true, endHasTime: true };
+  if (typeof when === "string") return actionError(when);
   const row = {
     kind: d.kind,
     title: d.title,
     body: d.body,
-    starts_at: d.startsAt,
-    ends_at: d.endsAt,
-    location: d.location,
+    starts_at: when.startsAt,
+    ends_at: when.endsAt,
+    start_has_time: when.startHasTime,
+    end_has_time: when.endHasTime,
+    location: d.kind === "evento" ? d.location : null,
     media_id: d.mediaId,
     link_url: d.linkUrl,
     link_label: d.linkLabel,

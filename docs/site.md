@@ -35,11 +35,25 @@ se actualiza solo.
 Pestañas: General (textos, fotos de portada y de "Quiénes somos", contacto,
 redes, enlace del portal), Fotos (subir varias a la vez; se reducen solas a
 1920 px + miniatura 640 px en el navegador), Álbumes (crear, agregar fotos,
-ordenar, portada, publicar), Eventos y anuncios (evento con fecha/hora de
-PR; anuncio con "mostrar hasta"), Videos (pegar enlace de YouTube;
+ordenar, portada, publicar), Eventos y anuncios (evento con fecha de
+inicio obligatoria y, opcionales, hora de inicio, fecha de fin y hora de
+fin, en hora de PR; anuncio con "mostrar hasta"), Videos (pegar enlace de YouTube;
 "destacado" sale en la portada), Ministerios, Equipo pastoral. Todo tiene
 **Publicado**: los borradores no se ven. Los cambios aparecen de inmediato
 (y el sitio se regenera cada 5 minutos de todos modos).
+
+**Hora opcional en eventos** (2026-10-04, `0050`): `site_posts.start_has_time`
+y `end_has_time`. Sin hora, `starts_at` se guarda a las 00:00 y `ends_at` a
+las 23:59 de PR (un evento de un solo día sin hora dura todo ese día), así
+las consultas de próximos y pasados no cambian. En el sitio solo se muestra
+la hora si se escribió; los eventos de varios días se ven como "30 oct – 1
+nov" en las listas y "Del viernes 30 de octubre al domingo 1 de noviembre"
+en la página del evento. Lógica en `src/lib/site/event-time.ts` (pruebas:
+`tests/unit/event-time.test.ts`).
+
+**Evento o anuncio**: evento = pasa en una fecha (sale en "Próximos" y en
+Eventos, y se va solo cuando termina); anuncio = aviso general (sale en
+"Anuncios" hasta "mostrar hasta"). Se puede cambiar el tipo al editar.
 
 **Quién edita**: `administrador`, SuperAdmin y el rol nuevo **Editor del
 sitio web** (`sitio_web`), que un administrador asigna en "Cuenta y

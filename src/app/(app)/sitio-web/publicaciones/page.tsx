@@ -48,7 +48,7 @@ export default async function SitePostsPage({
                     <span className="block truncate font-medium">{p.title}</span>
                     <span className="text-muted-foreground block text-sm">
                       {p.kind === "evento" && p.starts_at
-                        ? `Evento · ${formatChurchShortDate(p.starts_at)} ${formatChurchTime(p.starts_at)}`
+                        ? `Evento · ${formatChurchShortDate(p.starts_at)}${p.start_has_time ? ` ${formatChurchTime(p.starts_at)}` : ""}`
                         : "Anuncio"}
                     </span>
                   </span>

@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
 import { Typewriter } from "./typewriter";
-import { EventRow, timeRange } from "./event-row";
+import { EventRow } from "./event-row";
+import { eventDateText, eventTimeText } from "@/lib/site/event-time";
 
 export type SiteHomeData = {
   settings: PublicSettings;
@@ -46,13 +47,6 @@ function Spark({ className }: { className?: string }) {
     </svg>
   );
 }
-
-const longDate = new Intl.DateTimeFormat("es-PR", {
-  timeZone: "America/Puerto_Rico",
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-});
 
 function paragraphs(text: string | null) {
   return (text ?? "")
@@ -200,8 +194,8 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
                     <h2 className="text-[36px] leading-[40px] font-medium tracking-[-0.5px]">
                       {next.title}
                     </h2>
-                    <p className="mt-2 text-[17px] text-[#888888] first-letter:uppercase">
-                      {longDate.format(new Date(next.startsAt))}, {timeRange(next.startsAt)}
+                    <p className="mt-2 text-[17px] text-[#888888]">
+                      {[eventDateText(next), eventTimeText(next)].filter(Boolean).join(", ")}
                     </p>
                   </div>
                   <Link
@@ -272,6 +266,9 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
                       <EventRow
                         title={o.title}
                         startsAt={o.startsAt}
+                        endsAt={o.endsAt}
+                        startHasTime={o.startHasTime}
+                        endHasTime={o.endHasTime}
                         href={o.href}
                         cream={i > 0}
                         faded={i === 3 && upcoming.length > 4}

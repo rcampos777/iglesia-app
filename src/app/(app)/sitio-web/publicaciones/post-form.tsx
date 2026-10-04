@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MediaField } from "@/components/site/media-picker";
-import { isoToPrLocalInput, prLocalInputToIso } from "@/lib/datetime";
+import { rangeToParts } from "@/lib/site/event-time";
 import type { SiteMediaRow, SitePostRow } from "@/types/database";
 import { deletePostAction, savePostAction } from "../actions";
 
@@ -18,8 +18,16 @@ export function PostForm({ post, media }: { post?: SitePostRow; media: SiteMedia
     kind: post?.kind ?? ("evento" as "evento" | "anuncio"),
     title: post?.title ?? "",
     body: post?.body ?? "",
-    startsAt: isoToPrLocalInput(post?.starts_at ?? null),
-    endsAt: isoToPrLocalInput(post?.ends_at ?? null),
+    ...rangeToParts(
+      post?.starts_at
+        ? {
+            startsAt: post.starts_at,
+            endsAt: post.ends_at,
+            startHasTime: post.start_has_time,
+            endHasTime: post.end_has_time,
+          }
+        : null,
+    ),
     location: post?.location ?? "",
     mediaId: post?.media_id ?? null,
     linkUrl: post?.link_url ?? "",
@@ -43,8 +51,6 @@ export function PostForm({ post, media }: { post?: SitePostRow; media: SiteMedia
         id: post?.id ?? null,
         ...v,
         mediaId: v.mediaId ?? "",
-        startsAt: v.startsAt ? prLocalInputToIso(v.startsAt) : null,
-        endsAt: v.endsAt ? prLocalInputToIso(v.endsAt) : null,
       });
       if (!res.ok) setMsg({ ok: false, text: res.error });
       else if (!post) router.push(`/sitio-web/publicaciones?editar=${res.data.id}`);
@@ -93,19 +99,40 @@ export function PostForm({ post, media }: { post?: SitePostRow; media: SiteMedia
       {isEvent ? (
         <>
           <div className="space-y-1.5">
-            <Label htmlFor="p-start">Empieza (hora de Puerto Rico)</Label>
+            <Label htmlFor="p-start-date">Fecha de inicio</Label>
             <Input
-              id="p-start"
-              type="datetime-local"
-              value={v.startsAt}
-              onChange={set("startsAt")}
+              id="p-start-date"
+              type="date"
+              value={v.startDate}
+              onChange={set("startDate")}
               required
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="p-end">Termina (opcional)</Label>
-            <Input id="p-end" type="datetime-local" value={v.endsAt} onChange={set("endsAt")} />
+            <Label htmlFor="p-start-time">Hora de inicio (opcional)</Label>
+            <Input id="p-start-time" type="time" value={v.startTime} onChange={set("startTime")} />
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="p-end-date">Fecha de fin (opcional)</Label>
+            <Input
+              id="p-end-date"
+              type="date"
+              value={v.endDate}
+              min={v.startDate || undefined}
+              onChange={set("endDate")}
+              aria-describedby="p-end-help"
+            />
+            <p id="p-end-help" className="text-muted-foreground text-xs">
+              Solo si dura más de un día.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="p-end-time">Hora de fin (opcional)</Label>
+            <Input id="p-end-time" type="time" value={v.endTime} onChange={set("endTime")} />
+          </div>
+          <p className="text-muted-foreground text-xs sm:col-span-2">
+            Hora de Puerto Rico. Si no pones hora, en la página solo se ve la fecha.
+          </p>
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="p-loc">Lugar (opcional)</Label>
             <Input id="p-loc" value={v.location} onChange={set("location")} maxLength={200} />

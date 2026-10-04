@@ -4,6 +4,9 @@ export type ScheduleRule = { weekday: number; local_time: string; name: string }
 export type Occurrence = {
   title: string;
   startsAt: string;
+  endsAt?: string | null;
+  startHasTime?: boolean;
+  endHasTime?: boolean;
   href?: string;
   kind: "culto" | "evento";
 };

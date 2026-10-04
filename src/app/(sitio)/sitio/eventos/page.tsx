@@ -36,6 +36,8 @@ export default async function SiteEventsPage() {
                       title={e.title}
                       startsAt={e.starts_at!}
                       endsAt={e.ends_at}
+                      startHasTime={e.start_has_time}
+                      endHasTime={e.end_has_time}
                       href={`/sitio/eventos/${e.id}`}
                       cream={i % 2 === 1}
                     />
@@ -69,6 +71,8 @@ export default async function SiteEventsPage() {
                     title={e.title}
                     startsAt={e.starts_at!}
                     endsAt={e.ends_at}
+                    startHasTime={e.start_has_time}
+                    endHasTime={e.end_has_time}
                     href={`/sitio/eventos/${e.id}`}
                   />
                 </li>

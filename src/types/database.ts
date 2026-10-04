@@ -408,6 +408,8 @@ export type SitePostRow = {
   body: string | null;
   starts_at: string | null;
   ends_at: string | null;
+  start_has_time: boolean;
+  end_has_time: boolean;
   location: string | null;
   media_id: string | null;
   link_url: string | null;

@@ -35,6 +35,9 @@ export default async function SiteHomePage() {
       .map((e) => ({
         title: e.title,
         startsAt: e.starts_at!,
+        endsAt: e.ends_at,
+        startHasTime: e.start_has_time,
+        endHasTime: e.end_has_time,
         href: `/sitio/eventos/${e.id}`,
         kind: "evento" as const,
       })),

@@ -1,8 +1,24 @@
 # Progreso del proyecto
 
-Última actualización: 2026-10-03.
+Última actualización: 2026-10-04.
 
 ## Estado general: MVP verificado de punta a punta ✅
+
+### 2026-10-04 — Eventos del sitio: hora aparte y opcional
+
+Pedido del dueño: la hora del evento separada de la fecha y no
+obligatoria. `0050` (`start_has_time`, `end_has_time`); el editor tiene
+fecha de inicio (obligatoria), hora de inicio, fecha de fin y hora de fin
+(opcionales). Se corrigió de paso que un evento de varios días mostraba
+solo horas ("6:00 p. m. – 12:00 p. m.") sin las fechas. Ver
+`docs/site.md`. Pruebas: unitarias 22/22 (nuevo `event-time.test.ts`, 6),
+`test:db` 89/89; navegador (desarrollo): crear evento solo con fechas,
+lista, página del evento, reabrir en el editor y agregar hora; editor en
+375 px.
+
+- **Aplicado**: `0050` en desarrollo. **Pendiente**: `0050` en producción
+  (script del dueño) y publicar. Después, cambiar "Un Encuentro con Dios |
+  Retiro de Hombres" de anuncio a evento en el editor.
 
 ### 2026-10-03 — Aviso de privacidad y borrar mi perfil
 
