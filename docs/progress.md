@@ -12,7 +12,7 @@
 - Caché de las páginas públicas: 5 → 2 minutos (`revalidate = 120`). En
   vivo, la lista de Eventos siguió mostrando la versión vieja hasta que
   venció el caché, aunque la página del evento sí se actualizó al guardar.
-  **Pendiente**: investigar por qué `revalidatePath` no refresca al
+  Publicado 2026-10-04 (despliegue "Ready"). **Pendiente**: investigar por qué `revalidatePath` no refresca al
   instante todas las páginas del dominio público.
 
 ### 2026-10-04 — Dirección completa en el perfil
