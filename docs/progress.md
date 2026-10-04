@@ -23,9 +23,11 @@ cuenta y al entrar, y permitir que cada persona borre su perfil. Ver
   pantalla de aceptación, portal en 375 px, borrado real de una cuenta de
   prueba (persona y cuenta borradas, verificado en la base), registro y
   aviso público.
-- **Aplicado**: `0049` en **desarrollo**. **Pendiente**: aplicar `0049` en
-  producción (script del dueño) y publicar el código. Revisión legal del
-  texto (no certifica cumplimiento).
+- **Aplicado**: `0049` en desarrollo y en **producción** (script del
+  dueño, 2026-10-04). **Publicado** (`4dbcd11`, despliegue "Ready");
+  verificado en vivo: `/privacidad` en el sitio y la casilla en
+  `/registro`. Pendiente: revisión legal del texto (no certifica
+  cumplimiento).
 
 ### 2026-10-01 — CAPTCHA (Cloudflare Turnstile)
 
