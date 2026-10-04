@@ -50,7 +50,11 @@ export function partsToRange(p: EventParts): EventRange | string {
     endsAt = prIso(startDate, "23:59");
     endHasTime = false;
   }
-  if (endsAt && endsAt < startsAt) return "El fin no puede ser antes del inicio.";
+  if (endsAt && endsAt < startsAt) {
+    return endDate
+      ? "El fin no puede ser antes del inicio."
+      : "La hora de fin es antes que la de inicio. Si el evento dura más de un día, pon la fecha de fin.";
+  }
   return { startsAt, endsAt, startHasTime: Boolean(startTime), endHasTime };
 }
 

@@ -69,4 +69,7 @@ test("errores claros", () => {
     "El fin no puede ser antes del inicio.",
   );
   assert.equal(partsToRange(parts("2026-10-30", "6pm")), "Hora de inicio inválida.");
+  // El caso del retiro: 9:00 a 8:00 sin fecha de fin.
+  assert.match(String(partsToRange(parts("2026-10-30", "09:00", "", "08:00"))), /fecha de fin/);
+  assert.equal(typeof partsToRange(parts("2026-10-30", "09:00", "2026-11-01", "08:00")), "object");
 });
