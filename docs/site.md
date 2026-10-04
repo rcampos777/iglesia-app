@@ -51,6 +51,10 @@ nov" en las listas y "Del viernes 30 de octubre al domingo 1 de noviembre"
 en la página del evento. Lógica en `src/lib/site/event-time.ts` (pruebas:
 `tests/unit/event-time.test.ts`).
 
+El formulario usa `noValidate`: el navegador bloqueaba guardar cuando una
+hora opcional quedaba a medio escribir; ahora valida el servidor y una hora
+incompleta cuenta como sin hora (reportado por el dueño, 2026-10-04).
+
 **Evento o anuncio**: evento = pasa en una fecha (sale en "Próximos" y en
 Eventos, y se va solo cuando termina); anuncio = aviso general (sale en
 "Anuncios" hasta "mostrar hasta"). Se puede cambiar el tipo al editar.

@@ -77,7 +77,10 @@ export function PostForm({ post, media }: { post?: SitePostRow; media: SiteMedia
 
   const isEvent = v.kind === "evento";
   return (
-    <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    // noValidate: el navegador bloqueaba guardar si una hora opcional
+    // quedaba a medio escribir (p. ej. "--:-- PM"). El servidor valida todo
+    // y una hora incompleta cuenta como "sin hora".
+    <form noValidate onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <fieldset className="flex gap-2 sm:col-span-2">
         <legend className="sr-only">Tipo</legend>
         {(["evento", "anuncio"] as const).map((k) => (
