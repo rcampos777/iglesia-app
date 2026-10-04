@@ -40,7 +40,7 @@ inicio obligatoria y, opcionales, hora de inicio, fecha de fin y hora de
 fin, en hora de PR; anuncio con "mostrar hasta"), Videos (pegar enlace de YouTube;
 "destacado" sale en la portada), Ministerios, Equipo pastoral. Todo tiene
 **Publicado**: los borradores no se ven. Los cambios aparecen de inmediato
-(y el sitio se regenera cada 5 minutos de todos modos).
+(y el sitio se regenera cada 2 minutos de todos modos; antes 5, bajado el 2026-10-04 porque la lista de Eventos tardaba en reflejar un cambio en el dominio público).
 
 **Hora opcional en eventos** (2026-10-04, `0050`): `site_posts.start_has_time`
 y `end_has_time`. Sin hora, `starts_at` se guarda a las 00:00 y `ends_at` a

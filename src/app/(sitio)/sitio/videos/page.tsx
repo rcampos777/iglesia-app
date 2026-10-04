@@ -5,7 +5,7 @@ import { publicSettings, publicVideos } from "@/lib/data/site";
 import { formatDateKey } from "@/lib/datetime";
 import { safe } from "@/lib/site/load";
 
-export const revalidate = 300;
+export const revalidate = 120;
 export const metadata: Metadata = { title: "Predicaciones" };
 
 export default async function SiteVideosPage() {

@@ -4,6 +4,17 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-04 — Ajustes del editor de eventos y caché del sitio
+
+- El formulario de eventos ya no se bloquea por una hora a medio escribir
+  (`noValidate`; valida el servidor) y explica que falta la fecha de fin
+  cuando la hora de fin es antes que la de inicio.
+- Caché de las páginas públicas: 5 → 2 minutos (`revalidate = 120`). En
+  vivo, la lista de Eventos siguió mostrando la versión vieja hasta que
+  venció el caché, aunque la página del evento sí se actualizó al guardar.
+  **Pendiente**: investigar por qué `revalidatePath` no refresca al
+  instante todas las páginas del dominio público.
+
 ### 2026-10-04 — Dirección completa en el perfil
 
 Pedido del dueño: dirección en dos líneas y luego ciudad, país y código

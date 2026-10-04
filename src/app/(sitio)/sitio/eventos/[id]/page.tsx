@@ -9,7 +9,7 @@ import { publicPost } from "@/lib/data/site";
 import { siteMediaUrl } from "@/lib/site/media";
 import { safe } from "@/lib/site/load";
 
-export const revalidate = 300;
+export const revalidate = 120;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 async function load(id: string) {
   return UUID_RE.test(id) ? safe("evento", publicPost(id), null) : null;

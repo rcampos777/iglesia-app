@@ -6,7 +6,7 @@ import { publicAlbums } from "@/lib/data/site";
 import { siteMediaUrl } from "@/lib/site/media";
 import { safe } from "@/lib/site/load";
 
-export const revalidate = 300;
+export const revalidate = 120;
 export const metadata: Metadata = { title: "Álbumes" };
 
 const dateFmt = new Intl.DateTimeFormat("es-PR", {

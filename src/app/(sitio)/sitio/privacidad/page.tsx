@@ -5,7 +5,7 @@ import { publicSettings } from "@/lib/data/site";
 import { FALLBACK_SETTINGS, safe } from "@/lib/site/load";
 import { PRIVACY_VERSION } from "@/lib/privacy";
 
-export const revalidate = 300;
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Aviso de privacidad",

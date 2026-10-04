@@ -5,7 +5,7 @@ import { publicPastEvents, publicSchedule, publicUpcomingEvents } from "@/lib/da
 import { upcomingServices } from "@/lib/site/schedule";
 import { safe } from "@/lib/site/load";
 
-export const revalidate = 300;
+export const revalidate = 120;
 export const metadata: Metadata = { title: "Eventos" };
 
 export default async function SiteEventsPage() {

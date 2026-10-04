@@ -14,7 +14,7 @@ import { FALLBACK_SETTINGS, safe } from "@/lib/site/load";
 
 // Se regenera cada 5 minutos y, además, al guardar desde el editor
 // (revalidatePath("/sitio", "layout")).
-export const revalidate = 300;
+export const revalidate = 120;
 
 export default async function SiteHomePage() {
   const [settings, schedule, events, announcements, albums, videos, ministries, team] =
