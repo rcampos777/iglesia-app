@@ -373,3 +373,41 @@ export async function deletePersonAction(personId: string, reason: string): Prom
   revalidatePath("/personas");
   return actionOk(undefined);
 }
+
+/** Solo SuperAdmin (0049): quita los datos personales de alguien con historial. */
+export async function anonymizePersonAction(
+  personId: string,
+  reason: string,
+): Promise<ActionResult> {
+  try {
+    await requireRole(["apostol"]);
+  } catch (err) {
+    if (err instanceof AuthError) return actionError("Solo un SuperAdmin puede anonimizar.");
+    throw err;
+  }
+  if (!z.string().uuid().safeParse(personId).success) return actionError("Persona inválida.");
+  const parsed = z
+    .string()
+    .trim()
+    .min(5, "Escribe el motivo (mínimo 5 caracteres).")
+    .max(300)
+    .safeParse(reason);
+  if (!parsed.success) return actionError(parsed.error.issues[0]?.message ?? "Escribe el motivo.");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("anonymize_person", {
+    p_person_id: personId,
+    p_reason: parsed.data,
+  });
+  if (error) {
+    if (
+      /propia cuenta|SuperAdmin o Finanzas|motivo|anonimizada|último|última/i.test(error.message)
+    ) {
+      return actionError(error.message);
+    }
+    return actionError("No se pudo anonimizar. Intenta de nuevo.");
+  }
+  revalidatePath("/personas");
+  revalidatePath(`/personas/${personId}`);
+  return actionOk(undefined);
+}

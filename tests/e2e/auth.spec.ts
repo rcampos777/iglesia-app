@@ -19,6 +19,20 @@ test.describe("Páginas públicas", () => {
   test("la página de registro muestra el formulario", async ({ page }) => {
     await page.goto("/registro");
     await expect(page.getByRole("heading", { name: "Crear cuenta" })).toBeVisible();
+    // Aviso de privacidad antes de crear la cuenta (0049).
+    await expect(page.getByRole("checkbox", { name: /aviso de privacidad/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /aviso de privacidad completo/ })).toHaveAttribute(
+      "href",
+      "/sitio/privacidad",
+    );
+  });
+
+  test("el aviso de privacidad es público", async ({ page }) => {
+    await page.goto("/sitio/privacidad");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Aviso de privacidad" }),
+    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Tus derechos" })).toBeVisible();
   });
 
   test("la página de recuperar contraseña muestra el formulario", async ({ page }) => {

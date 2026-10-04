@@ -308,7 +308,11 @@ export function RegistrationForm({
         información médica y el contacto de emergencia solo los ven quienes organizan o administran
         las actividades de la iglesia, y no se incluyen en los emails. Recibirás por email la
         confirmación y recordatorios de esta actividad. Para consultar, corregir o pedir que se
-        borren tus datos, escribe a la iglesia.
+        borren tus datos, escribe a la iglesia.{" "}
+        <a href="/sitio/privacidad" target="_blank" className="underline underline-offset-4">
+          Aviso de privacidad
+        </a>
+        .
       </p>
 
       <Turnstile resetKey={state} />

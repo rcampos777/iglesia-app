@@ -1,8 +1,31 @@
 # Progreso del proyecto
 
-Última actualización: 2026-10-01.
+Última actualización: 2026-10-03.
 
 ## Estado general: MVP verificado de punta a punta ✅
+
+### 2026-10-03 — Aviso de privacidad y borrar mi perfil
+
+Pedido del dueño: avisar que se recogen datos personales antes de crear la
+cuenta y al entrar, y permitir que cada persona borre su perfil. Ver
+`docs/privacy.md` y la decisión del 2026-10-03.
+
+- `0049`: `profiles.privacy_version/privacy_accepted_at`,
+  `people.anonymized_at/deletion_requested_at`, `accept_privacy_notice`,
+  `delete_my_account`, `anonymize_person`.
+- Aviso público `/sitio/privacidad` (`/privacidad` en el sitio); resumen y
+  casilla obligatoria en `/registro`; pantalla para aceptar al entrar
+  (vuelve a salir si cambia `PRIVACY_VERSION`); Mi portal → "Privacidad y
+  mi cuenta" → Borrar mi perfil; SuperAdmin puede anonimizar desde la
+  ficha.
+- Pruebas: `test:db` 89/89 (nuevo `self-delete.test.ts`, 8), unitarias
+  16/16, E2E 35/35, check y build limpios. Navegador (desarrollo):
+  pantalla de aceptación, portal en 375 px, borrado real de una cuenta de
+  prueba (persona y cuenta borradas, verificado en la base), registro y
+  aviso público.
+- **Aplicado**: `0049` en **desarrollo**. **Pendiente**: aplicar `0049` en
+  producción (script del dueño) y publicar el código. Revisión legal del
+  texto (no certifica cumplimiento).
 
 ### 2026-10-01 — CAPTCHA (Cloudflare Turnstile)
 

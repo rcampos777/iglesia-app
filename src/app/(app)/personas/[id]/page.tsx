@@ -95,6 +95,7 @@ export default async function PersonDetailPage({
           personId={person.id}
           personName={`${person.first_name} ${person.last_name}`}
           blockers={deleteBlockers}
+          anonymized={person.anonymized_at !== null}
         />
       )}
     </div>
@@ -118,6 +119,24 @@ export default async function PersonDetailPage({
           {membershipStatusLabels[person.membership_status]}
         </StatusBadge>
       </div>
+
+      {person.deletion_requested_at ? (
+        <p
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950"
+        >
+          Esta persona borró su cuenta el{" "}
+          {new Date(person.deletion_requested_at).toLocaleDateString("es")} y pidió borrar sus
+          datos. Se conservó el registro porque tiene donaciones o certificaciones: un SuperAdmin
+          debe revisarlo (al final de esta página puede anonimizarla).
+        </p>
+      ) : null}
+      {person.anonymized_at ? (
+        <p role="status" className="bg-muted rounded-lg border p-3 text-sm">
+          Datos personales borrados el {new Date(person.anonymized_at).toLocaleDateString("es")} a
+          pedido de la persona. Sus registros se conservan sin nombre.
+        </p>
+      ) : null}
 
       {userIsAdmin ? (
         <Tabs defaultValue={defaultTab}>

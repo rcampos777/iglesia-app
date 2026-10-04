@@ -6,8 +6,12 @@ import {
   HandHeart,
   HeartHandshake,
   QrCode,
+  ShieldCheck,
   UserRound,
 } from "lucide-react";
+import Link from "next/link";
+import { PRIVACY_PATH } from "@/lib/privacy";
+import { DeleteAccountForm } from "./delete-account-form";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/ui-brand/page-header";
@@ -230,6 +234,36 @@ export default async function PortalPage() {
               </div>
             </details>
           ) : null}
+
+          <details className="group bg-card ring-foreground/10 rounded-xl shadow-xs ring-1">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-xl p-4 sm:p-5 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center gap-2">
+                <ShieldCheck className="text-muted-foreground size-[18px]" aria-hidden />
+                <span>
+                  <span className="block text-base font-semibold">Privacidad y mi cuenta</span>
+                  <span className="text-muted-foreground block text-sm">
+                    Aviso de privacidad y borrar mi perfil
+                  </span>
+                </span>
+              </span>
+              <ChevronDown
+                className="text-muted-foreground size-4 transition-transform group-open:rotate-180"
+                aria-hidden
+              />
+            </summary>
+            <div className="space-y-4 border-t p-4 sm:p-5">
+              <p className="text-sm">
+                <Link
+                  href={PRIVACY_PATH}
+                  target="_blank"
+                  className="font-medium underline underline-offset-4"
+                >
+                  Leer el aviso de privacidad
+                </Link>
+              </p>
+              <DeleteAccountForm />
+            </div>
+          </details>
         </div>
       </div>
     </div>

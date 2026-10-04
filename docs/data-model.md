@@ -61,6 +61,10 @@ trigger impide cambiarlo después (es un hecho histórico). En `/personas`
 se muestra como columna "Origen" y se puede filtrar por origen o por
 actividad concreta (`?origen=actividad:<uuid>`).
 
+`anonymized_at` y `deletion_requested_at` (0049): la persona borró su
+perfil con historial (datos personales quitados) o lo pidió teniendo
+donaciones/certificaciones (pendiente de revisión). Ver `docs/privacy.md`.
+
 ### `profiles`
 
 1:1 entre `auth.users` y `people` (`person_id` es `unique`). Se crea
@@ -68,6 +72,9 @@ automáticamente vía trigger `on_auth_user_created` al registrarse un
 usuario. Si la persona ya existía en `people` (por ejemplo, fue invitada),
 el trigger enlaza el `profile` a ese `person_id` en lugar de crear uno
 nuevo (pasado en `raw_user_meta_data.person_id`).
+
+`privacy_version` y `privacy_accepted_at` (0049): versión del aviso de
+privacidad que aceptó la cuenta y cuándo.
 
 ### `user_roles`
 

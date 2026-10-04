@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ActionResult } from "@/lib/action-result";
 import { Turnstile } from "@/components/captcha/turnstile";
+import { PrivacySummary } from "@/components/privacy/privacy-summary";
 
 const initialState: ActionResult = { ok: true, data: undefined };
 
@@ -102,6 +103,29 @@ export function RegisterForm() {
             />
             {!state.ok && state.fieldErrors?.confirmPassword && (
               <p className="text-destructive text-sm">{state.fieldErrors.confirmPassword[0]}</p>
+            )}
+          </div>
+          <div className="bg-muted/50 space-y-3 rounded-lg border p-3">
+            <p className="text-sm font-medium">Sobre tus datos</p>
+            <PrivacySummary />
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="acceptPrivacy"
+                value="si"
+                required
+                className="accent-primary mt-0.5 size-4 shrink-0"
+                aria-invalid={!state.ok && state.fieldErrors?.acceptPrivacy ? true : undefined}
+                aria-describedby={
+                  !state.ok && state.fieldErrors?.acceptPrivacy ? "acceptPrivacy-error" : undefined
+                }
+              />
+              <span>He leído el aviso de privacidad y acepto que la iglesia guarde mis datos.</span>
+            </label>
+            {!state.ok && state.fieldErrors?.acceptPrivacy && (
+              <p id="acceptPrivacy-error" className="text-destructive text-sm">
+                {state.fieldErrors.acceptPrivacy[0]}
+              </p>
             )}
           </div>
           <Turnstile resetKey={state} />

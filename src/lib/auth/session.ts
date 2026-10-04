@@ -7,6 +7,10 @@ export interface CurrentUser {
   email: string | null;
   personId: string | null;
   roles: AppRole[];
+  /** Versión del aviso de privacidad que aceptó (0049). */
+  privacyVersion: string | null;
+  /** Versión aceptada al crear la cuenta en /registro (user_metadata). */
+  signupPrivacyVersion: string | null;
 }
 
 /**
@@ -23,7 +27,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!user) return null;
 
   const [{ data: profile }, { data: roleRows }] = await Promise.all([
-    supabase.from("profiles").select("person_id").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("person_id, privacy_version").eq("id", user.id).maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", user.id),
   ]);
 
@@ -32,6 +36,11 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     email: user.email ?? null,
     personId: profile?.person_id ?? null,
     roles: (roleRows ?? []).map((r) => r.role),
+    privacyVersion: profile?.privacy_version ?? null,
+    signupPrivacyVersion:
+      typeof user.user_metadata?.privacy_version === "string"
+        ? user.user_metadata.privacy_version
+        : null,
   };
 }
 

@@ -33,7 +33,10 @@ create table auth.users (
   email_confirmed_at timestamptz,
   created_at timestamptz default now(),
   raw_user_meta_data jsonb default '{}',
-  raw_app_meta_data jsonb default '{}'
+  raw_app_meta_data jsonb default '{}',
+  encrypted_password text,
+  phone text,
+  banned_until timestamptz
 );
 create or replace function auth.uid() returns uuid language sql stable as $$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;

@@ -2,6 +2,29 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-10-03 — Aviso de privacidad obligatorio y borrado del propio perfil
+
+**Contexto**: el dueño del producto: "trabajar el anuncio de que colectamos
+data personal antes del signup y luego de logearse, y permitir que las
+personas borren su perfil, para poder cumplir con la ley" (auditoría H-02 y
+H-10).
+
+**Decisión** (`0049`, respuestas del dueño):
+
+- Al entrar, **pantalla para aceptar** (no un banner): hay que pulsar
+  "Entendido" y queda la versión y la fecha. Cambiar el texto obliga a
+  cambiar `PRIVACY_VERSION` y todos vuelven a aceptarlo.
+- Borrar con historial: **anonimizar** (alternativas descartadas: solo
+  crear una solicitud manual; borrar todo, que pierde estadísticas). Si
+  hay donaciones o certificaciones, se borra la cuenta pero el registro se
+  conserva intacto para que un SuperAdmin lo revise (obligaciones contables
+  y Ley 300).
+- Cuentas con SuperAdmin o Finanzas no se borran a sí mismas.
+
+**Consecuencias**: el texto del aviso solo describe lo verificado; plazos
+de conservación, entidad legal de Nexo y revisión legal siguen pendientes.
+Detalle en `docs/privacy.md`.
+
 ## 2026-10-01 — Borrar personas creadas por error (solo SuperAdmin)
 
 **Contexto**: el dueño del producto quiere "borrar cuentas que no tengan

@@ -239,4 +239,5 @@ docs/                                # documentación del proyecto
 | [`docs/site.md`](docs/site.md)                                   | Sitio web público y su editor                  |
 | [`docs/registrations.md`](docs/registrations.md)                 | Inscripción en línea, pagos y recordatorios    |
 | [`docs/finance.md`](docs/finance.md)                             | Donaciones, cartas y acceso financiero         |
+| [`docs/privacy.md`](docs/privacy.md)                             | Aviso de privacidad y borrado del perfil       |
 | [`docs/progress.md`](docs/progress.md)                           | Estado actual, próxima tarea                   |

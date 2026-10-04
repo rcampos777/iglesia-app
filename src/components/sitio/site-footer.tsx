@@ -42,6 +42,9 @@ export function SiteFooter({ s }: { s: PublicSettings }) {
           <a href={s.portal_url} className="hover:text-white">
             Portal de miembros
           </a>
+          <Link href="/sitio/privacidad" className="hover:text-white">
+            Aviso de privacidad
+          </Link>
         </nav>
         {socials.length ? (
           <div className="flex flex-col gap-2 text-[15px]">

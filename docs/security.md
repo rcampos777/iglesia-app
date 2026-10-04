@@ -517,6 +517,25 @@ y plan de incidentes.
   directo). Navegador: login con token, envío sin token rechazado y
   widget reiniciado.
 
+## 8.o Aviso de privacidad y borrado del propio perfil (2026-10-03, 0049)
+
+- `accept_privacy_notice`: solo actualiza el perfil de `auth.uid()`;
+  versión validada con formato de fecha.
+- `delete_my_account`: security definer sobre `auth.uid()` (nunca recibe
+  un id), confirmación literal `BORRAR`, rechaza SuperAdmin/Finanzas; el
+  guard del último administrador sigue aplicando. Según lo ligado: borra,
+  anonimiza o deja pendiente de revisión (donaciones, cartas,
+  certificaciones). La cuenta se borra o, si una referencia lo impide, se
+  vacía y bloquea (sin contraseña, identidades ni sesiones).
+- `anonymize_person`: solo `apostol`, motivo obligatorio, no la propia
+  cuenta ni SuperAdmin/Finanzas; `audit_log`.
+- Funciones internas `_person_links`, `_anonymize_person`,
+  `_remove_auth_user` sin `execute` para `anon`/`authenticated`.
+- Bitácora `person.self_delete` sin actor ni nombre (no conserva el dato
+  que se pidió borrar).
+- Límites: copias de seguridad, emails ya enviados y logs de proveedores
+  (`docs/privacy.md` §5). Ver detalle en `docs/privacy.md`.
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

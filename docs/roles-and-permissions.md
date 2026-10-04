@@ -231,6 +231,11 @@ Desde 2026-09-28 (0034–0035). Ver [`finance.md`](finance.md).
 | Certificaciones: ver, registrar, editar, abrir documento (0042) | ✔       | ✔        | ✘             | ✘      | ✘          | ✘                       |
 | Certificaciones: borrar                                         | ✔       | ✘        | ✘             | ✘      | ✘          | ✘                       |
 | Borrar personas sin nada ligado (y su cuenta) (0046)            | ✔       | ✘        | ✘             | ✘      | ✘          | ✘                       |
+| Anonimizar a una persona con historial (0049)                   | ✔       | ✘        | ✘             | ✘      | ✘          | ✘                       |
+
+**Cualquier cuenta** (0049) acepta el aviso de privacidad al entrar y puede
+borrar **su propio** perfil desde Mi portal, salvo que tenga SuperAdmin o
+Finanzas. Ver `docs/privacy.md`.
 
 (\*) Salvo que además tengan un rol de oración por su cuenta. Intercesión
 nunca ve monto, forma de pago ni la donación.

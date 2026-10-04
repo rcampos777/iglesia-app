@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth, AuthError } from "@/lib/auth/require-role";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
@@ -90,4 +91,35 @@ export async function submitPrayerRequestAction(formData: FormData): Promise<Act
 
   revalidatePath("/portal");
   return actionOk(undefined);
+}
+
+/**
+ * Borrar mi perfil (0049). Escribir BORRAR confirma. Al terminar, la cuenta
+ * ya no existe: se cierra la sesión y se vuelve al login con un aviso.
+ */
+export async function deleteMyAccountAction(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  try {
+    await requireAuth();
+  } catch (err) {
+    if (err instanceof AuthError) return actionError(err.message);
+    throw err;
+  }
+  const confirm = z.literal("BORRAR").safeParse(String(formData.get("confirm") ?? "").trim());
+  if (!confirm.success) return actionError("Escribe BORRAR (en mayúsculas) para confirmar.");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("delete_my_account", { p_confirm: confirm.data });
+  if (error) {
+    if (/SuperAdmin o Finanzas|último|última|BORRAR/i.test(error.message)) {
+      return actionError(error.message);
+    }
+    return actionError("No se pudo borrar tu perfil. Intenta de nuevo o escribe a la iglesia.");
+  }
+
+  await supabase.auth.signOut().catch(() => undefined);
+  revalidatePath("/", "layout");
+  redirect(`/login?cuenta=${data === "pendiente_revision" ? "revision" : "borrada"}`);
 }

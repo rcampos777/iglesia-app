@@ -11,6 +11,7 @@ import {
   registerSchema,
   resetPasswordSchema,
 } from "@/lib/validations/auth";
+import { PRIVACY_VERSION } from "@/lib/privacy";
 
 function zodFieldErrors(error: {
   flatten: () => { fieldErrors: Record<string, string[] | undefined> };
@@ -65,6 +66,7 @@ export async function registerAction(formData: FormData): Promise<ActionResult> 
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
+    acceptPrivacy: formData.get("acceptPrivacy"),
   });
 
   if (!parsed.success) {
@@ -84,6 +86,9 @@ export async function registerAction(formData: FormData): Promise<ActionResult> 
         first_name: parsed.data.firstName,
         last_name: parsed.data.lastName,
         full_name: `${parsed.data.firstName} ${parsed.data.lastName}`,
+        // Aceptó el aviso aquí: al primer inicio de sesión se registra en
+        // profiles sin volver a preguntar (ver (app)/layout.tsx).
+        privacy_version: PRIVACY_VERSION,
       },
     },
   });
@@ -141,6 +146,13 @@ export async function resetPasswordAction(formData: FormData): Promise<ActionRes
   }
 
   redirect("/login?reset=ok");
+}
+
+export async function acceptPrivacyAction(): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("accept_privacy_notice", { p_version: PRIVACY_VERSION });
+  if (error) throw new Error("No se pudo guardar. Intenta de nuevo.");
+  revalidatePath("/", "layout");
 }
 
 export async function logoutAction(): Promise<void> {

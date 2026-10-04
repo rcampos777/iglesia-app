@@ -89,6 +89,8 @@ export type PersonRow = {
   photo_url: string | null;
   source: PersonSource;
   source_activity_id: string | null;
+  anonymized_at: string | null;
+  deletion_requested_at: string | null;
   created_at: string;
   updated_at: string;
   created_by: string | null;
@@ -110,6 +112,8 @@ export type ProfileRow = {
   person_id: string;
   display_name: string | null;
   created_at: string;
+  privacy_version: string | null;
+  privacy_accepted_at: string | null;
 };
 
 export type UserRoleRow = {
@@ -966,6 +970,18 @@ export interface Database {
         Returns: Record<string, number>;
       };
       delete_person: {
+        Args: { p_person_id: string; p_reason: string };
+        Returns: undefined;
+      };
+      accept_privacy_notice: {
+        Args: { p_version: string };
+        Returns: undefined;
+      };
+      delete_my_account: {
+        Args: { p_confirm: string };
+        Returns: "borrado" | "anonimizado" | "pendiente_revision";
+      };
+      anonymize_person: {
         Args: { p_person_id: string; p_reason: string };
         Returns: undefined;
       };

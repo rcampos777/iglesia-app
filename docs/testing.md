@@ -115,6 +115,9 @@ corrección/anulación con versión y revisiones inmutables; cartas con total
 exacto (sin anónimas, anuladas ni fuera de período), versiones, revisión y
 PDF conservado; configuración y aprobación de plantilla.
 
+`tests/db/self-delete.test.ts` (aviso de privacidad y borrar mi perfil,
+8 pruebas, `0049`): ver `docs/privacy.md` §6.
+
 `tests/unit/money.test.ts`: lectura y formato de montos sin punto flotante.
 
 `tests/unit/datetime.test.ts` (`npm run test:unit`): formato de fecha y

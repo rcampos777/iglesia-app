@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deletePersonAction } from "@/app/(app)/personas/actions";
+import { anonymizePersonAction, deletePersonAction } from "@/app/(app)/personas/actions";
 
 const BLOCKER_LABELS: Record<string, string> = {
   matriculas: "matrícula(s) en clases",
@@ -43,10 +43,12 @@ export function DeletePersonCard({
   personId,
   personName,
   blockers,
+  anonymized,
 }: {
   personId: string;
   personName: string;
   blockers: Record<string, number>;
+  anonymized: boolean;
 }) {
   const router = useRouter();
   const [reason, setReason] = useState("");
@@ -71,10 +73,30 @@ export function DeletePersonCard({
     }
   }
 
+  async function anonymize() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await anonymizePersonAction(personId, reason);
+      if (res.ok) {
+        setReason("");
+        router.refresh();
+      } else setError(res.error);
+    } catch {
+      setError("No hubo respuesta del servidor. Revisa la conexión.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (anonymized) return null;
+
   return (
     <Card className="ring-destructive/30">
       <CardHeader>
-        <CardTitle className="text-base">Borrar persona</CardTitle>
+        <CardTitle className="text-base">
+          {blocked ? "Borrar o anonimizar persona" : "Borrar persona"}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         {blocked ? (
@@ -90,6 +112,52 @@ export function DeletePersonCard({
                 </li>
               ))}
             </ul>
+            <p className="text-muted-foreground">
+              Si la persona pidió borrar sus datos, puedes <b>anonimizarla</b>: se borran su nombre,
+              contacto, notas, peticiones de oración, respuestas de encuestas y seguimientos, y su
+              cuenta. Los registros (asistencia, clases, donaciones) quedan sin nombre.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="anonymize-reason">Motivo</Label>
+              <Textarea
+                id="anonymize-reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                maxLength={300}
+                rows={2}
+                placeholder="Ej.: la persona pidió borrar sus datos"
+                disabled={busy}
+              />
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={busy || reason.trim().length < 5}
+                >
+                  {busy ? (
+                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Trash2 className="size-4" aria-hidden />
+                  )}
+                  Anonimizar
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Anonimizar a {personName}?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Se borran sus datos personales y su cuenta. Si tiene donaciones, ya no tendrán
+                    nombre (no se podrán emitir cartas). No se puede deshacer.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={anonymize}>Anonimizar</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         ) : (
           <>
