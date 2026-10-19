@@ -29,8 +29,14 @@ Detalle en `docs/person-registry.md`; decisión del 2026-10-18.
   credenciales para este entorno). Pendiente: recorrer los flujos con
   cuentas de administrador, líder de ministerio, seguimiento y miembro, y
   en móvil (375 px).
-- Pendiente (usuario): aplicar `0054` en producción antes de desplegar el
-  código; proveedor de SMS si se quiere verificar por teléfono.
+- **Aplicado y publicado (2026-10-19)**: `0053` y `0054` aplicadas en
+  **producción** por el dueño (`0052` ya estaba); push de `f0c31ec` y
+  `3ef63bf` a `main`, despliegue de Vercel "completed". En vivo: login y
+  registro 200, sitio 200, rutas nuevas (`/personas/duplicados`,
+  `/portal/vincular`, importar de ministerio) piden sesión.
+- Pendiente: proveedor de SMS si se quiere verificar por teléfono; cambiar
+  la contraseña de la base de producción (quedó visible en una terminal al
+  aplicar las migraciones).
 
 ### 2026-10-11 — Importar diezmos y ofrendas + donantes solo de Finanzas (0053)
 
@@ -52,8 +58,7 @@ Detalle en `docs/person-registry.md`; decisión del 2026-10-18.
 - **No verificado en navegador con sesión** (no se usaron credenciales de
   prueba). Pendiente: recorrer el flujo con una cuenta de Finanzas en
   desarrollo y en móvil.
-- Pendiente (usuario): aplicar `0053` en producción antes de desplegar el
-  código.
+- **Aplicado y publicado** con `0054` (2026-10-19, ver arriba).
 - Login: con el email sin confirmar ya no dice "Email o contraseña
   incorrectos" sino que pide abrir el enlace de confirmación
   (`loginAction`). Encontrado al registrar una cuenta en desarrollo.
@@ -77,8 +82,8 @@ verify:oauth-profile` 13/13; ramas del trigger (apple/google/email) por
 - **No verificado**: acceso real con Google o Apple (los proveedores no
   están configurados en ningún proyecto; en desarrollo Supabase responde
   "provider is not enabled", como se esperaba).
-- Pendiente (usuario): aplicar `0052` en producción, configurar
-  proveedores y la variable (pasos en `docs/deployment.md` §7).
+- `0052` aplicada en producción (confirmado 2026-10-19). Pendiente
+  (usuario): configurar proveedores y la variable (pasos en `docs/deployment.md` §7).
 - Apple en espera: la iglesia aún no tiene cuenta de Apple Developer
   (2026-10-10). Se puede activar solo Google con
   `AUTH_OAUTH_PROVIDERS=google`; Apple se suma después sin cambiar código.
