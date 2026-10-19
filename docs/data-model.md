@@ -80,6 +80,11 @@ nuevo (pasado en `raw_user_meta_data.person_id`).
 `privacy_version` y `privacy_accepted_at` (0049): versión del aviso de
 privacidad que aceptó la cuenta y cuándo.
 
+`profile_completed_at` (0052): cuándo la persona confirmó nombre y
+apellido. NULL en cuentas nuevas de Google/Apple hasta pasar por
+`/completar-perfil` (`complete_my_profile`, que escribe el nombre en
+`people`). Registro con email e invitaciones quedan completas al crearse.
+
 ### `user_roles`
 
 `(user_id, role)` — un usuario puede tener múltiples filas (múltiples
@@ -217,6 +222,17 @@ null`). Nunca se borra: `voided_at/voided_by/void_reason` para
   total, cantidad, `snapshot` (jsonb), `pdf` (bytea), `pdf_sha256`, estado
   (`vigente`/`requiere_revision`/`reemplazada`).
 - `finance_settings` (fila única): datos de la iglesia y plantilla.
+- `people.finance_only` (0053): donante creado por Finanzas
+  (`source = 'finanzas'`), oculto del directorio por RLS restrictiva. Se
+  borra al vincularlo con la persona real (`finance_link_donor`).
+- `donation_import_batches` / `donation_import_donors` /
+  `donation_import_rows` (0053): staging de la importación. Un donante por
+  nombre normalizado (`match_key`) y lote, con candidatos, parecidos y
+  decisión (`enlazar`, `crear`, `unir`, `anonima`, `omitir`); cada fila
+  guarda lo leído, los errores y la donación creada (`donation_id`, con el
+  id de la fila como `idempotency_key`).
+- `finance_link_dismissals` (0053): sugerencias de vínculo descartadas.
+- `donation_type` incluye `pacto` (0053).
 - `finance_audit_log`: cartas, descargas, exportaciones, configuración y
   envíos a intercesión. Inmutable; solo `apostol`.
 

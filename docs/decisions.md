@@ -2,6 +2,81 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-10-11 — Donantes solo de Finanzas e importación de diezmos y ofrendas
+
+**Contexto**: el dueño del producto necesita subir lo que va del año
+(Excel con ~2,100 filas y ~430 nombres) y solo hay 110 personas
+registradas. Pidió: "los donantes no se deben ver como usuarios", "que no
+se dupliquen los nombres" y que no se dañen los reportes. Preguntó si
+convenía una base de datos aparte.
+
+**Decisión** (`0053`):
+
+- **Misma base, separados con candado**: `people.finance_only`. Una
+  política RLS **restrictiva** oculta esas filas a toda consulta directa,
+  para todos los roles (incluidos administrador y SuperAdmin): no salen
+  en el directorio, conteos, reportes, check-in, clases ni ministerios.
+  Finanzas las lee solo por sus funciones `security definer`. Los cuatro
+  selectores `security definer` que leen `people` (ministerios, check-in,
+  matrícula, inscripción en línea) se actualizaron para excluirlas.
+  Alternativa descartada: base de datos aparte (sin transacciones ni
+  relaciones con `donations`, y la vinculación posterior sería una
+  migración entre bases). Otra descartada: tabla `donors` separada (había
+  que rehacer todas las funciones de Finanzas y las cartas, que dependen
+  de `person_id`).
+- **Excepción a "Finanzas no crea personas"**: Finanzas crea _donantes_
+  (`source = 'finanzas'`), ocultos, desde la importación o "Crear donante
+  nuevo" en Registrar. Si ya existe alguien con el mismo nombre, se exige
+  confirmar.
+- **Sin duplicados**: en el archivo, un nombre repetido es un solo donante
+  (nombre normalizado sin acentos ni mayúsculas). Se sugiere enlazar con
+  quien ya existe (mismo nombre o el enlace usado en un archivo anterior)
+  y se señalan parecidos dentro del archivo ("Es la misma persona"). Nada
+  se enlaza solo: cada decisión la toma una persona (regla 5); los atajos
+  en bloque son un clic explícito y solo cubren coincidencias exactas o
+  nombres sin parecido con nadie.
+- **Vincular después**: cuando el donante aparece en el directorio (se
+  registra, lo importa Seguimiento…), Finanzas → Vincular mueve sus
+  donaciones (revisión "corregida" con motivo) y cartas a esa persona y
+  borra el registro de Finanzas. Queda un solo registro.
+- Tipo de donación nuevo **Pacto** (aparece en el registro de la iglesia).
+
+**Consecuencias**: el directorio y los reportes cuentan solo personas
+reales. Un donante oculto que se registra por su cuenta queda duplicado
+hasta que Finanzas lo vincula (la lista "Vincular" lo detecta por nombre).
+
+## 2026-10-10 — Acceso con Google y Apple + "Completa tu perfil"
+
+**Contexto**: el dueño del producto pidió registro e inicio de sesión con
+Google y Apple (Supabase Auth), sin quitar email y contraseña, y que nadie
+entre a la app sin nombre y apellido completos.
+
+**Decisión** (`0052`):
+
+- Un solo botón por proveedor ("Continuar con Google/Apple") en `/login` y
+  `/registro`: crea la cuenta la primera vez y entra las siguientes.
+- El nombre **sigue viviendo en `people`** (fuente única; `profiles` solo
+  enlaza la cuenta). En `profiles` se agrega `profile_completed_at`: NULL =
+  hay que pedir el nombre. Alternativa descartada: copiar nombre y apellido
+  a `profiles`, que duplicaría el dato y se desincronizaría cuando el
+  personal corrige el nombre en la ficha.
+- Cuentas de Google/Apple quedan pendientes. Apple: formulario vacío aunque
+  mande un nombre. Google: se prellena con su nombre. Lo que mande el
+  proveedor **nunca** se escribe en `people`; solo lo que la persona
+  confirma en `/completar-perfil`, una sola vez (`complete_my_profile`).
+- El aviso de privacidad se acepta en ese mismo formulario (misma casilla
+  obligatoria que `/registro`).
+- Los botones se encienden con `AUTH_OAUTH_PROVIDERS` solo después de
+  configurar el proveedor; sin eso llevarían a un error de Supabase.
+- No se unen personas por nombre. La única unión es la de Supabase: si el
+  email del proveedor (verificado) ya tiene cuenta, se vincula a esa misma
+  cuenta. Quien ya estaba en el directorio sin cuenta sigue el camino
+  normal (invitación al portal o fusión manual).
+
+**Consecuencias**: aplicar `0052` **antes** de desplegar el código (la app
+lee la columna nueva; sin ella mandaría a todos a completar perfil). Pasos
+de Google Cloud, Apple y Supabase en `docs/deployment.md` §7.
+
 ## 2026-10-03 — Aviso de privacidad obligatorio y borrado del propio perfil
 
 **Contexto**: el dueño del producto: "trabajar el anuncio de que colectamos

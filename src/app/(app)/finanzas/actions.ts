@@ -21,7 +21,7 @@ import type { AppRole } from "@/types/database";
 
 const uuid = z.string().uuid();
 const dateKey = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida.");
-const donationTypes = ["diezmo", "ofrenda", "semilla", "primicias"] as const;
+const donationTypes = ["diezmo", "ofrenda", "semilla", "primicias", "pacto"] as const;
 const methods = ["efectivo", "ath", "credito", "ath_movil", "cheque", "giro"] as const;
 const reason = z.string().trim().min(5, "Escribe el motivo (mínimo 5 caracteres).").max(300);
 
@@ -372,4 +372,79 @@ export async function setFinancialRoleAction(
   }
   revalidatePath("/finanzas/acceso");
   return actionOk({ result: String(data) });
+}
+
+/**
+ * Donante solo de Finanzas (0053): queda oculto del directorio. Si ya hay
+ * alguien con ese nombre, la base pide confirmar para no duplicar.
+ */
+export async function createDonorAction(input: {
+  firstName: string;
+  lastName: string;
+  confirmSameName: boolean;
+}): Promise<ActionResult<{ id: string; name: string } | { sameName: true; message: string }>> {
+  const denied = await guard();
+  if (denied) return denied;
+  const parsed = z
+    .object({
+      firstName: z.string().trim().min(1, "Escribe el nombre.").max(100),
+      lastName: z.string().trim().max(100),
+      confirmSameName: z.boolean(),
+    })
+    .safeParse(input);
+  if (!parsed.success) return actionError(issue(parsed.error));
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("finance_create_donor", {
+    p_first_name: parsed.data.firstName,
+    p_last_name: parsed.data.lastName,
+    p_confirm_same_name: parsed.data.confirmSameName,
+  });
+  if (error?.message.startsWith("MISMO_NOMBRE")) {
+    return actionOk({ sameName: true, message: dbErrorMessage(error) });
+  }
+  if (error || !data) return actionError(dbErrorMessage(error ?? { code: "", message: "" }));
+  return actionOk({
+    id: data,
+    name: `${parsed.data.firstName} ${parsed.data.lastName}`.trim(),
+  });
+}
+
+export async function linkDonorAction(input: {
+  donorId: string;
+  personId: string;
+  reason: string;
+}): Promise<ActionResult<number>> {
+  const denied = await guard();
+  if (denied) return denied;
+  const parsed = z.object({ donorId: uuid, personId: uuid, reason }).safeParse(input);
+  if (!parsed.success) return actionError(issue(parsed.error));
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("finance_link_donor", {
+    p_donor_id: parsed.data.donorId,
+    p_person_id: parsed.data.personId,
+    p_reason: parsed.data.reason,
+  });
+  if (error) return actionError(dbErrorMessage(error));
+  revalidatePath("/finanzas");
+  revalidatePath("/finanzas/vincular");
+  return actionOk(data ?? 0);
+}
+
+export async function dismissLinkSuggestionAction(
+  donorId: string,
+  personId: string,
+): Promise<ActionResult> {
+  const denied = await guard();
+  if (denied) return denied;
+  if (!uuid.safeParse(donorId).success || !uuid.safeParse(personId).success) {
+    return actionError("Datos inválidos.");
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("finance_dismiss_link_suggestion", {
+    p_donor_id: donorId,
+    p_person_id: personId,
+  });
+  if (error) return actionError(dbErrorMessage(error));
+  revalidatePath("/finanzas/vincular");
+  return actionOk(undefined);
 }

@@ -17,6 +17,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     redirect("/login");
   }
 
+  // Cuentas de Google/Apple: nombre y apellido antes que nada (0052).
+  if (!user.profileComplete) {
+    redirect("/completar-perfil");
+  }
+
   // El líder del ministerio de intercesión ve la bandeja de oración sin
   // tener el rol `intercesor` (ver 0020_prayer_access_scope.sql).
   const supabase = await createClient();

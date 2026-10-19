@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2, Search, UserPlus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { searchFinancePeopleAction } from "@/app/(app)/finanzas/actions";
+import { createDonorAction, searchFinancePeopleAction } from "@/app/(app)/finanzas/actions";
 
 export type PickedPerson = { id: string; name: string };
 
@@ -19,12 +20,15 @@ export function PersonPicker({
   onChange,
   disabled,
   placeholder = "Busca por nombre (mínimo 2 letras)",
+  allowCreateDonor = false,
 }: {
   id: string;
   value: PickedPerson | null;
   onChange: (p: PickedPerson | null) => void;
   disabled?: boolean;
   placeholder?: string;
+  /** Muestra "Crear donante nuevo" (solo Finanzas; queda oculto del directorio). */
+  allowCreateDonor?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<
@@ -32,6 +36,7 @@ export function PersonPicker({
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const seq = useRef(0);
 
   function change(v: string) {
@@ -136,12 +141,156 @@ export function PersonPicker({
             </li>
           ))}
         </ul>
-      ) : query.trim().length >= 2 && !loading && !error ? (
+      ) : query.trim().length >= 2 && !loading && !error && !allowCreateDonor ? (
         <p className="text-muted-foreground text-sm">
           No se encontró. Si la persona no está registrada, pide a Seguimiento o a un administrador
           que la registre (se revisan duplicados) y luego búscala aquí.
         </p>
       ) : null}
+      {allowCreateDonor && query.trim().length >= 2 && !loading ? (
+        creating ? (
+          <DonorCreator
+            initialName={query}
+            disabled={disabled}
+            onCancel={() => setCreating(false)}
+            onCreated={(p) => {
+              setCreating(false);
+              onChange(p);
+              change("");
+            }}
+          />
+        ) : (
+          <div className="space-y-1">
+            {results.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No se encontró a nadie con ese nombre.
+              </p>
+            ) : null}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setCreating(true)}
+              disabled={disabled}
+            >
+              <UserPlus className="size-4" aria-hidden />
+              Crear donante nuevo
+            </Button>
+          </div>
+        )
+      ) : null}
+    </div>
+  );
+}
+
+function splitName(full: string): { first: string; last: string } {
+  const t = full.trim().split(/\s+/).filter(Boolean);
+  if (t.length <= 3) return { first: t[0] ?? "", last: t.slice(1).join(" ") };
+  return { first: t.slice(0, 2).join(" "), last: t.slice(2).join(" ") };
+}
+
+/**
+ * Alta de un donante solo de Finanzas: no aparece en el directorio ni en
+ * reportes. Si ya existe alguien con el mismo nombre, se pide confirmar.
+ */
+function DonorCreator({
+  initialName,
+  disabled,
+  onCancel,
+  onCreated,
+}: {
+  initialName: string;
+  disabled?: boolean;
+  onCancel: () => void;
+  onCreated: (p: PickedPerson) => void;
+}) {
+  const start = splitName(initialName);
+  const [first, setFirst] = useState(start.first);
+  const [last, setLast] = useState(start.last);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sameName, setSameName] = useState<string | null>(null);
+
+  async function create(confirmSameName: boolean) {
+    setPending(true);
+    setError(null);
+    try {
+      const res = await createDonorAction({ firstName: first, lastName: last, confirmSameName });
+      if (!res.ok) setError(res.error);
+      else if ("sameName" in res.data) setSameName(res.data.message);
+      else onCreated(res.data);
+    } catch {
+      setError("No se pudo crear. Revisa la conexión.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="bg-muted/40 space-y-3 rounded-md border p-3">
+      <p className="text-sm font-medium">Donante nuevo</p>
+      <p className="text-muted-foreground text-sm">
+        Solo lo ve Finanzas: no aparece en el directorio ni en los reportes. Si luego se registra en
+        la app, lo vinculas desde Finanzas → Vincular.
+      </p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="donor-first">Nombre</Label>
+          <Input
+            id="donor-first"
+            value={first}
+            onChange={(e) => {
+              setFirst(e.target.value);
+              setSameName(null);
+            }}
+            maxLength={100}
+            disabled={pending || disabled}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="donor-last">Apellidos</Label>
+          <Input
+            id="donor-last"
+            value={last}
+            onChange={(e) => {
+              setLast(e.target.value);
+              setSameName(null);
+            }}
+            maxLength={100}
+            disabled={pending || disabled}
+          />
+        </div>
+      </div>
+      {error ? (
+        <p className="text-destructive text-sm" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {sameName ? (
+        <p className="text-state-warning text-sm" role="alert">
+          {sameName}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap gap-2">
+        {sameName ? (
+          <Button type="button" size="sm" onClick={() => create(true)} disabled={pending}>
+            Sí, es otra persona: crear
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => create(false)}
+            disabled={pending || !first.trim()}
+          >
+            {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
+            Crear donante
+          </Button>
+        )}
+        <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={pending}>
+          Cancelar
+        </Button>
+      </div>
     </div>
   );
 }

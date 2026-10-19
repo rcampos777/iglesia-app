@@ -163,7 +163,13 @@ export function DonationForm({
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">Donante</legend>
         {!anonymous ? (
-          <PersonPicker id="donante" value={person} onChange={setPerson} disabled={pending} />
+          <PersonPicker
+            id="donante"
+            value={person}
+            onChange={setPerson}
+            disabled={pending}
+            allowCreateDonor
+          />
         ) : null}
         <label className="flex items-center gap-2 text-sm">
           <Checkbox

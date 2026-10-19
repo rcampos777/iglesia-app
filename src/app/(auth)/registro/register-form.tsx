@@ -11,10 +11,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ActionResult } from "@/lib/action-result";
 import { Turnstile } from "@/components/captcha/turnstile";
 import { PrivacySummary } from "@/components/privacy/privacy-summary";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import type { OAuthProvider } from "@/lib/auth/oauth";
 
 const initialState: ActionResult = { ok: true, data: undefined };
 
-export function RegisterForm() {
+export function RegisterForm({ providers }: { providers: OAuthProvider[] }) {
   const [submitted, setSubmitted] = useState(false);
   const [state, formAction, isPending] = useActionState(
     async (_prev: ActionResult, formData: FormData) => {
@@ -54,6 +56,15 @@ export function RegisterForm() {
           <Alert variant="destructive" className="mb-4">
             <AlertDescription>{state.error}</AlertDescription>
           </Alert>
+        )}
+        {providers.length > 0 && (
+          <div className="mb-4 space-y-2">
+            <p className="text-muted-foreground text-xs">
+              Con Google o Apple te pediremos tu nombre y que aceptes el aviso de privacidad antes
+              de entrar.
+            </p>
+            <OAuthButtons providers={providers} />
+          </div>
         )}
         <form action={formAction} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">

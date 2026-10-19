@@ -71,6 +71,9 @@ supabase db push --db-url "postgresql://postgres.<ref>:<password>@aws-0-<region>
 
 ### Variables adicionales
 
+- `AUTH_OAUTH_PROVIDERS`: `google`, `apple` o `google,apple`. Vacío = sin
+  botones. Encender solo después de configurar el proveedor (§7).
+
 - `CRON_SECRET`: valor aleatorio largo. Vercel lo manda al cron de
   recordatorios de inscripciones (`vercel.json`, diario 13:00 UTC = 9:00
   a. m. en PR). Sin él, el cron responde 401 y no salen recordatorios.
@@ -119,6 +122,82 @@ manual en navegador con múltiples roles (login real, RLS positivo y
 negativo, mutaciones vía Server Actions). Sigue pendiente: repetir este
 proceso contra el proyecto de **producción** cuando exista, y todo lo
 listado en el checklist de la sección 5.
+
+## 7. Acceso con Google y Apple (0052)
+
+El código ya está; falta configurar los proveedores. `<ref>` es el id del
+proyecto de Supabase (producción: `ccempuwuefjnaarmxbkz`) y `<app>` el
+dominio de la app (`NEXT_PUBLIC_APP_URL`). Ningún secreto va en el código
+ni en el repositorio: se pegan solo en el panel de Supabase.
+
+### Orden
+
+1. Aplicar `0052` en producción **antes** de desplegar el código:
+   `npx supabase db push --db-url "postgresql://postgres.<ref>:<password>@<host-pooler>:5432/postgres"`.
+   Sin la columna `profile_completed_at`, la app mandaría a todas las
+   cuentas a "Completa tu perfil".
+2. Desplegar el código (los botones siguen ocultos).
+3. Configurar Google y/o Apple (abajo).
+4. En Vercel → Settings → Environment Variables (Production):
+   `AUTH_OAUTH_PROVIDERS=google,apple` (o solo uno) y volver a desplegar.
+5. Probar con una cuenta real: primer acceso → "Completa tu perfil";
+   salir sin guardar y volver → lo pide otra vez; guardar → entra; tercer
+   acceso → entra directo.
+
+### Supabase (ambos proveedores)
+
+- Authentication → URL Configuration:
+  - Site URL: `https://<app>`.
+  - Redirect URLs: `https://<app>/auth/callback**` (y en el proyecto de
+    desarrollo `http://localhost:3000/auth/callback**`).
+- La URL de retorno que piden Google y Apple es la de Supabase:
+  `https://<ref>.supabase.co/auth/v1/callback` (aparece en el panel de
+  cada proveedor).
+- Si el email del proveedor ya tiene cuenta (verificada), Supabase la
+  vincula a esa misma cuenta: no se crea otra persona.
+
+### Google Cloud
+
+1. console.cloud.google.com → crear o elegir un proyecto.
+2. Google Auth Platform → Branding (pantalla de consentimiento): nombre de
+   la app, email de soporte, logo opcional, dominios autorizados
+   (`<app>` sin `https://` y `supabase.co`), enlace al aviso de privacidad
+   (`https://ciudaddeavivamiento.org/privacidad`).
+3. Audience: External. Publicar la app ("In production"); en modo
+   "Testing" solo entran los usuarios de prueba agregados.
+4. Data access: solo `openid`, `.../auth/userinfo.email` y
+   `.../auth/userinfo.profile` (no requieren verificación de Google).
+5. Clients → Create client → Web application:
+   - Authorized JavaScript origins: `https://<app>` (y
+     `http://localhost:3000` si se usa en desarrollo).
+   - Authorized redirect URIs: `https://<ref>.supabase.co/auth/v1/callback`.
+6. Copiar Client ID y Client secret → Supabase → Authentication → Sign In /
+   Providers → Google → activar, pegar ambos, guardar.
+
+### Apple Developer (requiere la membresía pagada del Apple Developer Program)
+
+1. Certificates, Identifiers & Profiles → Identifiers → App IDs: crear (o
+   usar) un App ID con la capacidad **Sign in with Apple**. Anotar el
+   Team ID (arriba a la derecha).
+2. Identifiers → **Services IDs** → registrar uno, p. ej.
+   `org.ciudaddeavivamiento.web`. Este es el "Client ID" para Supabase.
+   Activar Sign in with Apple → Configure:
+   - Primary App ID: el del paso 1.
+   - Domains and Subdomains: `<ref>.supabase.co`.
+   - Return URLs: `https://<ref>.supabase.co/auth/v1/callback`.
+3. Keys → crear una key con Sign in with Apple (asociada al App ID).
+   Descargar el `.p8` (solo se puede una vez) y anotar el Key ID.
+4. Generar el "secret" (un JWT firmado con el `.p8`, Team ID, Key ID y
+   Services ID) con la herramienta de la guía de Apple en la documentación
+   de Supabase. **Vence a los 6 meses como máximo**: anotar la fecha y
+   renovarlo antes, o el acceso con Apple dejará de funcionar.
+5. Supabase → Authentication → Sign In / Providers → Apple → activar,
+   Client IDs: el Services ID; Secret Key: el JWT; guardar.
+6. "Ocultar mi email": Apple entrega una dirección
+   `@privaterelay.appleid.com`. Para que los emails de la app (Resend)
+   lleguen ahí, registrar el dominio y el remitente en Apple Developer →
+   Services → Sign in with Apple for Email Communication (requiere SPF del
+   dominio de envío).
 
 ## Alta de una iglesia nueva
 

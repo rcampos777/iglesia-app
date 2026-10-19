@@ -16,6 +16,7 @@
     "seed": "tsx --env-file=.env.local scripts/seed.ts",
     "verify:phase1": "tsx --env-file=.env.local scripts/verify-security-phase1.ts",
     "verify:permissions": "tsx --env-file=.env.local scripts/verify-permissions-management.ts",
+    "verify:oauth-profile": "tsx --env-file=.env.local scripts/verify-oauth-profile.ts",
     "check": "npm run lint && npm run typecheck && npm run format:check",
     "test:db": "tsx --test tests/db/*.test.ts",
     "test:unit": "tsx --test tests/unit/*.test.ts"

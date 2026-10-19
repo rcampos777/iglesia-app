@@ -22,7 +22,12 @@ export type AppRole =
   | "sitio_web";
 
 export type MembershipStatus = "visitante" | "asistente_habitual" | "miembro" | "inactivo";
-export type PersonSource = "manual" | "importacion" | "inscripcion_actividad" | "registro_cuenta";
+export type PersonSource =
+  | "manual"
+  | "importacion"
+  | "inscripcion_actividad"
+  | "registro_cuenta"
+  | "finanzas";
 
 export type GenderType = "masculino" | "femenino" | "no_especifica";
 
@@ -40,7 +45,7 @@ export type ActivityStatus = "planificada" | "abierta" | "realizada" | "cancelad
 
 export type CheckinMethod = "qr" | "manual";
 
-export type DonationType = "diezmo" | "ofrenda" | "semilla" | "primicias";
+export type DonationType = "diezmo" | "ofrenda" | "semilla" | "primicias" | "pacto";
 
 export type DonationPaymentMethod =
   "efectivo" | "ath" | "credito" | "ath_movil" | "cheque" | "giro";
@@ -92,6 +97,8 @@ export type PersonRow = {
   photo_url: string | null;
   source: PersonSource;
   source_activity_id: string | null;
+  /** Donante creado por Finanzas: oculto del directorio (0053). */
+  finance_only: boolean;
   anonymized_at: string | null;
   deletion_requested_at: string | null;
   created_at: string;
@@ -104,7 +111,12 @@ export type PersonInsert = Pick<PersonRow, "first_name" | "last_name" | "members
   Partial<
     Omit<
       PersonRow,
-      "id" | "created_at" | "updated_at" | "first_name" | "last_name" | "membership_status"
+      | "id"
+      | "created_at"
+      | "updated_at"
+      | "first_name"
+      | "last_name"
+      | "membership_status"
     >
   >;
 
@@ -117,6 +129,8 @@ export type ProfileRow = {
   created_at: string;
   privacy_version: string | null;
   privacy_accepted_at: string | null;
+  /** NULL = falta completar nombre y apellido (cuentas de Google/Apple, 0052). */
+  profile_completed_at: string | null;
 };
 
 export type UserRoleRow = {
@@ -642,6 +656,127 @@ export type SurveyAnswerRow = {
   answer_options: unknown;
 };
 
+export type DonationImportBatchStatus = "en_revision" | "completado" | "descartado";
+export type DonationImportDecision =
+  "pendiente" | "enlazar" | "crear" | "anonima" | "omitir" | "unir";
+export type DonationImportRowStatus = "pendiente" | "importada" | "omitida" | "posible_repetida";
+
+export type DonationImportBatchRow = {
+  id: string;
+  file_name: string;
+  status: DonationImportBatchStatus;
+  total_rows: number;
+  imported_count: number;
+  created_by: string | null;
+  created_at: string;
+  completed_at: string | null;
+};
+
+export type DonationImportDonorRow = {
+  id: string;
+  batch_id: string;
+  match_key: string;
+  display_name: string;
+  family: string | null;
+  row_count: number;
+  total_cents: number;
+  candidate_person_ids: string[];
+  suggested_person_id: string | null;
+  suggest_anonymous: boolean;
+  similar_donor_ids: string[];
+  decision: DonationImportDecision;
+  same_as_donor_id: string | null;
+  person_id: string | null;
+  new_first_name: string | null;
+  new_last_name: string | null;
+  decided_by: string | null;
+  decided_at: string | null;
+};
+
+export type DonationImportRowRow = {
+  id: string;
+  batch_id: string;
+  donor_id: string;
+  row_number: number;
+  raw: Record<string, string>;
+  donation_date: string | null;
+  amount_cents: number | null;
+  raw_type: string | null;
+  donation_type: DonationType | null;
+  raw_method: string | null;
+  payment_method: DonationPaymentMethod | null;
+  reference: string | null;
+  subcategory: string | null;
+  notes: string | null;
+  errors: string[];
+  status: DonationImportRowStatus;
+  status_detail: string | null;
+  allow_repeat: boolean;
+  donation_id: string | null;
+};
+
+export type DonationImportCandidate = {
+  id: string;
+  name: string;
+  hint: string | null;
+  finance_only: boolean;
+  has_account: boolean;
+};
+
+export type DonationImportDonorListItem = {
+  id: string;
+  display_name: string;
+  family: string | null;
+  row_count: number;
+  total_cents: number;
+  decision: DonationImportDecision;
+  person_id: string | null;
+  person_name: string | null;
+  same_as_donor_id: string | null;
+  same_as_name: string | null;
+  new_first_name: string | null;
+  new_last_name: string | null;
+  suggest_anonymous: boolean;
+  suggested_person_id: string | null;
+  candidates: DonationImportCandidate[];
+  similar: { id: string; name: string; decision: DonationImportDecision }[];
+  imported_count: number;
+};
+
+export type DonationImportSummary = {
+  rows: number;
+  with_errors: number;
+  pending: number;
+  imported: number;
+  skipped: number;
+  repeated: number;
+  valid_cents: number;
+  imported_cents: number;
+  donors: number;
+  donors_pending: number;
+  donors_suggested: number;
+  donors_no_match: number;
+};
+
+export type DonationImportPromoteResult = {
+  imported: number;
+  skipped: number;
+  repeated: number;
+  remaining: number;
+  review: number;
+};
+
+export type FinanceLinkSuggestion = {
+  donor_id: string;
+  donor_name: string;
+  donation_count: number;
+  person_id: string;
+  person_name: string;
+  hint: string | null;
+  has_account: boolean;
+  exact: boolean;
+};
+
 export type ImportBatchRow = {
   id: string;
   source_type: ImportSourceType;
@@ -869,6 +1004,9 @@ export interface Database {
       service_checkins: TableDef<ServiceCheckinRow>;
       service_series: TableDef<ServiceSeriesRow>;
       donations: TableDef<DonationRow>;
+      donation_import_batches: TableDef<DonationImportBatchRow>;
+      donation_import_donors: TableDef<DonationImportDonorRow>;
+      donation_import_rows: TableDef<DonationImportRowRow>;
       site_media: TableDef<SiteMediaRow>;
       site_settings: TableDef<SiteSettingsRow>;
       site_albums: TableDef<SiteAlbumRow>;
@@ -980,6 +1118,10 @@ export interface Database {
       };
       accept_privacy_notice: {
         Args: { p_version: string };
+        Returns: undefined;
+      };
+      complete_my_profile: {
+        Args: { p_first_name: string; p_last_name: string };
         Returns: undefined;
       };
       delete_my_account: {
@@ -1203,6 +1345,73 @@ export interface Database {
       finance_get_person: {
         Args: { p_person_id: string };
         Returns: { person_id: string; display_name: string }[];
+      };
+      finance_person_info: {
+        Args: { p_person_id: string };
+        Returns: { display_name: string; finance_only: boolean; has_account: boolean }[];
+      };
+      finance_create_donor: {
+        Args: { p_first_name: string; p_last_name: string; p_confirm_same_name?: boolean };
+        Returns: string;
+      };
+      finance_import_create_batch: {
+        Args: { p_file_name: string; p_rows: unknown };
+        Returns: string;
+      };
+      finance_import_donor_list: {
+        Args: { p_batch_id: string };
+        Returns: DonationImportDonorListItem[];
+      };
+      finance_import_summary: {
+        Args: { p_batch_id: string };
+        Returns: DonationImportSummary;
+      };
+      finance_import_unmapped: {
+        Args: { p_batch_id: string };
+        Returns: { field: "tipo" | "forma"; raw_value: string; row_count: number }[];
+      };
+      finance_import_map_value: {
+        Args: { p_batch_id: string; p_field: "tipo" | "forma"; p_raw: string; p_value: string };
+        Returns: number;
+      };
+      finance_import_decide: {
+        Args: {
+          p_donor_id: string;
+          p_decision: DonationImportDecision;
+          p_person_id?: string | null;
+          p_first_name?: string | null;
+          p_last_name?: string | null;
+          p_same_as_donor_id?: string | null;
+        };
+        Returns: undefined;
+      };
+      finance_import_bulk_decide: {
+        Args: { p_batch_id: string; p_action: "sugerencias" | "crear_sin_coincidencia" };
+        Returns: number;
+      };
+      finance_import_promote: {
+        Args: { p_batch_id: string; p_limit?: number };
+        Returns: DonationImportPromoteResult;
+      };
+      finance_import_resolve_repeats: {
+        Args: { p_batch_id: string; p_row_id: string | null; p_include: boolean };
+        Returns: number;
+      };
+      finance_import_discard: {
+        Args: { p_batch_id: string };
+        Returns: undefined;
+      };
+      finance_link_donor: {
+        Args: { p_donor_id: string; p_person_id: string; p_reason: string };
+        Returns: number;
+      };
+      finance_donor_link_suggestions: {
+        Args: Record<string, never>;
+        Returns: FinanceLinkSuggestion[];
+      };
+      finance_dismiss_link_suggestion: {
+        Args: { p_donor_id: string; p_person_id: string };
+        Returns: undefined;
       };
       finance_search_people: {
         Args: { p_query: string };

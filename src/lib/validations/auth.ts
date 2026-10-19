@@ -23,6 +23,23 @@ export const registerSchema = z
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
+export const completeProfileSchema = z.object({
+  firstName: z
+    .string()
+    .trim()
+    .min(1, "El nombre es requerido.")
+    .max(80, "El nombre es demasiado largo."),
+  lastName: z
+    .string()
+    .trim()
+    .min(1, "El apellido es requerido.")
+    .max(80, "El apellido es demasiado largo."),
+});
+
+export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
+
+export const oauthProviderSchema = z.enum(["google", "apple"]);
+
 export const forgotPasswordSchema = z.object({
   email: z.string().trim().min(1, "El email es requerido.").email("Email inválido."),
 });

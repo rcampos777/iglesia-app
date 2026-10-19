@@ -21,6 +21,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Importación de donaciones: archivos de Excel de hasta 8 MB.
+  experimental: { serverActions: { bodySizeLimit: "9mb" } },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

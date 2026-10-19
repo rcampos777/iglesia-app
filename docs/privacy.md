@@ -15,6 +15,7 @@ con historial) de la auditoría (`docs/audit/2026-10-privacidad-seguridad.md`).
 | -------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `/sitio/privacidad` (en el sitio: `/privacidad`)   | Aviso completo, público. Datos de contacto tomados de `site_settings` (editor del sitio).     |
 | `/registro` (crear cuenta)                         | Resumen + casilla obligatoria "He leído el aviso..." (Zod en servidor: `acceptPrivacy = si`). |
+| `/completar-perfil` (Google/Apple, 0052)           | Misma casilla obligatoria, junto con nombre y apellido, si la cuenta no lo ha aceptado.       |
 | Al entrar a la app (`(app)/layout.tsx`)            | Pantalla `PrivacyGate`: hay que pulsar **Entendido** para seguir, o **Salir**.                |
 | Mi portal → "Privacidad y mi cuenta"               | Enlace al aviso + borrar mi perfil.                                                           |
 | Login, pie del sitio, forma pública de inscripción | Enlace al aviso.                                                                              |

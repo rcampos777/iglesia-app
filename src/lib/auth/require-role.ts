@@ -12,11 +12,7 @@ export class AuthError extends Error {}
  * docs/security.md).
  */
 export async function requireRole(allowedRoles: AppRole[]): Promise<CurrentUser> {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    throw new AuthError("Debes iniciar sesión para continuar.");
-  }
+  const user = await requireAuth();
 
   if (!hasAnyRole(user, allowedRoles)) {
     throw new AuthError("No tienes permiso para realizar esta acción.");
@@ -29,6 +25,12 @@ export async function requireAuth(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) {
     throw new AuthError("Debes iniciar sesión para continuar.");
+  }
+  // Cuentas de Google/Apple sin nombre confirmado (0052): el layout las
+  // manda a /completar-perfil, pero una Server Action se puede invocar
+  // directo, así que se bloquea también aquí.
+  if (!user.profileComplete) {
+    throw new AuthError("Completa tu perfil para continuar.");
   }
   return user;
 }

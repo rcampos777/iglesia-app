@@ -1,8 +1,74 @@
 # Progreso del proyecto
 
-Última actualización: 2026-10-04.
+Última actualización: 2026-10-11.
 
 ## Estado general: MVP verificado de punta a punta ✅
+
+### 2026-10-11 — Importar diezmos y ofrendas + donantes solo de Finanzas (0053)
+
+- `/finanzas/importar`: sube el Excel (.xlsx directo, sin convertir) o CSV.
+  Lee la hoja con encabezados de donaciones e ignora las de resumen.
+  Revisión: valores sin reconocer → donantes (enlazar / crear / misma
+  persona / anónimas / no importar, con atajos en bloque) → importar por
+  tandas → filas con error o ya registradas. Detalle en `docs/finance.md` §9.
+- Donantes de Finanzas ocultos del directorio y reportes (RLS
+  restrictiva); "Crear donante nuevo" en Registrar; `/finanzas/vincular` y
+  la ficha del donante para unirlo con la persona registrada.
+- Tipo de donación **Pacto**.
+- Verificado: `tests/db/finance-import.test.ts` (14 casos, PGlite) y
+  `tests/unit/finance-import.test.ts` (7); suites completas `test:db`
+  104/104 y `test:unit` 29/29; lint, typecheck, build. El intérprete se
+  probó contra el Excel real de la iglesia **solo con conteos** (2,115
+  filas, 436 nombres, 8 filas para revisar; ningún dato copiado al repo).
+  `0053` aplicada en **desarrollo**.
+- **No verificado en navegador con sesión** (no se usaron credenciales de
+  prueba). Pendiente: recorrer el flujo con una cuenta de Finanzas en
+  desarrollo y en móvil.
+- Pendiente (usuario): aplicar `0053` en producción antes de desplegar el
+  código.
+- Login: con el email sin confirmar ya no dice "Email o contraseña
+  incorrectos" sino que pide abrir el enlace de confirmación
+  (`loginAction`). Encontrado al registrar una cuenta en desarrollo.
+
+### 2026-10-10 — Acceso con Google y Apple + "Completa tu perfil" (0052)
+
+- Botones "Continuar con Google/Apple" en `/login` y `/registro`
+  (`src/components/auth/oauth-buttons.tsx`), ocultos hasta configurar
+  `AUTH_OAUTH_PROVIDERS`. Email y contraseña sin cambios.
+- `/completar-perfil`: nombre y apellido obligatorios (+ aviso de
+  privacidad si falta). Apple sin prellenar; Google prellenado. Se exige en
+  `(app)/layout.tsx`, `requireAuth`/`requireRole` y el callback de OAuth.
+- `0052`: `profiles.profile_completed_at`, trigger de alta actualizado,
+  `complete_my_profile()`, bloqueo de PATCH directo. Backfill: cuentas con
+  nombre y apellido reales quedan completas.
+- Verificado en **desarrollo**: migración aplicada; `npm run
+verify:oauth-profile` 13/13; ramas del trigger (apple/google/email) por
+  SQL; navegador: login → completar perfil, salir y volver (lo pide de
+  nuevo), validación del servidor, guardar → panel sin volver a pedir el
+  aviso, móvil 375 px; E2E `auth.spec.ts` 9/9; lint, typecheck y build.
+- **No verificado**: acceso real con Google o Apple (los proveedores no
+  están configurados en ningún proyecto; en desarrollo Supabase responde
+  "provider is not enabled", como se esperaba).
+- Pendiente (usuario): aplicar `0052` en producción, configurar
+  proveedores y la variable (pasos en `docs/deployment.md` §7).
+- Apple en espera: la iglesia aún no tiene cuenta de Apple Developer
+  (2026-10-10). Se puede activar solo Google con
+  `AUTH_OAUTH_PROVIDERS=google`; Apple se suma después sin cambiar código.
+
+### 2026-10-07 — Launch: registros fallando ("No se pudo crear la cuenta")
+
+- Síntoma: varias personas no pudieron crear cuenta el día del launch;
+  `registerAction` ocultaba el error real de Supabase.
+- Causa probable: límite de envío de emails de Supabase Auth (30/hora
+  por defecto con SMTP propio) agotado por el volumen del launch. El
+  SMTP de Resend sí estaba configurado en producción.
+- Corrección en producción (panel): Authentication → Rate Limits →
+  "Rate limit for sending emails" subido a 150/hora.
+- Código: `registerAction` registra el error de `signUp` en los logs
+  (`console.error`) y muestra mensajes claros para límite de emails,
+  fallo de envío del email y contraseña rechazada.
+- Pendiente: verificar que el plan de Resend aguante el volumen (el plan
+  gratis permite 100 emails/día) y revisar los Auth Logs de Supabase.
 
 ### 2026-10-04 — Ajustes del editor de eventos y caché del sitio
 

@@ -11,6 +11,8 @@ export interface CurrentUser {
   privacyVersion: string | null;
   /** Versión aceptada al crear la cuenta en /registro (user_metadata). */
   signupPrivacyVersion: string | null;
+  /** Nombre y apellido confirmados (0052). Si es false, solo /completar-perfil. */
+  profileComplete: boolean;
 }
 
 /**
@@ -27,7 +29,11 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!user) return null;
 
   const [{ data: profile }, { data: roleRows }] = await Promise.all([
-    supabase.from("profiles").select("person_id, privacy_version").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("person_id, privacy_version, profile_completed_at")
+      .eq("id", user.id)
+      .maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", user.id),
   ]);
 
@@ -41,6 +47,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       typeof user.user_metadata?.privacy_version === "string"
         ? user.user_metadata.privacy_version
         : null,
+    profileComplete: Boolean(profile?.profile_completed_at),
   };
 }
 

@@ -30,6 +30,7 @@ export const personSourceLabels: Record<PersonSource, string> = {
   importacion: "Importación",
   inscripcion_actividad: "Inscripción en línea",
   registro_cuenta: "Registro de cuenta",
+  finanzas: "Donante (Finanzas)",
 };
 
 export const genderLabels: Record<GenderType, string> = {
@@ -114,6 +115,7 @@ export const donationTypeLabels: Record<DonationType, string> = {
   ofrenda: "Ofrenda",
   semilla: "Semilla",
   primicias: "Primicias",
+  pacto: "Pacto",
 };
 
 export const paymentMethodLabels: Record<DonationPaymentMethod, string> = {

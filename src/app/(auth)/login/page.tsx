@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LoginForm } from "./login-form";
 import { PRIVACY_PATH } from "@/lib/privacy";
+import { enabledOAuthProviders } from "@/lib/auth/oauth";
 
 export default async function LoginPage({
   searchParams,
@@ -18,7 +19,12 @@ export default async function LoginPage({
             : "Tu cuenta se borró. Tus registros de donaciones o certificaciones se conservan por obligaciones legales y un pastor general revisará tu solicitud."}
         </p>
       ) : null}
-      <LoginForm resetOk={params.reset === "ok"} next={params.next} authError={params.error} />
+      <LoginForm
+        resetOk={params.reset === "ok"}
+        next={params.next}
+        authError={params.error}
+        providers={enabledOAuthProviders()}
+      />
       <p className="text-muted-foreground text-center text-sm">
         ¿Primera vez?{" "}
         <Link href="/registro" className="text-foreground font-medium hover:underline">

@@ -16,9 +16,10 @@ guardan números de tarjeta, códigos de seguridad ni credenciales bancarias
 - **Tipos**: Diezmo, Ofrenda, Semilla, Primicias.
 - **Formas de pago**: Efectivo (Cash), ATH, Crédito, ATH Móvil, Cheque, Giro.
 - **Donante**: una persona existente (por ID, nunca por nombre; puede no
-  tener cuenta) **o** donación anónima (sin persona). Si la persona no está
-  registrada, se pide a Seguimiento/administración que la registre con el
-  flujo existente (detección de duplicados); Finanzas no crea personas.
+  tener cuenta) **o** donación anónima (sin persona). Si no está
+  registrada, Finanzas puede **crear un donante** ("Crear donante nuevo"):
+  queda solo para Finanzas, oculto del directorio y los reportes (§9).
+- **Tipos**: además de los de arriba, **Pacto** (desde 2026-10-11).
 - **Cantidad**: centavos enteros (`bigint`), > $0.00 y ≤ $1,000,000.00. El
   texto se interpreta sin punto flotante (`src/lib/money.ts`); los totales
   los suma la base (`sum(bigint)`).
@@ -170,3 +171,56 @@ Desde 2026-10-01 (`0042`, `0043`). Mismo acceso que Finanzas: Apóstol
   `finance_audit_log`.
 - **Pendiente**: aviso por email cuando una certificación está por vencer;
   qué ministerios exigen qué certificación.
+
+## 9. Importar diezmos y ofrendas y donantes de Finanzas (`0053`)
+
+Desde 2026-10-11. Decisión en `docs/decisions.md` (2026-10-11).
+
+### Donantes solo de Finanzas
+
+- `people.finance_only = true`, `source = 'finanzas'`. Una política RLS
+  restrictiva los oculta a **toda** consulta directa (nadie los ve en
+  Personas, panel, reportes, check-in, clases ni ministerios; tampoco
+  admin ni SuperAdmin). Finanzas los ve en sus pantallas (búsqueda con la
+  pista "Donante (solo Finanzas)", ficha del donante, cartas).
+- Se crean desde la importación o con "Crear donante nuevo" en
+  Registrar. Si el nombre ya existe, pide confirmar que es otra persona.
+
+### Importar (`/finanzas/importar`)
+
+1. **Subir** .xlsx (hasta 8 MB, 20,000 filas) o CSV. Se usa la primera hoja
+   con columnas de donaciones: Fecha, Nombre del miembro, Familia/Grupo,
+   Categoría, Subcategoría, Monto, Forma de pago, Referencia,
+   Observaciones ("Año/Mes (auto)" se ignoran; "Mes #" ayuda con fechas
+   ambiguas). Fechas de Excel, `AAAA-MM-DD` o `M/D/AAAA`. Montos
+   redondeados al centavo sin punto flotante. Visa/Mastercard → Crédito.
+2. **Staging** (`donation_import_batches/_donors/_rows`, solo lectura para
+   Finanzas; se escriben solo por funciones). Filas con error (sin monto,
+   fecha futura, referencia con número de tarjeta, año poco común en el
+   archivo) no se importan y se listan con su número de fila.
+3. **Valores sin reconocer** de Categoría o Forma de pago: se asignan una
+   vez para todas sus filas.
+4. **Donantes**: cada nombre (normalizado) aparece una vez. Opciones:
+   "Es esta persona" (candidatos de la app con pista), "Es la misma
+   persona" (nombre parecido en el mismo archivo), buscar otra persona,
+   crear donante nuevo (nombre y apellidos editables), anónimas o no
+   importar. Atajos: aceptar coincidencias exactas (mismo nombre completo o
+   el enlace usado en un archivo anterior) y crear los que no se parecen a
+   nadie. Los parecidos siempre se deciden uno por uno.
+5. **Importar**: por tandas de 250 (`finance_import_promote`). Cada fila
+   usa su id como clave de idempotencia: reintentar no duplica. Si ya hay
+   una donación igual (persona, fecha, monto, tipo) registrada fuera de
+   este archivo, la fila queda "ya registrada" para importar igual u
+   omitir. Las iguales dentro del mismo archivo sí se importan. Las cartas
+   del período se marcan para revisión como en cualquier alta.
+6. Un lote sin nada importado se puede descartar. Subcategoría y
+   Observaciones quedan en el staging (no hay campo en `donations`).
+
+### Vincular (`/finanzas/vincular` y ficha del donante)
+
+- Lista donantes de Finanzas cuyo nombre se parece a una persona del
+  directorio (indica si tiene cuenta). "Vincular" (motivo obligatorio)
+  mueve donaciones (revisión `corregida`) y cartas a esa persona y borra
+  el registro de Finanzas. "No es la misma" oculta la sugerencia.
+- Auditoría en `finance_audit_log`: crear donante, crear/completar/
+  descartar lote, vincular.

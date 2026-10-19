@@ -56,4 +56,19 @@ test.describe("Protección de rutas", () => {
     await page.goto("/admin");
     await expect(page).toHaveURL(/\/login/);
   });
+
+  test("acceder a /completar-perfil sin sesión redirige a /login", async ({ page }) => {
+    await page.goto("/completar-perfil");
+    await expect(page).toHaveURL(/\/login/);
+  });
+});
+
+test.describe("Google/Apple (0052)", () => {
+  test("un acceso cancelado en el proveedor vuelve al login con un mensaje claro", async ({
+    page,
+  }) => {
+    await page.goto("/auth/callback?next=%2Fdashboard&via=oauth&error=access_denied");
+    await expect(page).toHaveURL(/\/login\?error=oauth/);
+    await expect(page.getByText(/No pudimos completar el acceso con Google o Apple/)).toBeVisible();
+  });
 });

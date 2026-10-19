@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { href: "/finanzas", label: "Donaciones" },
   { href: "/finanzas/nueva", label: "Registrar" },
+  { href: "/finanzas/importar", label: "Importar" },
+  { href: "/finanzas/vincular", label: "Vincular" },
   { href: "/finanzas/cartas", label: "Cartas" },
   { href: "/finanzas/configuracion", label: "Configuración" },
 ];
@@ -17,7 +19,7 @@ export function FinanceTabs({ showAccess }: { showAccess: boolean }) {
   const active = (href: string) =>
     href === "/finanzas"
       ? pathname === "/finanzas" ||
-        /^\/finanzas\/(?!nueva|cartas|configuracion|acceso)/.test(pathname)
+        /^\/finanzas\/(?!nueva|importar|vincular|cartas|configuracion|acceso)/.test(pathname)
       : pathname.startsWith(href);
   return (
     <nav

@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui-brand/page-header";
 import { LettersTable } from "@/components/finance/letters-table";
 import { requireFinancePage } from "@/lib/finance/guard";
-import { getDonorYearly, getPersonName, listLetters } from "@/lib/data/finance";
+import { getDonorYearly, listLetters } from "@/lib/data/finance";
+import { getFinancePersonInfo } from "@/lib/data/finance-import";
+import { LinkDonorForm } from "@/components/finance/link-donor";
 import { formatCents } from "@/lib/money";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -15,8 +17,9 @@ export default async function DonorPage({ params }: { params: Promise<{ personId
   await requireFinancePage();
   const { personId } = await params;
   if (!UUID_RE.test(personId)) notFound();
-  const name = await getPersonName(personId);
-  if (!name) notFound();
+  const info = await getFinancePersonInfo(personId);
+  if (!info) notFound();
+  const name = info.display_name;
   const [yearly, letters] = await Promise.all([getDonorYearly(personId), listLetters(personId)]);
 
   return (
@@ -29,7 +32,11 @@ export default async function DonorPage({ params }: { params: Promise<{ personId
       </Button>
       <PageHeader
         title={name}
-        description="Aportaciones identificadas y vigentes. Las anónimas no se asocian a ninguna persona."
+        description={
+          info.finance_only
+            ? "Donante de Finanzas: no aparece en el directorio ni en los reportes. Aportaciones identificadas y vigentes."
+            : "Aportaciones identificadas y vigentes. Las anónimas no se asocian a ninguna persona."
+        }
         actions={
           <>
             <Button asChild variant="outline">
@@ -78,6 +85,18 @@ export default async function DonorPage({ params }: { params: Promise<{ personId
           <LettersTable letters={letters} />
         </section>
       </div>
+      {info.finance_only ? (
+        <section className="bg-card ring-foreground/10 max-w-2xl space-y-3 rounded-xl p-4 shadow-xs ring-1 sm:p-5">
+          <div>
+            <h2 className="text-base font-semibold">¿Ya está registrado en la app?</h2>
+            <p className="text-muted-foreground text-sm">
+              Vincúlalo con su persona del directorio: sus donaciones y cartas pasan a esa persona y
+              este registro de Finanzas desaparece. Queda en el historial de cada donación.
+            </p>
+          </div>
+          <LinkDonorForm donorId={personId} />
+        </section>
+      ) : null}
     </div>
   );
 }

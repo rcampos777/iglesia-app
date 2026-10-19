@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ActionResult } from "@/lib/action-result";
 import { Turnstile } from "@/components/captcha/turnstile";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import type { OAuthProvider } from "@/lib/auth/oauth";
 
 const initialState: ActionResult = { ok: true, data: undefined };
 
@@ -17,11 +19,13 @@ export function LoginForm({
   resetOk,
   next,
   authError,
+  providers,
 }: {
   resetOk: boolean;
   next?: string;
   /** Motivo con el que el callback de auth nos devolvió aquí. */
   authError?: string;
+  providers: OAuthProvider[];
 }) {
   const [state, formAction, isPending] = useActionState(
     async (_prev: ActionResult, formData: FormData) => loginAction(formData),
@@ -34,7 +38,15 @@ export function LoginForm({
         <CardTitle>Iniciar sesión</CardTitle>
       </CardHeader>
       <CardContent>
-        {authError && (
+        {authError === "oauth" && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>
+              No pudimos completar el acceso con Google o Apple. Si cancelaste, intenta de nuevo;
+              también puedes entrar con tu email y contraseña.
+            </AlertDescription>
+          </Alert>
+        )}
+        {authError && authError !== "oauth" && (
           <Alert variant="destructive" className="mb-4">
             <AlertDescription>
               No pudimos validar el enlace del email. Puede que ya lo hayas usado, que haya
@@ -58,6 +70,9 @@ export function LoginForm({
             <AlertDescription>{state.error}</AlertDescription>
           </Alert>
         )}
+        <div className="mb-4">
+          <OAuthButtons providers={providers} next={next} />
+        </div>
         <form action={formAction} className="space-y-4">
           {next && <input type="hidden" name="next" value={next} />}
           <div className="space-y-2">

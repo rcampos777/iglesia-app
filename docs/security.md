@@ -140,6 +140,22 @@ Detalle en `docs/finance.md` y matriz en `docs/roles-and-permissions.md` §7.
   (la app no tiene esa función), el error de clave foránea de Postgres
   mencionaría `donations`. (3) La búsqueda de personas para Finanzas
   expone nombre y una pista, como la de check-in.
+- **Donantes de Finanzas (0053)**: `people.finance_only` + políticas
+  **restrictivas** (`as restrictive`) de select/insert/update/delete con
+  `not finance_only`: se combinan con AND con todas las demás, así que
+  ningún rol (ni admin ni SuperAdmin) los ve o cambia por consulta
+  directa, y nadie puede crear uno por la API. Solo funciones `security
+definer` con `finance_require_access()` los leen o crean. Los selectores
+  definer que leían `people` sin RLS (`list_people_for_ministry_picker`,
+  `search_people_for_checkin`, `list_people_for_class_enrollment` y los
+  candidatos de `submit_activity_registration`) ahora los excluyen.
+  Cualquier función `security definer` nueva que lea `people` debe
+  filtrar `not finance_only`.
+- **Importación de donaciones (0053)**: staging con RLS de solo lectura
+  para Finanzas y sin políticas de escritura; el servidor interpreta el
+  archivo y la base revalida fecha, monto y referencia. El lector de
+  .xlsx limita el tamaño descomprimido (anti ZIP bomb) y solo extrae las
+  partes de hojas y textos.
 
 ## 5.c Certificaciones de ministros (0042–0043)
 
@@ -535,6 +551,27 @@ y plan de incidentes.
   que se pidió borrar).
 - Límites: copias de seguridad, emails ya enviados y logs de proveedores
   (`docs/privacy.md` §5). Ver detalle en `docs/privacy.md`.
+
+## 8.p Acceso con Google/Apple y perfil obligatorio (2026-10-10, 0052)
+
+- `handle_new_auth_user`: cuentas con `provider` distinto de `email` no
+  usan nombres del proveedor y quedan con `profile_completed_at` NULL.
+  `person_id` sigue saliendo solo de `app_metadata` (8.f). Rol por defecto:
+  solo `miembro`.
+- `complete_my_profile`: security definer sobre `auth.uid()` (nunca recibe
+  un id), nombres obligatorios (≤ 80), rechaza un perfil ya completo
+  (`55000`): no se sobrescribe el nombre en accesos futuros.
+- Trigger `profiles_prevent_completion_change` (security invoker): un
+  `PATCH /rest/v1/profiles` del propio usuario no puede marcar el perfil
+  como completo para saltarse el formulario.
+- Servidor: `(app)/layout.tsx` redirige a `/completar-perfil` y
+  `requireAuth`/`requireRole` rechazan Server Actions mientras falte.
+- `oauthSignInAction` valida el proveedor con Zod y contra
+  `AUTH_OAUTH_PROVIDERS`; `next` pasa por `safeNext` (sin redirección
+  abierta). Flujo PKCE de `@supabase/ssr`.
+- Verificación: `npm run verify:oauth-profile` (13 comprobaciones contra el
+  proyecto de desarrollo) + ramas del trigger por SQL en transacción
+  revertida.
 
 ## 9. Datos de menores
 
