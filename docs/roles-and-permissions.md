@@ -114,6 +114,20 @@ servidor `requireMinistryManager()`.
 no solo las asignadas a sí mismo, dado que su función es precisamente
 distribuir y trabajar el seguimiento del equipo.
 
+## 3.b Registro central de personas (0054)
+
+| Acción                                         | Quién                                                       |
+| ---------------------------------------------- | ----------------------------------------------------------- |
+| Buscar coincidencias / registrar (directorio)  | administrador, pastor, coordinador, seguimiento             |
+| Registrar visita (persona mínima)              | administrador, coordinador, seguimiento                     |
+| Registrar/importar integrantes                 | administrador, coordinador o el líder de **ese** ministerio |
+| Ver posibles duplicados y descartar parejas    | roles con directorio completo                               |
+| Unificar y resolver solicitudes de vinculación | administrador (y SuperAdmin)                                |
+| Vincular su propia cuenta (con código)         | la propia persona                                           |
+| Coincidencias con donantes de Finanzas         | finanzas, SuperAdmin                                        |
+
+Pertenecer a un ministerio no da permisos de líder ni financieros.
+
 ## 4. Aplicación técnica
 
 - **Base de datos**: cada tabla tiene políticas RLS que reflejan esta

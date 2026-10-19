@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { createDonorAction, searchFinancePeopleAction } from "@/app/(app)/finanzas/actions";
+import { MatchList, toMatchItem, type MatchItem } from "@/components/people/match-list";
 
 export type PickedPerson = { id: string; name: string };
 
@@ -210,6 +211,7 @@ function DonorCreator({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sameName, setSameName] = useState<string | null>(null);
+  const [matches, setMatches] = useState<MatchItem[]>([]);
 
   async function create(confirmSameName: boolean) {
     setPending(true);
@@ -217,8 +219,10 @@ function DonorCreator({
     try {
       const res = await createDonorAction({ firstName: first, lastName: last, confirmSameName });
       if (!res.ok) setError(res.error);
-      else if ("sameName" in res.data) setSameName(res.data.message);
-      else onCreated(res.data);
+      else if ("sameName" in res.data) {
+        setSameName(res.data.message);
+        setMatches(res.data.matches.map(toMatchItem));
+      } else onCreated(res.data);
     } catch {
       setError("No se pudo crear. Revisa la conexión.");
     } finally {
@@ -271,10 +275,26 @@ function DonorCreator({
           {sameName}
         </p>
       ) : null}
+      {sameName && matches.length > 0 ? (
+        <MatchList
+          items={matches}
+          action={(m) => (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={pending}
+              onClick={() => onCreated({ id: m.id, name: m.name })}
+            >
+              Usar esta persona
+            </Button>
+          )}
+        />
+      ) : null}
       <div className="flex flex-wrap gap-2">
         {sameName ? (
           <Button type="button" size="sm" onClick={() => create(true)} disabled={pending}>
-            Sí, es otra persona: crear
+            Ninguna es esta persona: crear
           </Button>
         ) : (
           <Button

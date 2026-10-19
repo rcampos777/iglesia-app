@@ -2,6 +2,43 @@
 
 Formato: fecha, decisión, contexto/alternativas, consecuencias.
 
+## 2026-10-18 — Registro central de personas y vinculación verificada
+
+**Contexto**: el dueño pidió que cada persona tenga una sola identidad sin
+importar cómo llegue (visitante, cuenta propia, donante, registrada por un
+director de departamento) y que crear persona, crear cuenta, asignar
+departamento y dar permisos sean pasos separados. `people` ya era la
+identidad, pero cada módulo creaba personas por su lado (el registro de
+cuenta siempre crea una nueva) y no había forma de unir duplicados.
+
+**Decisión** (`0054`, detalle en `docs/person-registry.md`):
+
+- "Departamento" = ministerio existente; se respeta que una persona esté en
+  varios. No se agregó ninguna restricción nueva.
+- Claves normalizadas generadas (nombre, correo, teléfono) y una sola
+  función de coincidencias con niveles confiable/posible y motivos. El
+  correo nunca es identificador; mismo nombre con fecha de nacimiento
+  distinta no se sugiere.
+- Alta común con clave de envío y candado por clave normalizada (doble
+  envío y altas simultáneas no duplican); las coincidencias se revisan
+  antes de crear.
+- Vinculación de una cuenta con su registro anterior **solo** con un código
+  enviado al correo que la iglesia ya tenía (no al recién dado), con
+  respuesta idéntica haya o no coincidencia, o por revisión de un
+  administrador. Alternativas descartadas: unir por correo igual (puede ser
+  compartido) y "sí, soy yo" (no prueba nada). SMS queda preparado en el
+  modelo, sin proveedor.
+- Unificación manual (administrador), transaccional, con rastro inmutable e
+  id anterior → definitivo. Nunca une dos cuentas. Las donaciones solo
+  cambian de persona (con revisión), igual que Finanzas → Vincular.
+- Los directores registran personas sin cuenta en su ministerio (individual
+  o CSV con vista previa y revisión de lo ambiguo); ven solo datos mínimos
+  enmascarados de coincidencias y nada de otros ministerios ni de Finanzas.
+
+**Consecuencias**: los datos existentes no se tocan (posibles duplicados
+quedan para revisión). Pendiente: proveedor de SMS; recorrer los flujos en
+el navegador con cuentas de prueba.
+
 ## 2026-10-11 — Donantes solo de Finanzas e importación de diezmos y ofrendas
 
 **Contexto**: el dueño del producto necesita subir lo que va del año

@@ -1,8 +1,36 @@
 # Progreso del proyecto
 
-Última actualización: 2026-10-11.
+Última actualización: 2026-10-18.
 
 ## Estado general: MVP verificado de punta a punta ✅
+
+### 2026-10-18 — Registro central de personas (0054)
+
+Detalle en `docs/person-registry.md`; decisión del 2026-10-18.
+
+- Coincidencias comunes (nombre, correo, teléfono, fecha de nacimiento
+  normalizados; confiable/posible con motivos) y alta sin duplicados
+  (clave de envío + candado) en Personas → Nueva, Visitantes → Nuevo
+  seguimiento, Ministerio → Registrar persona y Finanzas → Crear donante.
+- Ministerios: registrar personas sin cuenta, "Con cuenta / Sin cuenta",
+  importar lista CSV con vista previa, decisiones por fila y reimportación
+  sin duplicar.
+- Mi portal → "¿Ya estabas registrado?": código al correo que la iglesia
+  ya tenía, o solicitud de revisión (Personas → Posibles duplicados →
+  Solicitudes de vinculación).
+- Personas → Posibles duplicados y unificación con vista previa,
+  conflictos, rastro (`person_merges`) e id anterior que redirige.
+- Verificado: `test:db` 124/124 (nuevo `person-registry.test.ts`, 20),
+  `test:unit` 33/33 (nuevo `ministry-import.test.ts`, 4), E2E 43/43 (nuevo
+  `person-registry.spec.ts`, 6), lint, typecheck y build. `0054` aplicada
+  en **desarrollo**; ahí se probó concurrencia real (dos altas simultáneas
+  → una persona; misma clave → misma persona; datos de prueba borrados).
+- **No verificado en navegador con sesión** (no hay cuentas de prueba con
+  credenciales para este entorno). Pendiente: recorrer los flujos con
+  cuentas de administrador, líder de ministerio, seguimiento y miembro, y
+  en móvil (375 px).
+- Pendiente (usuario): aplicar `0054` en producción antes de desplegar el
+  código; proveedor de SMS si se quiere verificar por teléfono.
 
 ### 2026-10-11 — Importar diezmos y ofrendas + donantes solo de Finanzas (0053)
 

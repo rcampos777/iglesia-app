@@ -279,6 +279,23 @@ null`). Nunca se borra: `voided_at/voided_by/void_reason` para
   `matched_person_id`), y dispara desde código de aplicación, nunca
   automáticamente. Ver `docs/import-process.md`.
 
+## 9.b Registro central de personas (0054)
+
+Ver `docs/person-registry.md`.
+
+- `people.name_key`, `email_key`, `phone_key`: columnas **generadas**
+  (normalizadas) para comparar; los valores originales no cambian.
+- `people.source` suma `ministerio` (registrada por un líder) y `visita`.
+- `person_create_requests`: clave de cada alta (idempotencia).
+- `ministry_import_batches` / `ministry_import_rows`: staging de la lista
+  de integrantes (fila, datos, errores, coincidencias, decisión
+  `pendiente | usar_existente | crear | omitir`, resultado).
+- `person_merges`: rastro inmutable de unificaciones (id que queda, id
+  anterior, datos previos, campos elegidos, traslados, quién/cuándo).
+- `person_duplicate_dismissals`: parejas marcadas "no son la misma".
+- `identity_claims`: códigos de vinculación (solo hash, intentos, vence en
+  15 min); `identity_review_requests`: solicitudes de revisión.
+
 ## 10. Auditoría
 
 - `audit_log`: bitácora genérica de acciones administrativas sensibles

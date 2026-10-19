@@ -6,10 +6,13 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole, AuthError } from "@/lib/auth/require-role";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
 import { personSchema } from "@/lib/validations/people";
-import { findDuplicateCandidates, getPerson, type DuplicateCandidate } from "@/lib/data/people";
+import { getPerson } from "@/lib/data/people";
+import { findPersonMatches } from "@/lib/data/person-registry";
+import { parseAcknowledged, requestKeySchema } from "@/lib/validations/person-registry";
+import { isMatchesError, registryErrorMessage } from "@/lib/person-registry-errors";
 import { sendEmail } from "@/lib/email/send";
 import { para } from "@/lib/email/escape";
-import type { AppRole, PersonInsert } from "@/types/database";
+import type { AppRole, PersonInsert, PersonMatch } from "@/types/database";
 import { z } from "zod";
 
 const PEOPLE_WRITE_ROLES = [
@@ -53,9 +56,14 @@ function toPersonInsert(data: ReturnType<typeof personSchema.parse>): PersonInse
 }
 
 export interface CreatePersonResult {
-  duplicates?: DuplicateCandidate[];
+  matches?: PersonMatch[];
 }
 
+/**
+ * Alta desde el directorio con el flujo común (register_person, 0054):
+ * si hay coincidencias que no se han revisado, las devuelve en vez de
+ * crear. `acknowledged` = las que se vieron y no son esta persona.
+ */
 export async function createPersonAction(
   formData: FormData,
 ): Promise<ActionResult<CreatePersonResult>> {
@@ -72,39 +80,35 @@ export async function createPersonAction(
   if (!parsed.success) {
     return actionError("Revisa los datos ingresados.", zodFieldErrors(parsed.error));
   }
-
-  const confirmDuplicate = formData.get("confirmDuplicate") === "true";
-
-  if (!confirmDuplicate && (parsed.data.email || parsed.data.phone)) {
-    const duplicates = await findDuplicateCandidates({
-      email: parsed.data.email || undefined,
-      phone: parsed.data.phone || undefined,
-    });
-
-    if (duplicates.length > 0) {
-      // No es un error: requiere confirmación humana antes de crear un
-      // posible duplicado (nunca se fusiona/crea automáticamente).
-      return actionOk({ duplicates });
-    }
-  }
+  const requestKey = requestKeySchema.safeParse(formData.get("requestKey"));
+  if (!requestKey.success) return actionError("Envío inválido. Recarga la página.");
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: personId, error } = await supabase.rpc("register_person", {
+    p_context: "directorio",
+    p_data: toPersonInsert(parsed.data),
+    p_acknowledged: parseAcknowledged(formData.get("acknowledged")),
+    p_request_key: requestKey.data,
+  });
 
-  const { data: person, error } = await supabase
-    .from("people")
-    .insert({ ...toPersonInsert(parsed.data), created_by: user?.id ?? null })
-    .select("id")
-    .single();
-
-  if (error || !person) {
-    return actionError(`No se pudo crear la persona: ${error?.message ?? "error desconocido"}`);
+  if (error) {
+    if (isMatchesError(error.message)) {
+      // No es un error: requiere decisión humana (nunca se une ni se crea
+      // un posible duplicado sin revisarlo).
+      const matches = await findPersonMatches("directorio", null, {
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        email: parsed.data.email,
+        phone: parsed.data.phone,
+        birthDate: parsed.data.birthDate,
+      });
+      return actionOk({ matches });
+    }
+    return actionError(registryErrorMessage(error, "No se pudo crear la persona."));
   }
 
   revalidatePath("/personas");
-  redirect(`/personas/${person.id}`);
+  redirect(`/personas/${personId}`);
 }
 
 export async function updatePersonAction(

@@ -6,6 +6,7 @@ import { getActivityName, getPerson, getPersonDeleteBlockers } from "@/lib/data/
 import { isApostol } from "@/lib/auth/finance";
 import { DeletePersonCard } from "@/components/people/delete-person-card";
 import { getPersonJourney } from "@/lib/data/journey";
+import { resolvePersonId } from "@/lib/data/person-registry";
 import { PersonJourneyCard } from "@/components/people/person-journey";
 import { getPortalAccountStatus } from "@/lib/data/portal-invitations";
 import { InvitePortalCard } from "@/components/people/invite-portal-card";
@@ -36,6 +37,9 @@ export default async function PersonDetailPage({
   const [person, journey] = await Promise.all([getPerson(id), getPersonJourney(id)]);
 
   if (!person) {
+    // Si se unificó con otra, el id anterior lleva a la que quedó.
+    const current = await resolvePersonId(id);
+    if (current && current !== id) redirect(`/personas/${current}`);
     notFound();
   }
 

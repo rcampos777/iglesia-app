@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { AuthError, requireRole } from "@/lib/auth/require-role";
 import { FINANCE_ROLES } from "@/lib/auth/finance";
 import { actionError, actionOk, type ActionResult } from "@/lib/action-result";
+import { findPersonMatches } from "@/lib/data/person-registry";
+import type { PersonMatch } from "@/types/database";
 import { attendanceErrorMessage as dbErrorMessage } from "@/lib/attendance/rpc-error";
 import { parseAmountToCents } from "@/lib/money";
 import { churchDateKey } from "@/lib/datetime";
@@ -382,7 +384,11 @@ export async function createDonorAction(input: {
   firstName: string;
   lastName: string;
   confirmSameName: boolean;
-}): Promise<ActionResult<{ id: string; name: string } | { sameName: true; message: string }>> {
+}): Promise<
+  ActionResult<
+    { id: string; name: string } | { sameName: true; message: string; matches: PersonMatch[] }
+  >
+> {
   const denied = await guard();
   if (denied) return denied;
   const parsed = z
@@ -393,6 +399,21 @@ export async function createDonorAction(input: {
     })
     .safeParse(input);
   if (!parsed.success) return actionError(issue(parsed.error));
+  // Flujo común (0054): antes de crear, coincidencias por nombre en todo el
+  // directorio y en los donantes de Finanzas, para elegir a la persona.
+  if (!parsed.data.confirmSameName) {
+    const matches = await findPersonMatches("finanzas", null, {
+      firstName: parsed.data.firstName,
+      lastName: parsed.data.lastName,
+    });
+    if (matches.length > 0) {
+      return actionOk({
+        sameName: true,
+        message: "Parece que esta persona ya tiene un registro. Elígela si es la misma.",
+        matches,
+      });
+    }
+  }
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("finance_create_donor", {
     p_first_name: parsed.data.firstName,
@@ -400,7 +421,7 @@ export async function createDonorAction(input: {
     p_confirm_same_name: parsed.data.confirmSameName,
   });
   if (error?.message.startsWith("MISMO_NOMBRE")) {
-    return actionOk({ sameName: true, message: dbErrorMessage(error) });
+    return actionOk({ sameName: true, message: dbErrorMessage(error), matches: [] });
   }
   if (error || !data) return actionError(dbErrorMessage(error ?? { code: "", message: "" }));
   return actionOk({

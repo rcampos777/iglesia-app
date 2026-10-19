@@ -81,6 +81,15 @@ silencioso.
 El asistente de importación permite mapear columnas con nombres distintos
 a esta plantilla (no obliga a renombrar el archivo original).
 
+## 4.b Listas de integrantes por ministerio (0054)
+
+Un líder o coordinador sube un CSV a su ministerio
+(`/ministerios/[id]/importar`). Mismo principio: staging
+(`ministry_import_rows`), validación, coincidencias por fila (las del
+registro central), decisión humana en lo ambiguo y aplicar por separado.
+No crea cuentas ni envía emails, y repetir el archivo no duplica. Ver
+`docs/person-registry.md` §4.
+
 ## 5. Qué falta para producción
 
 - Parseo real de `.xlsx` (actualmente el pipeline soporta CSV

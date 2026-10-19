@@ -44,13 +44,14 @@ grant usage on schema auth, extensions, public to anon, authenticated, service_r
 grant execute on function auth.uid() to anon, authenticated, service_role;
 `;
 
-export async function createTestDb(): Promise<PGlite> {
-  const db = new PGlite({ extensions: { citext, pgcrypto } });
-  await db.exec(PRELUDE);
-  const files = fs
+function migrationFiles(): string[] {
+  return fs
     .readdirSync(MIGRATIONS_DIR)
     .filter((f) => f.endsWith(".sql") && !SKIP.has(f))
     .sort();
+}
+
+async function applyFiles(db: PGlite, files: string[]): Promise<void> {
   for (const f of files) {
     try {
       await db.exec(fs.readFileSync(path.join(MIGRATIONS_DIR, f), "utf8"));
@@ -62,7 +63,25 @@ export async function createTestDb(): Promise<PGlite> {
     grant all on all tables in schema public to anon, authenticated, service_role;
     grant all on all sequences in schema public to anon, authenticated, service_role;
   `);
+}
+
+/**
+ * `stopBefore`: aplica solo las migraciones anteriores a ese archivo (para
+ * cargar datos con el esquema viejo y luego `applyMigrationsFrom`).
+ */
+export async function createTestDb(options: { stopBefore?: string } = {}): Promise<PGlite> {
+  const db = new PGlite({ extensions: { citext, pgcrypto } });
+  await db.exec(PRELUDE);
+  const files = migrationFiles().filter((f) => !options.stopBefore || f < options.stopBefore);
+  await applyFiles(db, files);
   return db;
+}
+
+export async function applyMigrationsFrom(db: PGlite, first: string): Promise<void> {
+  await applyFiles(
+    db,
+    migrationFiles().filter((f) => f >= first),
+  );
 }
 
 /** Ejecuta `fn` como un usuario autenticado (RLS activo) y vuelve a superusuario. */

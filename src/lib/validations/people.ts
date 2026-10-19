@@ -12,6 +12,8 @@ export const personSourceValues = [
   "importacion",
   "inscripcion_actividad",
   "registro_cuenta",
+  "ministerio",
+  "visita",
 ] as const;
 
 /**

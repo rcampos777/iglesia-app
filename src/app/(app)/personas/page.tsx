@@ -1,5 +1,14 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Mail, Phone, Plus, Search, Users } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CopyCheck,
+  Mail,
+  Phone,
+  Plus,
+  Search,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +31,7 @@ import { PageHeader } from "@/components/ui-brand/page-header";
 import { StatusBadge } from "@/components/ui-brand/status-badge";
 import { EmptyState, TableCard } from "@/components/ui-brand/table-card";
 import { listPeople, listRegistrationActivities } from "@/lib/data/people";
+import { getAccountStatus } from "@/lib/data/person-registry";
 import { membershipStatusLabels, personSourceLabels } from "@/lib/labels";
 import { membershipTone } from "@/lib/status-tones";
 import {
@@ -30,7 +40,7 @@ import {
   personSourceValues,
 } from "@/lib/validations/people";
 import { redirect } from "next/navigation";
-import { getCurrentUser, hasAnyRole, isStaff } from "@/lib/auth/session";
+import { getCurrentUser, hasAnyRole, hasDirectoryAccess, isStaff } from "@/lib/auth/session";
 import type { MembershipStatus, PersonRow } from "@/types/database";
 
 const WRITE_ROLES = ["administrador", "pastor", "coordinador_ministerio", "seguimiento"] as const;
@@ -73,6 +83,16 @@ export default async function PeoplePage({
   ]);
 
   const canWrite = hasAnyRole(user, [...WRITE_ROLES]);
+  const accounts = await getAccountStatus(people.map((p) => p.id));
+  const accountBadge = (id: string) => {
+    const a = accounts.get(id);
+    if (!a) return null;
+    return (
+      <StatusBadge tone={a.hasAccount ? "active" : "idle"}>
+        {a.hasAccount ? "Con cuenta" : a.invitationPending ? "Invitada" : "Sin cuenta"}
+      </StatusBadge>
+    );
+  };
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const to = Math.min(page * PAGE_SIZE, total);
@@ -94,13 +114,25 @@ export default async function PeoplePage({
         title="Personas"
         description={`${total} ${total === 1 ? "persona" : "personas"}${hasFilters ? " con estos filtros" : " registradas"}.`}
         actions={
-          canWrite ? (
-            <Button asChild>
-              <Link href="/personas/nueva">
-                <Plus className="size-4" aria-hidden />
-                Nueva persona
-              </Link>
-            </Button>
+          canWrite || hasDirectoryAccess(user) ? (
+            <div className="flex flex-wrap gap-2">
+              {hasDirectoryAccess(user) ? (
+                <Button asChild variant="outline">
+                  <Link href="/personas/duplicados">
+                    <CopyCheck className="size-4" aria-hidden />
+                    Posibles duplicados
+                  </Link>
+                </Button>
+              ) : null}
+              {canWrite ? (
+                <Button asChild>
+                  <Link href="/personas/nueva">
+                    <Plus className="size-4" aria-hidden />
+                    Nueva persona
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
           ) : null
         }
       />
@@ -227,6 +259,7 @@ export default async function PeoplePage({
                       >
                         {membershipStatusLabels[person.membership_status]}
                       </StatusBadge>
+                      <span className="sm:hidden">{accountBadge(person.id)}</span>
                     </div>
                     <p className="text-muted-foreground mt-1 text-xs lg:hidden">
                       <span className="sr-only">Origen: </span>
@@ -253,9 +286,12 @@ export default async function PeoplePage({
                     </div>
                   </TableCell>
                   <TableCell className="hidden py-3 sm:table-cell">
-                    <StatusBadge tone={membershipTone[person.membership_status]}>
-                      {membershipStatusLabels[person.membership_status]}
-                    </StatusBadge>
+                    <div className="flex flex-wrap gap-1.5">
+                      <StatusBadge tone={membershipTone[person.membership_status]}>
+                        {membershipStatusLabels[person.membership_status]}
+                      </StatusBadge>
+                      {accountBadge(person.id)}
+                    </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground hidden py-3 pr-4 text-sm whitespace-normal lg:table-cell">
                     {originLabel(person, activityNames)}

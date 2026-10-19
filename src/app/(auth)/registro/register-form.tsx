@@ -38,6 +38,11 @@ export function RegisterForm({ providers }: { providers: OAuthProvider[] }) {
             Te enviamos un enlace de confirmación. Ábrelo para activar tu cuenta y luego inicia
             sesión.
           </p>
+          <p className="text-muted-foreground mt-3 text-sm">
+            ¿Ya estabas registrado en la iglesia (como visitante, en un ministerio o en una
+            actividad)? Al entrar, ve a Mi portal → &quot;Vincular mi registro&quot; para unir tu
+            historial con tu cuenta.
+          </p>
           <Button asChild className="mt-4 w-full">
             <Link href="/login">Ir a iniciar sesión</Link>
           </Button>

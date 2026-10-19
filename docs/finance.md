@@ -224,3 +224,13 @@ Desde 2026-10-11. Decisión en `docs/decisions.md` (2026-10-11).
   el registro de Finanzas. "No es la misma" oculta la sugerencia.
 - Auditoría en `finance_audit_log`: crear donante, crear/completar/
   descartar lote, vincular.
+
+## Registro central de personas (0054)
+
+- "Crear donante nuevo" muestra antes las coincidencias del directorio y de
+  donantes de Finanzas ("Usar esta persona"); el donante nuevo sigue oculto.
+- Una unificación del directorio (administrador) mueve las donaciones de
+  la persona unida con revisión "corregida"; importe, fecha, tipo, método y
+  referencia no cambian; las cartas del período quedan para revisión.
+- Los donantes de Finanzas no se unifican desde el directorio: se vinculan
+  en Finanzas → Vincular. Ver `docs/person-registry.md`.

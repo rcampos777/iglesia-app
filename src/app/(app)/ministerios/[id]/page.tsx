@@ -1,16 +1,19 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileUp } from "lucide-react";
 import { StatusBadge } from "@/components/ui-brand/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getAccountStatus } from "@/lib/data/person-registry";
 import { getMinistryDetail, listPeopleForMinistryPicker } from "@/lib/data/ministries";
 import { getCurrentUser, hasAnyRole, hasRole, isStaff } from "@/lib/auth/session";
 import { ministryMemberRoleLabels } from "@/lib/labels";
 import { MinistryForm } from "../ministry-form";
 import { AddMemberForm } from "./add-member-form";
 import { MemberRow } from "./member-row";
+import { RegisterMember } from "./register-member";
 
 const MINISTRY_ADMIN_ROLES = ["administrador", "pastor", "coordinador_ministerio"] as const;
 
@@ -46,7 +49,13 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
   // su equipo aquí mismo, pero /personas/[id] no es para él.
   const canOpenPerson = isStaff(user);
 
-  const people = canManageMembers ? await listPeopleForMinistryPicker() : [];
+  const [people, accounts] = await Promise.all([
+    canManageMembers ? listPeopleForMinistryPicker() : Promise.resolve([]),
+    getAccountStatus(activeMembers.map((m) => m.person_id)),
+  ]);
+  const withoutAccount = activeMembers.filter(
+    (m) => accounts.get(m.person_id)?.hasAccount === false,
+  ).length;
   const alreadyServing = new Set(activeMembers.map((m) => m.person_id));
   const availablePeople = people.filter((p) => !alreadyServing.has(p.id));
 
@@ -88,8 +97,24 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
       )}
 
       <Card>
-        <CardHeader>
-          <CardTitle>Quiénes sirven</CardTitle>
+        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Quiénes sirven</CardTitle>
+            {withoutAccount > 0 ? (
+              <p className="text-muted-foreground mt-1 text-sm">
+                {withoutAccount} {withoutAccount === 1 ? "persona" : "personas"} sin cuenta
+                (pendientes de registrarse).
+              </p>
+            ) : null}
+          </div>
+          {canManageMembers ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/ministerios/${ministry.id}/importar`}>
+                <FileUp className="size-4" aria-hidden />
+                Importar lista
+              </Link>
+            </Button>
+          ) : null}
         </CardHeader>
         <CardContent className="space-y-4">
           {activeMembers.length === 0 && (
@@ -108,6 +133,7 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
                 member={m}
                 canManage={canManageMembers}
                 canOpenPerson={canOpenPerson}
+                hasAccount={accounts.get(m.person_id)?.hasAccount}
               />
             ))}
           </div>
@@ -115,7 +141,18 @@ export default async function MinistryDetailPage({ params }: { params: Promise<{
           {canManageMembers && (
             <>
               <Separator />
-              <AddMemberForm ministryId={ministry.id} people={availablePeople} />
+              <Tabs defaultValue="nueva">
+                <TabsList>
+                  <TabsTrigger value="nueva">Registrar persona</TabsTrigger>
+                  <TabsTrigger value="directorio">Elegir de la lista</TabsTrigger>
+                </TabsList>
+                <TabsContent value="nueva" className="pt-2">
+                  <RegisterMember ministryId={ministry.id} />
+                </TabsContent>
+                <TabsContent value="directorio" className="pt-2">
+                  <AddMemberForm ministryId={ministry.id} people={availablePeople} />
+                </TabsContent>
+              </Tabs>
             </>
           )}
         </CardContent>

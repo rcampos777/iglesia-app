@@ -26,18 +26,22 @@ import { ministryMemberRoleLabels } from "@/lib/labels";
 import { ministryMemberRoleValues } from "@/lib/validations/ministries";
 import type { MinistryMemberWithPerson } from "@/lib/data/ministries";
 import type { MinistryMemberRole } from "@/types/database";
+import { StatusBadge } from "@/components/ui-brand/status-badge";
 
 export function MemberRow({
   ministryId,
   member,
   canManage,
   canOpenPerson,
+  hasAccount,
 }: {
   ministryId: string;
   member: MinistryMemberWithPerson;
   canManage: boolean;
   /** Solo staff puede abrir la ficha completa de la persona. */
   canOpenPerson: boolean;
+  /** Derivado de la cuenta real; undefined = no visible para este rol. */
+  hasAccount?: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -61,13 +65,20 @@ export function MemberRow({
   return (
     <div className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        {canOpenPerson ? (
-          <Link href={`/personas/${member.person_id}`} className="font-medium hover:underline">
-            {fullName}
-          </Link>
-        ) : (
-          <p className="font-medium">{fullName}</p>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {canOpenPerson ? (
+            <Link href={`/personas/${member.person_id}`} className="font-medium hover:underline">
+              {fullName}
+            </Link>
+          ) : (
+            <p className="font-medium">{fullName}</p>
+          )}
+          {hasAccount !== undefined ? (
+            <StatusBadge tone={hasAccount ? "active" : "idle"}>
+              {hasAccount ? "Con cuenta" : "Sin cuenta"}
+            </StatusBadge>
+          ) : null}
+        </div>
         <p className="text-muted-foreground truncate text-sm">
           {member.personPhone || member.personEmail || "sin contacto"} · desde {member.joined_at}
         </p>

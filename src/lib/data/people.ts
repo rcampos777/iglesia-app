@@ -98,51 +98,6 @@ export async function getPerson(id: string): Promise<PersonRow | null> {
   return data;
 }
 
-export interface DuplicateCandidate {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  phone: string | null;
-}
-
-/**
- * Búsqueda de posibles duplicados por señales exactas (nunca por nombre
- * solo). Se usa antes de crear una persona desde la UI normal, para
- * evitar duplicados por accidente sin bloquear casos legítimos
- * (ej. dos personas distintas pueden compartir teléfono de casa).
- */
-export async function findDuplicateCandidates(input: {
-  email?: string;
-  phone?: string;
-}): Promise<DuplicateCandidate[]> {
-  const supabase = await createClient();
-  const conditions: string[] = [];
-
-  if (input.email) conditions.push(`email.eq.${sanitizeSearchTerm(input.email)}`);
-  if (input.phone) conditions.push(`phone.eq.${sanitizeSearchTerm(input.phone)}`);
-
-  if (conditions.length === 0) return [];
-
-  const { data, error } = await supabase
-    .from("people")
-    .select("id, first_name, last_name, email, phone")
-    .or(conditions.join(","))
-    .limit(5);
-
-  if (error) {
-    throw new Error(`No se pudo verificar duplicados: ${error.message}`);
-  }
-
-  return (data ?? []).map((p) => ({
-    id: p.id,
-    firstName: p.first_name,
-    lastName: p.last_name,
-    email: p.email,
-    phone: p.phone,
-  }));
-}
-
 /**
  * Qué impide borrar a una persona (0046), por tipo y cantidad. Vacío =
  * se puede borrar. Solo SuperAdmin; para cualquier otro devuelve null.

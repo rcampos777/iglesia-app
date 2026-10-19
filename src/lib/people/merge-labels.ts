@@ -1,0 +1,37 @@
+/** Etiquetas en español para la vista previa de unificación. */
+export const mergeFieldLabels: Record<string, string> = {
+  first_name: "Nombre",
+  last_name: "Apellidos",
+  preferred_name: "Nombre preferido",
+  birth_date: "Fecha de nacimiento",
+  gender: "Género",
+  email: "Correo",
+  phone: "Teléfono",
+  address_line: "Dirección",
+  address_line2: "Dirección (línea 2)",
+  city: "Ciudad",
+  postal_code: "Código postal",
+  country: "País",
+  marital_status: "Estado civil",
+  membership_status: "Estatus",
+  joined_at: "Fecha de ingreso",
+  photo_url: "Foto",
+};
+
+export const relationLabels: Record<string, string> = {
+  matriculas: "Matrículas",
+  asistencia_clases: "Asistencia a clases",
+  maestro_de_clases: "Maestro de clases",
+  ministerios: "Ministerios",
+  lider_de_ministerios: "Líder de ministerios",
+  actividades: "Actividades",
+  responsable_de_actividades: "Responsable de actividades",
+  inscripciones: "Inscripciones en línea",
+  asistencia_cultos: "Asistencia a cultos",
+  seguimiento: "Seguimiento de visitas",
+  peticiones_oracion: "Peticiones de oración",
+  encuestas: "Encuestas",
+  donaciones: "Donaciones",
+  cartas_donativos: "Cartas de donativos",
+  certificaciones: "Certificaciones",
+};

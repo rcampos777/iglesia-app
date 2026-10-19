@@ -85,6 +85,29 @@ export default async function PortalPage() {
         description="Tu asistencia, tus actividades y tus cursos en un solo lugar."
       />
 
+      {/* Cuenta creada por la propia persona y todavía sin unir a un registro
+          anterior: se ofrece vincularlo (verificado, ver /portal/vincular). */}
+      {person?.source === "registro_cuenta" ? (
+        <section className="bg-card ring-foreground/10 flex flex-col gap-3 rounded-xl p-4 shadow-xs ring-1 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="space-y-1">
+            <h2 className="flex items-center gap-2 text-base font-semibold">
+              <UserRound className="text-muted-foreground size-[18px]" aria-hidden />
+              ¿Ya estabas registrado en la iglesia?
+            </h2>
+            <p className="text-muted-foreground text-[15px]">
+              Si visitaste, sirves en un ministerio o un líder te registró antes, vincula ese
+              registro con tu cuenta.
+            </p>
+          </div>
+          <Link
+            href="/portal/vincular"
+            className="text-primary shrink-0 text-sm font-medium underline underline-offset-4"
+          >
+            Vincular mi registro
+          </Link>
+        </section>
+      ) : null}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
         <div className="space-y-4 lg:col-span-2">
           <section

@@ -31,6 +31,8 @@ export const personSourceLabels: Record<PersonSource, string> = {
   inscripcion_actividad: "Inscripción en línea",
   registro_cuenta: "Registro de cuenta",
   finanzas: "Donante (Finanzas)",
+  ministerio: "Registrado por un ministerio",
+  visita: "Registro de visita",
 };
 
 export const genderLabels: Record<GenderType, string> = {

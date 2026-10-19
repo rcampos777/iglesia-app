@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AddressFields } from "./address-fields";
+import { MatchList, toMatchItem } from "./match-list";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -15,7 +17,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
 import { membershipStatusLabels, genderLabels } from "@/lib/labels";
 import { membershipStatusValues, genderValues } from "@/lib/validations/people";
 import type { ActionResult } from "@/lib/action-result";
@@ -38,13 +39,14 @@ export function PersonForm({
   submitLabel?: string;
 }) {
   const router = useRouter();
-  const [confirmDuplicate, setConfirmDuplicate] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  // Una clave por formulario: un doble envío no crea dos personas.
+  const [requestKey] = useState(() => crypto.randomUUID());
 
-  const [state, formAction, isPending] = useActionState(
+  const [state, dispatch, isPending] = useActionState(
     async (_prev: ActionResult<CreatePersonResult | undefined>, formData: FormData) => {
-      if (confirmDuplicate) formData.set("confirmDuplicate", "true");
       const result = await action(formData);
-      if (result.ok && result.data && !("duplicates" in result.data)) {
+      if (result.ok && result.data && !("matches" in result.data)) {
         router.refresh();
       }
       return result;
@@ -52,37 +54,58 @@ export function PersonForm({
     initialState,
   );
 
-  const duplicates = state.ok ? state.data?.duplicates : undefined;
+  // Se envía con onSubmit (no con `action` del form) para que React no
+  // vacíe los campos mientras se revisan las coincidencias.
+  function send(acknowledged: string[]) {
+    if (!formRef.current) return;
+    const fd = new FormData(formRef.current);
+    fd.set("requestKey", requestKey);
+    fd.set("acknowledged", acknowledged.join(","));
+    startTransition(() => dispatch(fd));
+  }
+
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    send([]);
+  }
+
+  const matches = state.ok ? state.data?.matches : undefined;
   const fieldErrors = !state.ok ? state.fieldErrors : undefined;
 
   return (
-    <form action={formAction} className="space-y-6" noValidate>
+    <form ref={formRef} onSubmit={onSubmit} className="space-y-6" noValidate>
       {!state.ok && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}
 
-      {duplicates && duplicates.length > 0 && (
-        <Alert>
-          <AlertTitle>Posibles duplicados encontrados</AlertTitle>
-          <AlertDescription>
-            <ul className="mt-2 list-disc space-y-1 pl-4">
-              {duplicates.map((d) => (
-                <li key={d.id}>
-                  {d.firstName} {d.lastName} — {d.email || d.phone}
-                </li>
-              ))}
-            </ul>
-            <label className="mt-3 flex items-center gap-2 text-sm">
-              <Checkbox
-                checked={confirmDuplicate}
-                onCheckedChange={(v) => setConfirmDuplicate(v === true)}
-              />
-              Confirmo que es una persona distinta, crear de todas formas.
-            </label>
-          </AlertDescription>
-        </Alert>
+      {matches && matches.length > 0 && (
+        <div className="space-y-3" aria-live="polite">
+          <Alert>
+            <AlertTitle>Parece que esta persona ya tiene un registro</AlertTitle>
+            <AlertDescription>
+              Ábrela para revisarla en vez de crear otra. Si ninguna es la misma persona, regístrala
+              como nueva.
+            </AlertDescription>
+          </Alert>
+          <MatchList
+            items={matches.map(toMatchItem)}
+            action={(m) => (
+              <Button asChild size="sm" variant="outline">
+                <Link href={`/personas/${m.id}`}>Abrir ficha</Link>
+              </Button>
+            )}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isPending}
+            onClick={() => send(matches.map((m) => m.person_id))}
+          >
+            Ninguna es esta persona: registrar nueva
+          </Button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

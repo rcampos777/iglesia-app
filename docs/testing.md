@@ -124,6 +124,11 @@ PDF conservado; configuración y aprobación de plantilla.
 hora de la iglesia; ejecutar con `TZ=Asia/Tokyo npm run test:unit`
 (o cualquier otra zona) para comprobar que el dispositivo no afecta.
 
+- `person-registry.test.ts` (0054): coincidencias, alta sin duplicados,
+  ministerios e importación, vinculación verificada, unificación y
+  migración sobre datos del esquema anterior
+  (`createTestDb({ stopBefore })` + `applyMigrationsFrom`).
+
 ## 5. Estado actual
 
 Implementado: `tests/e2e/auth.spec.ts` — smoke tests que **no** requieren

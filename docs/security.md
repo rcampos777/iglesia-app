@@ -573,6 +573,28 @@ y plan de incidentes.
   proyecto de desarrollo) + ramas del trigger por SQL en transacción
   revertida.
 
+## 8.q Registro central y vinculación de cuentas (2026-10-18, 0054)
+
+- **Sin enumeración**: la vinculación propia responde igual haya o no
+  coincidencia y nunca muestra datos; el código va al correo que la
+  iglesia ya tenía. `identity_claim_start`/`identity_claim_verify` solo
+  los ejecuta `service_role` desde el servidor (si un usuario pudiera
+  llamarlos, obtendría el código sin recibir el correo). Código: hash
+  sha256 con el id, 15 minutos, 5 intentos, 5 solicitudes por día.
+- **No reclamar lo ajeno**: solo personas sin cuenta; al verificar se
+  vuelve a comprobar con candado. Un contacto recién dado no es prueba.
+  Correo compartido o varias coincidencias → no hay código, solo revisión.
+- **Coincidencias acotadas**: `person_matches` exige el permiso del
+  módulo; devuelve nombre, motivos y contacto enmascarado. Un líder solo
+  busca para su ministerio y no ve otros ministerios ni Finanzas;
+  `people_account_status` solo responde por personas que quien pregunta
+  ya puede ver. Los donantes de Finanzas solo aparecen en Finanzas.
+  Riesgo aceptado: un líder puede saber si existe alguien con un correo
+  que escribe (ya veía todos los nombres en el selector del ministerio).
+- **Unificación**: solo administrador, transaccional, nunca dos cuentas;
+  el administrador no ve detalle financiero; rastro inmutable.
+- Todas las tablas nuevas con RLS; escritura solo por funciones.
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

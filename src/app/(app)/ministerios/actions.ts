@@ -11,7 +11,18 @@ import {
   ministryMembershipSchema,
   NO_LEADER_VALUE,
 } from "@/lib/validations/ministries";
-import type { MinistryMemberRole } from "@/types/database";
+import type { MinistryImportDecision, MinistryMemberRole, PersonMatch } from "@/types/database";
+import {
+  acknowledgedSchema,
+  ministryImportSchema,
+  quickPersonSchema,
+  requestKeySchema,
+  toPersonData,
+  type QuickPersonInput,
+} from "@/lib/validations/person-registry";
+import { findPersonMatches } from "@/lib/data/person-registry";
+import { isMatchesError, registryErrorMessage } from "@/lib/person-registry-errors";
+import { z } from "zod";
 
 /**
  * Quién puede gestionar CUALQUIER ministerio. `pastor` ya no está aquí:
@@ -325,4 +336,166 @@ export async function endMinistryMembershipAction(
 
   revalidatePath(`/ministerios/${ministryId}`);
   return actionOk(undefined);
+}
+
+export type AddMinistryPersonResult =
+  | { status: "matches"; matches: PersonMatch[] }
+  | { status: "done"; membership: "agregada" | "ya_integrante"; personCreated: boolean };
+
+/**
+ * Integrante nuevo o existente con el flujo común (ministry_add_person,
+ * 0054). Crea la persona sin cuenta: crear la cuenta, asignar el
+ * ministerio y dar permisos son pasos separados.
+ */
+export async function addMinistryPersonAction(
+  ministryId: string,
+  target:
+    { personId: string } | { input: QuickPersonInput; acknowledged: string[]; requestKey: string },
+): Promise<ActionResult<AddMinistryPersonResult>> {
+  try {
+    await requireMinistryManager(ministryId);
+  } catch (err) {
+    if (err instanceof AuthError) return actionError(err.message);
+    throw err;
+  }
+  if (!z.string().uuid().safeParse(ministryId).success) return actionError("Ministerio inválido.");
+
+  const supabase = await createClient();
+  let args;
+  let input: QuickPersonInput | null = null;
+  if ("personId" in target) {
+    if (!z.string().uuid().safeParse(target.personId).success) {
+      return actionError("Persona inválida.");
+    }
+    args = {
+      p_ministry_id: ministryId,
+      p_person_id: target.personId,
+      p_data: null,
+      p_acknowledged: null,
+      p_request_key: null,
+    };
+  } else {
+    const parsed = quickPersonSchema.safeParse(target.input);
+    if (!parsed.success) {
+      const fe: Record<string, string[]> = {};
+      for (const [k, v] of Object.entries(parsed.error.flatten().fieldErrors)) {
+        if (Array.isArray(v) && v.length) fe[k] = v as string[];
+      }
+      return actionError("Revisa los datos.", fe);
+    }
+    const key = requestKeySchema.safeParse(target.requestKey);
+    const ack = acknowledgedSchema.safeParse(target.acknowledged);
+    if (!key.success || !ack.success) return actionError("Envío inválido. Recarga la página.");
+    input = parsed.data;
+    args = {
+      p_ministry_id: ministryId,
+      p_person_id: null,
+      p_data: toPersonData(parsed.data),
+      p_acknowledged: ack.data,
+      p_request_key: key.data,
+    };
+  }
+
+  const { data, error } = await supabase.rpc("ministry_add_person", args);
+  if (error) {
+    if (input && isMatchesError(error.message)) {
+      const matches = await findPersonMatches("ministerio", ministryId, input);
+      return actionOk({ status: "matches", matches });
+    }
+    return actionError(registryErrorMessage(error, "No se pudo agregar a la persona."));
+  }
+
+  revalidatePath(`/ministerios/${ministryId}`);
+  return actionOk({
+    status: "done",
+    membership: data.membership,
+    personCreated: data.person_created,
+  });
+}
+
+export async function createMinistryImportAction(
+  ministryId: string,
+  input: { fileName: string; rows: unknown },
+): Promise<ActionResult<{ batchId: string }>> {
+  try {
+    await requireMinistryManager(ministryId);
+  } catch (err) {
+    if (err instanceof AuthError) return actionError(err.message);
+    throw err;
+  }
+  const parsed = ministryImportSchema.safeParse(input);
+  if (!parsed.success) {
+    return actionError(parsed.error.issues[0]?.message ?? "El archivo no es válido.");
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("ministry_import_create_batch", {
+    p_ministry_id: ministryId,
+    p_file_name: parsed.data.fileName,
+    p_rows: parsed.data.rows,
+  });
+  if (error || !data) {
+    return actionError(registryErrorMessage(error, "No se pudo preparar la importación."));
+  }
+  return actionOk({ batchId: data });
+}
+
+const decisionSchema = z.enum(["pendiente", "usar_existente", "crear", "omitir"]);
+
+export async function decideMinistryImportRowAction(
+  ministryId: string,
+  batchId: string,
+  rowId: string,
+  decision: MinistryImportDecision,
+  personId: string | null,
+): Promise<ActionResult> {
+  try {
+    await requireMinistryManager(ministryId);
+  } catch (err) {
+    if (err instanceof AuthError) return actionError(err.message);
+    throw err;
+  }
+  const ok =
+    z.string().uuid().safeParse(rowId).success &&
+    decisionSchema.safeParse(decision).success &&
+    (personId === null || z.string().uuid().safeParse(personId).success);
+  if (!ok) return actionError("Decisión inválida.");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("ministry_import_decide", {
+    p_row_id: rowId,
+    p_decision: decision,
+    p_person_id: personId,
+  });
+  if (error) return actionError(registryErrorMessage(error, "No se pudo guardar la decisión."));
+  revalidatePath(`/ministerios/${ministryId}/importar/${batchId}`);
+  return actionOk(undefined);
+}
+
+export async function applyMinistryImportAction(
+  ministryId: string,
+  batchId: string,
+): Promise<
+  ActionResult<{
+    creadas: number;
+    agregadas: number;
+    ya_integrantes: number;
+    omitidas: number;
+    a_revisar: number;
+    pendientes: number;
+  }>
+> {
+  try {
+    await requireMinistryManager(ministryId);
+  } catch (err) {
+    if (err instanceof AuthError) return actionError(err.message);
+    throw err;
+  }
+  if (!z.string().uuid().safeParse(batchId).success) return actionError("Lote inválido.");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("ministry_import_apply", { p_batch_id: batchId });
+  if (error || !data) {
+    return actionError(registryErrorMessage(error, "No se pudo aplicar la importación."));
+  }
+  revalidatePath(`/ministerios/${ministryId}`);
+  revalidatePath(`/ministerios/${ministryId}/importar/${batchId}`);
+  return actionOk(data);
 }

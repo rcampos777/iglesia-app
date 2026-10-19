@@ -27,7 +27,9 @@ export type PersonSource =
   | "importacion"
   | "inscripcion_actividad"
   | "registro_cuenta"
-  | "finanzas";
+  | "finanzas"
+  | "ministerio"
+  | "visita";
 
 export type GenderType = "masculino" | "femenino" | "no_especifica";
 
@@ -105,6 +107,10 @@ export type PersonRow = {
   updated_at: string;
   created_by: string | null;
   updated_by: string | null;
+  /** Columnas generadas (0054): nombre, correo y teléfono normalizados. */
+  name_key: string;
+  email_key: string | null;
+  phone_key: string | null;
 };
 
 export type PersonInsert = Pick<PersonRow, "first_name" | "last_name" | "membership_status"> &
@@ -117,6 +123,9 @@ export type PersonInsert = Pick<PersonRow, "first_name" | "last_name" | "members
       | "first_name"
       | "last_name"
       | "membership_status"
+      | "name_key"
+      | "email_key"
+      | "phone_key"
     >
   >;
 
@@ -981,6 +990,124 @@ export type CertificationListRow = {
  * completos, Functions, etc). No es una alternativa a generar los
  * tipos reales desde un proyecto Supabase vivo.
  */
+export type MatchLevel = "confiable" | "posible";
+
+/** Coincidencia mostrada al registrar (0054 person_matches). */
+export type PersonMatch = {
+  person_id: string;
+  display_name: string;
+  level: MatchLevel;
+  reasons: string[];
+  email_hint: string | null;
+  phone_hint: string | null;
+  has_account: boolean;
+  in_ministry: boolean;
+  finance_only: boolean;
+};
+
+export type MinistryImportBatchRow = {
+  id: string;
+  ministry_id: string;
+  file_name: string;
+  row_count: number;
+  created_by: string | null;
+  created_at: string;
+  last_applied_at: string | null;
+};
+
+export type MinistryImportCandidate = {
+  id: string;
+  name: string;
+  level: MatchLevel;
+  reasons: string[];
+  email_hint: string | null;
+  phone_hint: string | null;
+  has_account: boolean;
+  in_ministry: boolean;
+};
+
+export type MinistryImportDecision = "pendiente" | "usar_existente" | "crear" | "omitir";
+export type MinistryImportResult = "agregada" | "ya_integrante" | "creada" | "omitida";
+
+export type MinistryImportRowRow = {
+  id: string;
+  batch_id: string;
+  row_number: number;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  birth_date: string | null;
+  errors: string[];
+  match_level: MatchLevel | "ninguna";
+  candidates: MinistryImportCandidate[];
+  decision: MinistryImportDecision;
+  person_id: string | null;
+  result: MinistryImportResult | null;
+  result_person_id: string | null;
+  processed_at: string | null;
+  decided_by: string | null;
+};
+
+export type PersonMergeRow = {
+  id: string;
+  survivor_person_id: string;
+  merged_person_id: string;
+  kind: "unificacion" | "vinculacion_cuenta" | "vinculacion_revisada";
+  reason: string;
+  survivor_before: Record<string, unknown>;
+  merged_snapshot: Record<string, unknown>;
+  field_choices: string[];
+  moved: Record<string, number>;
+  details: Record<string, unknown>;
+  merged_by: string | null;
+  merged_at: string;
+};
+
+export type DuplicatePair = {
+  person_a: string;
+  name_a: string;
+  person_b: string;
+  name_b: string;
+  level: MatchLevel;
+  reasons: string[];
+  both_accounts: boolean;
+};
+
+export type MergePreviewPerson = PersonRow & {
+  has_account: boolean;
+  relations: Record<string, number>;
+};
+
+export type MergePreview = {
+  survivor: MergePreviewPerson;
+  merged: MergePreviewPerson;
+  conflicts: { field: string; survivor: string; merged: string }[];
+  shared_ministries: string[];
+  finance_detail_visible: boolean;
+  blocked: string | null;
+};
+
+export type IdentityReviewItem = {
+  request_id: string;
+  created_at: string;
+  account_email: string | null;
+  person_id: string;
+  person_name: string;
+  submitted: { phone?: string; birth_date?: string; note?: string };
+  last_outcome: string | null;
+  candidates: {
+    id: string;
+    name: string;
+    level: MatchLevel;
+    reasons: string[];
+    email: string | null;
+    phone: string | null;
+    birth_date: string | null;
+    has_account: boolean;
+  }[];
+};
+
 type TableDef<Row, Insert = Partial<Row>, Update = Partial<Row>> = {
   Row: Row;
   Insert: Insert;
@@ -1040,6 +1167,9 @@ export interface Database {
       ministry_memberships: TableDef<MinistryMembershipRow>;
       audit_log: TableDef<AuditLogRow>;
       portal_invitations: TableDef<PortalInvitationRow>;
+      ministry_import_batches: TableDef<MinistryImportBatchRow>;
+      ministry_import_rows: TableDef<MinistryImportRowRow>;
+      person_merges: TableDef<PersonMergeRow>;
     };
     Views: {
       enrollment_progress: {
@@ -1048,6 +1178,116 @@ export interface Database {
       };
     };
     Functions: {
+      person_matches: {
+        Args: {
+          p_context: "directorio" | "ministerio" | "finanzas";
+          p_ministry_id: string | null;
+          p_first: string;
+          p_last: string;
+          p_email?: string | null;
+          p_phone?: string | null;
+          p_birth?: string | null;
+          p_age?: number | null;
+        };
+        Returns: PersonMatch[];
+      };
+      register_person: {
+        Args: {
+          p_context: "directorio" | "visita";
+          p_data: Record<string, unknown>;
+          p_acknowledged: string[];
+          p_request_key: string;
+        };
+        Returns: string;
+      };
+      people_account_status: {
+        Args: { p_ids: string[] };
+        Returns: { person_id: string; has_account: boolean; invitation_pending: boolean }[];
+      };
+      ministry_add_person: {
+        Args: {
+          p_ministry_id: string;
+          p_person_id: string | null;
+          p_data: Record<string, unknown> | null;
+          p_acknowledged: string[] | null;
+          p_request_key: string | null;
+          p_role?: MinistryMemberRole;
+          p_joined_at?: string | null;
+          p_notes?: string | null;
+        };
+        Returns: {
+          person_id: string;
+          person_created: boolean;
+          membership: "agregada" | "ya_integrante";
+        };
+      };
+      ministry_import_create_batch: {
+        Args: { p_ministry_id: string; p_file_name: string; p_rows: unknown };
+        Returns: string;
+      };
+      ministry_import_decide: {
+        Args: { p_row_id: string; p_decision: MinistryImportDecision; p_person_id: string | null };
+        Returns: undefined;
+      };
+      ministry_import_apply: {
+        Args: { p_batch_id: string };
+        Returns: {
+          creadas: number;
+          agregadas: number;
+          ya_integrantes: number;
+          omitidas: number;
+          a_revisar: number;
+          pendientes: number;
+        };
+      };
+      person_duplicate_pairs: { Args: { p_limit?: number }; Returns: DuplicatePair[] };
+      person_duplicate_dismiss: {
+        Args: { p_a: string; p_b: string; p_reason: string };
+        Returns: undefined;
+      };
+      person_merge_preview: {
+        Args: { p_survivor: string; p_merged: string };
+        Returns: MergePreview;
+      };
+      person_merge: {
+        Args: {
+          p_survivor: string;
+          p_merged: string;
+          p_reason: string;
+          p_take_from_merged?: string[];
+        };
+        Returns: { survivor_id: string; merged_id: string; moved: Record<string, number> };
+      };
+      can_manage_ministry_members: { Args: { p_ministry_id: string }; Returns: boolean };
+      resolve_person_id: { Args: { p_person_id: string }; Returns: string | null };
+      identity_claim_start: {
+        Args: { p_user_id: string; p_phone: string | null; p_birth: string | null };
+        Returns: {
+          status: "ok" | "limite";
+          claim_id?: string;
+          send_to?: string | null;
+          code?: string | null;
+        };
+      };
+      identity_claim_verify: {
+        Args: { p_user_id: string; p_code: string };
+        Returns: {
+          ok: boolean;
+          reason?: "vencido" | "bloqueado" | "incorrecto" | "ya_vinculada";
+          remaining?: number;
+          person_id?: string;
+        };
+      };
+      request_identity_review: {
+        Args: { p_phone: string | null; p_birth: string | null; p_note: string | null };
+        Returns: undefined;
+      };
+      my_identity_review_pending: { Args: Record<string, never>; Returns: boolean };
+      identity_review_list: { Args: Record<string, never>; Returns: IdentityReviewItem[] };
+      identity_review_resolve: {
+        Args: { p_request_id: string; p_target_person_id: string | null; p_note: string };
+        Returns: undefined;
+      };
       has_role: { Args: { check_role: AppRole }; Returns: boolean };
       has_any_role: { Args: { check_roles: AppRole[] }; Returns: boolean };
       is_staff: { Args: Record<string, never>; Returns: boolean };

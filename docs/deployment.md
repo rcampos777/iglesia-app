@@ -199,6 +199,17 @@ ni en el repositorio: se pegan solo en el panel de Supabase.
    Services → Sign in with Apple for Email Communication (requiere SPF del
    dominio de envío).
 
+## 8. Registro central de personas (0054)
+
+1. Aplicar `0054` **antes** de desplegar el código (el directorio, Visitantes
+   y Ministerios llaman a sus funciones):
+   `npx supabase db push --db-url "postgresql://postgres.<ref>:<password>@<host-pooler>:5432/postgres"`.
+   No une datos existentes.
+2. La vinculación por código usa Resend (`RESEND_API_KEY`,
+   `RESEND_FROM_EMAIL`, ya configurados) y la service_role key en el
+   servidor. Sin Resend la app ofrece la revisión por un administrador.
+3. SMS: no configurado (ver `docs/person-registry.md` §5).
+
 ## Alta de una iglesia nueva
 
 1. Crear el proyecto en Supabase (región cercana a la iglesia). Guardar
