@@ -233,27 +233,27 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
       ) : null}
 
       {/* ---------- Próximas actividades (pantalla 3 del diseño) ---------- */}
-      <section aria-labelledby="proximos" className="site-fade bg-white">
-        <div className="relative">
-          <div className="absolute inset-x-0 top-0 h-[220px] bg-[#1D191A]" aria-hidden />
-          <div className="relative mx-auto max-w-6xl px-[19px] pt-10 pb-14 md:px-8">
-            <div className="flex items-end justify-between gap-4">
-              <h2 id="proximos" className="text-[38px] leading-tight tracking-[-0.8px] text-white">
-                Próximos
-              </h2>
-              <Link
-                href="/sitio/eventos"
-                className="pb-2 text-[15px] text-white/60 hover:text-white"
-              >
-                Ver todos
-              </Link>
-            </div>
-            <div className="mt-8 rounded-[28px] bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.12)] md:p-8">
-              {upcoming.length === 0 ? (
-                <p className="text-[17px] text-[#999999]">
-                  Pronto anunciaremos nuevas actividades.
-                </p>
-              ) : (
+      {/* Sin actividades publicadas no se muestra: los cultos están en Horarios. */}
+      {upcoming.length ? (
+        <section aria-labelledby="proximos" className="site-fade bg-white">
+          <div className="relative">
+            <div className="absolute inset-x-0 top-0 h-[220px] bg-[#1D191A]" aria-hidden />
+            <div className="relative mx-auto max-w-6xl px-[19px] pt-10 pb-14 md:px-8">
+              <div className="flex items-end justify-between gap-4">
+                <h2
+                  id="proximos"
+                  className="text-[38px] leading-tight tracking-[-0.8px] text-white"
+                >
+                  Próximos
+                </h2>
+                <Link
+                  href="/sitio/eventos"
+                  className="pb-2 text-[15px] text-white/60 hover:text-white"
+                >
+                  Ver todos
+                </Link>
+              </div>
+              <div className="mt-8 rounded-[28px] bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.12)] md:p-8">
                 <ul className="grid gap-[22px] md:grid-cols-2 md:gap-x-10">
                   {upcoming.slice(0, 4).map((o, i) => (
                     <li key={`${o.title}-${o.startsAt}`}>
@@ -270,11 +270,11 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
                     </li>
                   ))}
                 </ul>
-              )}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* ---------- Predicaciones ---------- */}
       {videos.length ? (
