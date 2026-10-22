@@ -18,6 +18,10 @@
   sitio 11/11, lint, typecheck, build. `0056` aplicada en **desarrollo**;
   envío real probado ahí (mensaje guardado). En desarrollo se borró el
   correo de Contacto del sitio para no mandar emails reales al probar.
+- **Aplicado y publicado (2026-10-21)**: `0056` en **producción** (el dueño
+  corrió `db push`); push de `ccf97a7`. En vivo: 3 predicaciones en
+  cuadrícula, forma "Escríbenos", `/mensajes` pide sesión. "Próximos" quedó
+  vacío ("Pronto anunciaremos…") porque no hay eventos publicados.
 - No verificado con sesión: la bandeja `/mensajes` (no hay cuentas de
   prueba con credenciales aquí); cubierta por RLS en `contact.test.ts` y
   E2E de redirección sin sesión.
