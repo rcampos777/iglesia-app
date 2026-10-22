@@ -4,6 +4,20 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-21 — Nueva actividad: "Invalid value" en la hora de inicio
+
+- El dueño no podía crear "Family Fest": Safari mostraba "Invalid value" en
+  Hora de inicio y bloqueaba el envío (validación propia del navegador, en
+  inglés). Mismo caso que el editor de eventos del sitio (2026-10-04).
+- `activity-form.tsx`: `noValidate`; si una fecha u hora está a medio
+  escribir (`validity.badInput`) se avisa en español junto al campo; el
+  envío es manual (`onSubmit` + `startTransition`) para que un error del
+  servidor no borre lo escrito. La validación real sigue en el servidor.
+- Verificado: lint, typecheck, build, E2E de actividades. **No probado en
+  Safari con sesión** (no hay cuenta de prueba aquí): confirmar con el
+  dueño.
+- Además se escondió "Próximos" en la portada cuando no hay actividades.
+
 ### 2026-10-21 — Predicaciones, Próximos y forma de contacto (0056)
 
 - Pedido del dueño: (1) las predicaciones en la portada salen todas en

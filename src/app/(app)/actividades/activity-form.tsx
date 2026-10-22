@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,12 +38,43 @@ export function ActivityForm({
     initialState,
   );
 
+  const [, startTransition] = useTransition();
+  // Fecha u hora a medio escribir (p. ej. sin AM/PM): el navegador la manda
+  // vacía y, sin noValidate, bloqueaba el envío con un aviso propio en inglés.
+  const [incomplete, setIncomplete] = useState<Record<string, string>>({});
+
   const saved = state.ok && state.data === "guardado";
   const fieldError = (name: string) =>
-    !state.ok && state.fieldErrors?.[name] ? state.fieldErrors[name][0] : null;
+    incomplete[name] ??
+    (!state.ok && state.fieldErrors?.[name] ? state.fieldErrors[name][0] : null);
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form
+      noValidate
+      onSubmit={(e) => {
+        // Se envía a mano (no con `action=`) para que React no borre lo
+        // escrito si el servidor devuelve un error.
+        e.preventDefault();
+        const form = e.currentTarget;
+        const bad: Record<string, string> = {};
+        for (const [name, label] of [
+          ["activityDate", "La fecha"],
+          ["endDate", "La fecha de fin"],
+          ["startTime", "La hora de inicio"],
+          ["endTime", "La hora de fin"],
+        ] as const) {
+          const input = form.elements.namedItem(name);
+          if (input instanceof HTMLInputElement && input.validity.badInput) {
+            bad[name] = `${label} está incompleta. Complétala (incluye a. m. o p. m.) o bórrala.`;
+          }
+        }
+        setIncomplete(bad);
+        if (Object.keys(bad).length) return;
+        const fd = new FormData(form);
+        startTransition(() => formAction(fd));
+      }}
+      className="space-y-4"
+    >
       {!state.ok && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -123,6 +154,9 @@ export function ActivityForm({
             type="time"
             defaultValue={activity?.start_time?.slice(0, 5) ?? ""}
           />
+          {fieldError("startTime") && (
+            <p className="text-destructive text-sm">{fieldError("startTime")}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="endTime">Hora de fin</Label>
