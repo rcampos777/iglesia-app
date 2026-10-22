@@ -95,6 +95,9 @@ export function hasDirectoryAccess(user: CurrentUser | null): boolean {
  */
 export const ADMIN_ROLES: AppRole[] = ["administrador"];
 
+/** Mensajes de la forma de contacto. Espeja `can_read_contact_messages()` (0056). */
+export const CONTACT_ROLES: AppRole[] = ["administrador", "seguimiento"];
+
 export function isStaff(user: CurrentUser | null): boolean {
   return hasAnyRole(user, STAFF_ROLES);
 }

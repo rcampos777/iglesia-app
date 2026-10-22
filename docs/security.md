@@ -595,6 +595,18 @@ y plan de incidentes.
   el administrador no ve detalle financiero; rastro inmutable.
 - Todas las tablas nuevas con RLS; escritura solo por funciones.
 
+## 8.r Forma de contacto del sitio (2026-10-21, 0056)
+
+- `site_contact_messages` con RLS: leen, marcan atendido y borran solo
+  `can_read_contact_messages()` (administrador, seguimiento; SuperAdmin
+  por 0036). `sitio_web` y `pastor` no. Nadie (ni anon) inserta directo.
+- `submit_site_contact()` solo la ejecuta `service_role`, después de la
+  trampa (campo invisible + 3 s mínimos) y el CAPTCHA, como la
+  inscripción (8.n). Máximo 3 mensajes por correo por hora.
+- Un trigger impide editar lo que escribió el visitante (solo cambia el
+  estado). El email de aviso a la iglesia no lleva el texto del mensaje.
+- Pruebas: `tests/db/contact.test.ts`.
+
 ## 9. Datos de menores
 
 Por ahora el modelo solo ofrece la función `is_minor(birth_date)`

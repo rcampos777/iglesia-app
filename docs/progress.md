@@ -4,6 +4,24 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-21 — Predicaciones, Próximos y forma de contacto (0056)
+
+- Pedido del dueño: (1) las predicaciones en la portada salen todas en
+  cuadrícula (hasta 6, con "Ver todas"), no un solo video grande;
+  (2) forma de contacto "Escríbenos" con bandeja en la app → **Mensajes del
+  sitio** (administrador, seguimiento) y aviso por email a la iglesia sin
+  el texto; (3) "Próximos" de la portada solo con actividades (los cultos
+  ya están en Horarios). Ver `docs/site.md`, `docs/security.md` §8.r.
+- Aviso de privacidad actualizado (forma de contacto) → `PRIVACY_VERSION`
+  `2026-10-21`: todas las cuentas lo vuelven a aceptar al entrar.
+- Verificado: `test:db` 129/129 (nuevo `contact.test.ts`, 5), E2E del
+  sitio 11/11, lint, typecheck, build. `0056` aplicada en **desarrollo**;
+  envío real probado ahí (mensaje guardado). En desarrollo se borró el
+  correo de Contacto del sitio para no mandar emails reales al probar.
+- No verificado con sesión: la bandeja `/mensajes` (no hay cuentas de
+  prueba con credenciales aquí); cubierta por RLS en `contact.test.ts` y
+  E2E de redirección sin sesión.
+
 ### 2026-10-21 — Visión, misión y "Nuestra fe" en el sitio (0055)
 
 - El dueño envió la hoja "Nuestra fe" (visión + 19 fundamentos). Nuevos

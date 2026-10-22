@@ -23,7 +23,17 @@ Inicio: portada (foto, título, frase, "Visítanos", "Portal de miembros");
 cita del equipo pastoral o misión + tarjeta "Próximo"; predicación
 destacada + "Próximos" (eventos y cultos); anuncios; quiénes somos y
 ministerios; equipo pastoral; álbumes; horarios; cómo llegar (mapa);
-pie con redes. Páginas: `/sitio/eventos` (+ detalle), `/sitio/albumes`
+pie con redes. Desde el 2026-10-21: "Próximos" (y la tarjeta "Próximo")
+muestran **solo actividades** (eventos del editor); los cultos semanales ya
+están en "Horarios de servicio" (la página `/sitio/eventos` sigue
+mostrando ambos). Las predicaciones salen en una cuadrícula (hasta 6, se
+reproducen ahí mismo) con "Ver todas", en vez de un solo video grande.
+Debajo de "Cómo llegar" está la **forma de contacto** ("Escríbenos"):
+nombre, correo o teléfono y mensaje; se guarda en `site_contact_messages`
+(`0056`), le llega un aviso por email a la iglesia (al correo de Contacto
+del editor, sin el texto) y se lee en la app → **Mensajes del sitio**
+(administrador y seguimiento), donde se marca "Atendido". Anti-spam igual
+que la inscripción. Seguridad: `docs/security.md` §8.r. Páginas: `/sitio/eventos` (+ detalle), `/sitio/albumes`
 (+ álbum con visor de fotos), `/sitio/videos`, `/sitio/nuestra-fe`.
 
 **Visión, misión y fundamentos de fe** (2026-10-21, `0055`):

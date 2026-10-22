@@ -114,6 +114,8 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   { href: "/sitio-web", label: "Sitio web", roles: ["administrador", "sitio_web"] },
+  // = CONTACT_ROLES (forma de contacto del sitio, 0056).
+  { href: "/mensajes", label: "Mensajes del sitio", roles: ["administrador", "seguimiento"] },
   // Solo acceso financiero explícito: un administrador NO lo ve (0035).
   { href: "/finanzas", label: "Finanzas", roles: ["apostol", "finanzas"] },
   // Antecedentes penales, Ley 300...: mismo acceso que Finanzas (0042).

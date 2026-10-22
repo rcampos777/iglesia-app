@@ -73,6 +73,10 @@ export default async function PrivacyPage() {
                 médica.
               </li>
               <li>
+                <b>Forma de contacto del sitio:</b> tu nombre, correo o teléfono y el mensaje que
+                escribas.
+              </li>
+              <li>
                 <b>Certificaciones de quienes sirven</b> (por ejemplo, certificados de antecedentes
                 penales o de la Ley 300) cuando la iglesia las requiere para trabajar con menores.
               </li>
@@ -113,6 +117,10 @@ export default async function PrivacyPage() {
               <li>
                 Los datos médicos y el contacto de emergencia de una inscripción solo los ven
                 quienes organizan o administran las actividades, y no se envían por email.
+              </li>
+              <li>
+                Los mensajes de la forma de contacto solo los ven la administración y el equipo de
+                seguimiento; a la iglesia le llega un aviso por email sin el texto del mensaje.
               </li>
             </ul>
           </Section>

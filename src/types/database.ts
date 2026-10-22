@@ -384,6 +384,18 @@ export type SiteMediaRow = {
   created_by: string | null;
 };
 
+export type SiteContactMessageRow = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  message: string;
+  status: "nuevo" | "atendido";
+  handled_at: string | null;
+  handled_by: string | null;
+  created_at: string;
+};
+
 export type SiteSettingsRow = {
   id: boolean;
   hero_eyebrow: string;
@@ -1142,6 +1154,7 @@ export interface Database {
       site_album_photos: TableDef<SiteAlbumPhotoRow>;
       site_posts: TableDef<SitePostRow>;
       site_videos: TableDef<SiteVideoRow>;
+      site_contact_messages: TableDef<SiteContactMessageRow>;
       certification_types: TableDef<CertificationTypeRow>;
       person_certifications: TableDef<PersonCertificationRow>;
       site_ministries: TableDef<SiteMinistryRow>;
@@ -1546,6 +1559,11 @@ export interface Database {
         }[];
       };
       can_edit_site: { Args: Record<string, never>; Returns: boolean };
+      can_read_contact_messages: { Args: Record<string, never>; Returns: boolean };
+      submit_site_contact: {
+        Args: { p_name: string; p_email: string | null; p_phone: string | null; p_message: string };
+        Returns: string;
+      };
       public_service_schedule: {
         Args: Record<string, never>;
         Returns: { weekday: number; local_time: string; name: string }[];

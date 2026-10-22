@@ -53,3 +53,8 @@ iglesia.
     permisos de aplicación, pero no inventa una jerarquía de cargos
     eclesiales para llenar ese vacío — pendiente de requisitos
     explícitos del usuario si se necesita en el futuro.
+12. **Quién lee la forma de contacto del sitio** (2026-10-21): se asumió
+    administrador y seguimiento (y SuperAdmin), porque responder a quien
+    pregunta o quiere visitar es trabajo de seguimiento. El rol `sitio_web`
+    no, porque no da acceso a datos personales. Si la iglesia quiere otro
+    equipo, se cambia `can_read_contact_messages()` y `CONTACT_ROLES`.

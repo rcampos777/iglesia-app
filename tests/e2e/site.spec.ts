@@ -6,7 +6,13 @@ import { test, expect } from "@playwright/test";
  * contenido: tests/db/site.test.ts.
  */
 test.describe("Sitio web", () => {
-  for (const path of ["/sitio", "/sitio/eventos", "/sitio/albumes", "/sitio/videos"]) {
+  for (const path of [
+    "/sitio",
+    "/sitio/eventos",
+    "/sitio/albumes",
+    "/sitio/videos",
+    "/sitio/nuestra-fe",
+  ]) {
     test(`${path} es público`, async ({ page }) => {
       await page.goto(path);
       await expect(page).toHaveURL(new RegExp(`${path}$`));
@@ -24,7 +30,17 @@ test.describe("Sitio web", () => {
     await expect(menu).toBeHidden();
   });
 
-  for (const path of ["/sitio-web", "/sitio-web/fotos", "/sitio-web/publicaciones"]) {
+  test("la forma de contacto valida antes de enviar", async ({ page }) => {
+    await page.goto("/sitio#contacto");
+    // Antes de 3 s la acción responde "éxito" sin guardar (trampa anti-bots).
+    await page.waitForTimeout(3500);
+    await page.getByRole("button", { name: "Enviar mensaje" }).click();
+    await expect(page.getByText("Escribe tu nombre.")).toBeVisible();
+    await expect(page.getByText("Déjanos un correo o un teléfono para responderte.")).toBeVisible();
+    await expect(page.getByLabel("Nombre")).toHaveAttribute("aria-invalid", "true");
+  });
+
+  for (const path of ["/sitio-web", "/sitio-web/fotos", "/sitio-web/publicaciones", "/mensajes"]) {
     test(`${path} sin sesión redirige a /login`, async ({ page }) => {
       await page.goto(path);
       await expect(page).toHaveURL(/\/login/);

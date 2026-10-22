@@ -40,23 +40,24 @@ revisión posterior.
 Leyenda: **C**rear, **L**eer, **A**ctualizar, **E**liminar. `propio` =
 solo sobre registros propios o asignados a uno.
 
-| Módulo                     | miembro        | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor                     | administrador |
-| -------------------------- | -------------- | ------------- | ------------ | --------------------- | ----------------- | -------------------------- | ------------- |
-| Directorio de personas     | L propio       | L a su cargo  | CLA          | CLA                   | CLA               | C; LA a su cargo           | CLAE          |
-| Cursos / categorías        | –              | L             | L            | L                     | CLA               | – (sin catálogo propio)    | CLA           |
-| Clases (offerings)         | L propias      | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
-| Ministerios (catálogo)     | –              | L             | L            | L                     | CLA               | solo los que lidera        | CLA           |
-| Membresía de ministerio    | L propia       | L propia      | L            | L                     | CLA               | solo los que lidera        | CLA           |
-| Matrícula                  | L propio       | CLA propio    | CLA          | L                     | CLA               | CLA propio                 | CLA           |
-| Asistencia                 | L propio       | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
-| Visitantes / seguimiento   | –              | –             | CLA propio+  | L                     | CLA               | –                          | CLA           |
-| Asistencia a cultos (\*\*) | – (muestra QR) | –             | –            | –                     | –                 | –                          | ver §6        |
-| Peticiones de oración      | C, L propio    | –             | –            | CLA asignadas+bandeja | –                 | solo si lidera intercesión | CLA           |
-| Notificaciones/plantillas  | –              | –             | –            | –                     | L                 | CLA                        | CLA           |
-| Encuestas                  | responder      | L, responder  | L, responder | L, responder          | CLA               | CLA                        | CLA           |
-| Importación de datos       | –              | –             | CLA          | –                     | CLA               | –                          | CLA           |
-| Roles de usuarios          | L propio       | L propio      | L propio     | L propio              | L propio          | L propio                   | CLA           |
-| Reportes/paneles           | propio         | propio+clases | seguimiento  | oración               | su área           | su gente                   | todo          |
+| Módulo                      | miembro        | maestro       | seguimiento  | intercesor            | coord. ministerio | pastor                     | administrador |
+| --------------------------- | -------------- | ------------- | ------------ | --------------------- | ----------------- | -------------------------- | ------------- |
+| Directorio de personas      | L propio       | L a su cargo  | CLA          | CLA                   | CLA               | C; LA a su cargo           | CLAE          |
+| Cursos / categorías         | –              | L             | L            | L                     | CLA               | – (sin catálogo propio)    | CLA           |
+| Clases (offerings)          | L propias      | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
+| Ministerios (catálogo)      | –              | L             | L            | L                     | CLA               | solo los que lidera        | CLA           |
+| Membresía de ministerio     | L propia       | L propia      | L            | L                     | CLA               | solo los que lidera        | CLA           |
+| Matrícula                   | L propio       | CLA propio    | CLA          | L                     | CLA               | CLA propio                 | CLA           |
+| Asistencia                  | L propio       | CLA propio    | L            | L                     | CLA               | CLA propio                 | CLA           |
+| Visitantes / seguimiento    | –              | –             | CLA propio+  | L                     | CLA               | –                          | CLA           |
+| Mensajes del sitio (\*\*\*) | –              | –             | LAE          | –                     | –                 | –                          | LAE           |
+| Asistencia a cultos (\*\*)  | – (muestra QR) | –             | –            | –                     | –                 | –                          | ver §6        |
+| Peticiones de oración       | C, L propio    | –             | –            | CLA asignadas+bandeja | –                 | solo si lidera intercesión | CLA           |
+| Notificaciones/plantillas   | –              | –             | –            | –                     | L                 | CLA                        | CLA           |
+| Encuestas                   | responder      | L, responder  | L, responder | L, responder          | CLA               | CLA                        | CLA           |
+| Importación de datos        | –              | –             | CLA          | –                     | CLA               | –                          | CLA           |
+| Roles de usuarios           | L propio       | L propio      | L propio     | L propio              | L propio          | L propio                   | CLA           |
+| Reportes/paneles            | propio         | propio+clases | seguimiento  | oración               | su área           | su gente                   | todo          |
 
 (\*\*) Registrar asistencia a cultos: solo `ujier` y SuperAdmin (0044,
 decisión 2026-10-01). El administrador conserva gestionar cultos, abrir o
@@ -109,6 +110,10 @@ sin obtener acceso al directorio completo ni a otros ministerios. Se
 implementa con la función `is_ministry_leader(ministry_id)`, usada tanto
 en la política RLS `ministry_memberships_write` como en el guard de
 servidor `requireMinistryManager()`.
+
+(\*\*\*) Forma de contacto del sitio (0056): los mensajes los crea el
+público desde la web; los leen, marcan atendido y borran solo
+administrador y seguimiento (y SuperAdmin). `sitio_web` no.
 
 "seguimiento CLA propio+" = puede gestionar cualquier `visitor_follow_up`,
 no solo las asignadas a sí mismo, dado que su función es precisamente

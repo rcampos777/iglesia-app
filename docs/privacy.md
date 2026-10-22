@@ -30,6 +30,8 @@ completo en `src/app/(sitio)/sitio/privacidad/page.tsx`.
   las cuentas vuelven a ver la pantalla al entrar ("Actualizamos el aviso
   de privacidad"). Así se cumple lo que el aviso promete en "Cambios a este
   aviso".
+- Versiones: `2026-10-03` (inicial), `2026-10-21` (se agregó la forma de
+  contacto del sitio: qué recoge y quién la lee).
 - `profiles.privacy_version` y `profiles.privacy_accepted_at` guardan qué
   versión aceptó cada cuenta y cuándo (`accept_privacy_notice(p_version)`,
   solo la propia cuenta).

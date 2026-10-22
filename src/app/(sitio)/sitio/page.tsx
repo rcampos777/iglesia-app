@@ -9,7 +9,7 @@ import {
   publicUpcomingEvents,
   publicVideos,
 } from "@/lib/data/site";
-import { upcomingServices, type Occurrence } from "@/lib/site/schedule";
+import type { Occurrence } from "@/lib/site/schedule";
 import { FALLBACK_SETTINGS, safe } from "@/lib/site/load";
 
 // Se regenera cada 5 minutos y, además, al guardar desde el editor
@@ -29,6 +29,7 @@ export default async function SiteHomePage() {
       safe("equipo", publicTeam(), []),
     ]);
 
+  // Solo actividades: los cultos semanales ya salen en "Horarios de servicio".
   const upcoming: Occurrence[] = [
     ...events
       .filter((e) => e.starts_at)
@@ -41,7 +42,6 @@ export default async function SiteHomePage() {
         href: `/sitio/eventos/${e.id}`,
         kind: "evento" as const,
       })),
-    ...upcomingServices(schedule, 14),
   ].sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 
   return (

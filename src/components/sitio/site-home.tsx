@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Mail, MapPin, Phone, Play } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import type { AlbumCard, PublicSettings, WithMedia } from "@/lib/data/site";
 import type { SiteMinistryRow, SitePostRow, SiteTeamRow, SiteVideoRow } from "@/types/database";
 import type { Occurrence, ScheduleRule } from "@/lib/site/schedule";
@@ -12,6 +12,8 @@ import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
 import { Typewriter } from "./typewriter";
 import { EventRow } from "./event-row";
+import { VideoCard } from "./video-card";
+import { ContactForm } from "./contact-form";
 import { eventDateText, eventTimeText } from "@/lib/site/event-time";
 
 export type SiteHomeData = {
@@ -66,7 +68,6 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
   const portrait = featured?.media ?? null;
   const visionAbove = !featured && Boolean(s.vision_text);
   const next = upcoming[0] ?? null;
-  const video = videos[0] ?? null;
   const avatars = team.filter((t) => t.media).slice(0, 4);
   const about = paragraphs(s.about_text);
   const mapSrc = s.map_query
@@ -231,33 +232,8 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
         </section>
       ) : null}
 
-      {/* ---------- Predicación + próximos (pantalla 3 del diseño) ---------- */}
+      {/* ---------- Próximas actividades (pantalla 3 del diseño) ---------- */}
       <section aria-labelledby="proximos" className="site-fade bg-white">
-        {video ? (
-          <a
-            href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative block h-[345px] overflow-hidden md:h-[480px]"
-            aria-label={`Ver predicación: ${video.title}`}
-          >
-            <Image
-              src={`https://i.ytimg.com/vi/${video.youtube_id}/maxresdefault.jpg`}
-              alt=""
-              fill
-              unoptimized
-              sizes="100vw"
-              className="object-cover transition duration-500 group-hover:scale-[1.03]"
-            />
-            <span className="absolute inset-0 bg-black/30" />
-            <span className="absolute top-1/2 left-1/2 flex size-[65px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#F1E5C6] text-[#1D191A] transition group-hover:scale-110 md:size-[84px]">
-              <Play className="ml-1 size-7 fill-current" aria-hidden />
-            </span>
-            <span className="absolute inset-x-0 bottom-0 px-[19px] pb-6 text-[17px] text-white/90 md:px-8">
-              {video.title}
-            </span>
-          </a>
-        ) : null}
         <div className="relative">
           <div className="absolute inset-x-0 top-0 h-[220px] bg-[#1D191A]" aria-hidden />
           <div className="relative mx-auto max-w-6xl px-[19px] pt-10 pb-14 md:px-8">
@@ -299,6 +275,35 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
           </div>
         </div>
       </section>
+
+      {/* ---------- Predicaciones ---------- */}
+      {videos.length ? (
+        <section aria-labelledby="predicaciones" className="site-fade bg-[#1D191A]">
+          <div className="mx-auto max-w-6xl px-[19px] py-16 md:px-8 md:py-20">
+            <div className="flex items-end justify-between gap-4">
+              <h2
+                id="predicaciones"
+                className="text-[38px] leading-tight tracking-[-0.8px] text-white"
+              >
+                Predicaciones
+              </h2>
+              <Link
+                href="/sitio/videos"
+                className="pb-2 text-[15px] text-white/60 hover:text-white"
+              >
+                Ver todas
+              </Link>
+            </div>
+            <ul className="mt-8 grid gap-10 md:grid-cols-2 md:gap-x-6 lg:grid-cols-3">
+              {videos.map((v) => (
+                <li key={v.id}>
+                  <VideoCard id={v.youtube_id} title={v.title} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
 
       {/* ---------- Anuncios ---------- */}
       {announcements.length ? (
@@ -607,6 +612,18 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
               />
             </div>
           ) : null}
+        </div>
+        <div className="mx-auto max-w-6xl px-[19px] pb-16 md:grid md:grid-cols-2 md:gap-14 md:px-8 md:pb-24">
+          <div>
+            <h2 className="text-[38px] leading-tight tracking-[-0.8px]">Escríbenos</h2>
+            <p className="mt-4 max-w-md text-[17px] leading-[26px] text-[#666]">
+              ¿Tienes una pregunta, quieres visitarnos o necesitas hablar con alguien? Déjanos tu
+              mensaje y te responderemos.
+            </p>
+          </div>
+          <div className="mt-8 md:mt-0">
+            <ContactForm />
+          </div>
         </div>
       </section>
 

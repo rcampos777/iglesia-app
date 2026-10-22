@@ -40,7 +40,7 @@ export function balanceCents(a: RegistrationEmailActivity, r: RegistrationEmailP
   return Math.max(0, (a.price_cents ?? 0) - r.amount_paid_cents);
 }
 
-function layout(title: string, body: string): string {
+export function layout(title: string, body: string): string {
   return `<!doctype html><html lang="es"><body style="margin:0;background:#F5F0E8;font-family:Helvetica,Arial,sans-serif;color:#1D191A">
 <div style="max-width:560px;margin:0 auto;padding:24px 16px">
 <div style="background:#1D191A;color:#F1E5C6;border-radius:16px 16px 0 0;padding:20px 24px;font-size:20px">${esc(title)}</div>

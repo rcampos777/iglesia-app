@@ -3,7 +3,7 @@
  * AAAA-MM-DD) cada vez que cambie el contenido: al entrar, la app vuelve a
  * pedir que cada cuenta lo lea y lo acepte (0049).
  */
-export const PRIVACY_VERSION = "2026-10-03";
+export const PRIVACY_VERSION = "2026-10-21";
 
 /** Página pública: en el dominio del sitio es /privacidad. */
 export const PRIVACY_PATH = "/sitio/privacidad";
