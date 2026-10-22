@@ -68,6 +68,8 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
   const portrait = featured?.media ?? null;
   const visionAbove = !featured && Boolean(s.vision_text);
   const next = upcoming[0] ?? null;
+  // La primera ya sale en la tarjeta "Próximo": la lista empieza en la segunda.
+  const later = upcoming.slice(1);
   const avatars = team.filter((t) => t.media).slice(0, 4);
   const about = paragraphs(s.about_text);
   const mapSrc = s.map_query
@@ -233,8 +235,8 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
       ) : null}
 
       {/* ---------- Próximas actividades (pantalla 3 del diseño) ---------- */}
-      {/* Sin actividades publicadas no se muestra: los cultos están en Horarios. */}
-      {upcoming.length ? (
+      {/* Sin más actividades no se muestra: los cultos están en Horarios. */}
+      {later.length ? (
         <section aria-labelledby="proximos" className="site-fade bg-white">
           <div className="relative">
             <div className="absolute inset-x-0 top-0 h-[220px] bg-[#1D191A]" aria-hidden />
@@ -255,7 +257,7 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
               </div>
               <div className="mt-8 rounded-[28px] bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.12)] md:p-8">
                 <ul className="grid gap-[22px] md:grid-cols-2 md:gap-x-10">
-                  {upcoming.slice(0, 4).map((o, i) => (
+                  {later.slice(0, 4).map((o, i) => (
                     <li key={`${o.title}-${o.startsAt}`}>
                       <EventRow
                         title={o.title}
@@ -265,7 +267,7 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
                         endHasTime={o.endHasTime}
                         href={o.href}
                         cream={i > 0}
-                        faded={i === 3 && upcoming.length > 4}
+                        faded={i === 3 && later.length > 4}
                       />
                     </li>
                   ))}

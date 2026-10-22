@@ -25,8 +25,9 @@ destacada + "Próximos" (eventos y cultos); anuncios; quiénes somos y
 ministerios; equipo pastoral; álbumes; horarios; cómo llegar (mapa);
 pie con redes. Desde el 2026-10-21: "Próximos" (y la tarjeta "Próximo")
 muestran **solo actividades** (eventos del editor); los cultos semanales ya
-están en "Horarios de servicio"; si no hay actividades publicadas, la
-sección no se muestra (la página `/sitio/eventos` sigue
+están en "Horarios de servicio"; la primera actividad sale en la
+tarjeta "Próximo" y la lista empieza en la segunda (para no repetirla);
+si no hay más, la sección no se muestra (la página `/sitio/eventos` sigue
 mostrando ambos). Las predicaciones salen en una cuadrícula (hasta 6, se
 reproducen ahí mismo) con "Ver todas", en vez de un solo video grande.
 Debajo de "Cómo llegar" está la **forma de contacto** ("Escríbenos"):
