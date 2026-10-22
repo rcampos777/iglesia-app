@@ -62,7 +62,9 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
   // Sin cita del equipo pastoral, la visión (corta) ocupa ese lugar; la misión
   // es larga y ya sale en "Quiénes somos".
   const quote = featured?.bio ?? s.vision_text;
-  const portrait = featured?.media ?? s.aboutMedia;
+  // La foto de "Quiénes somos" no se repite aquí.
+  const portrait = featured?.media ?? null;
+  const visionAbove = !featured && Boolean(s.vision_text);
   const next = upcoming[0] ?? null;
   const video = videos[0] ?? null;
   const avatars = team.filter((t) => t.media).slice(0, 4);
@@ -150,7 +152,12 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
         <section aria-label="Palabra" className="site-fade relative bg-[#1D191A]">
           <div className="mx-auto max-w-6xl md:grid md:grid-cols-2 md:gap-12 md:px-8 md:py-20">
             {quote ? (
-              <div className="relative min-h-[430px] px-[19px] pt-10 md:min-h-0 md:px-0 md:pt-0">
+              <div
+                className={cn(
+                  "relative px-[19px] pt-10 md:px-0 md:pt-0",
+                  portrait && "min-h-[430px] md:min-h-0",
+                )}
+              >
                 {featured ? (
                   <p
                     className="absolute top-[140px] left-[19px] rotate-180 text-[14px] tracking-[1.2px] whitespace-nowrap text-white/50 [writing-mode:vertical-rl] md:hidden"
@@ -191,15 +198,6 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
                     <p className="mt-3 max-w-md text-[32px] leading-[38px] font-light tracking-[-0.8px] text-[#F1E5C6] md:text-[40px] md:leading-[46px]">
                       {quote}
                     </p>
-                    {s.beliefs_text ? (
-                      <Link
-                        href="/sitio/nuestra-fe"
-                        className="mt-5 inline-flex items-center gap-2 text-[17px] text-white/70 hover:text-white"
-                      >
-                        Nuestra fe
-                        <ArrowRight className="size-5" aria-hidden />
-                      </Link>
-                    ) : null}
                   </div>
                 )}
               </div>
@@ -363,15 +361,19 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
               {s.about_title}
             </h2>
             <div className="mt-6 space-y-4 text-[18px] leading-[28px] text-white/[0.77]">
-              {about.length ? (
-                about.map((p) => <p key={p.slice(0, 40)}>{p}</p>)
-              ) : s.hero_subtitle ? (
-                <p>{s.hero_subtitle}</p>
-              ) : null}
+              {about.map((p) => (
+                <p key={p.slice(0, 40)}>{p}</p>
+              ))}
             </div>
-            {s.vision_text || s.mission_text ? (
-              <dl className="mt-10 grid gap-6 border-t border-white/10 pt-8 sm:grid-cols-2">
-                {s.vision_text ? (
+            {(s.vision_text && !visionAbove) || s.mission_text ? (
+              <dl
+                className={cn(
+                  "grid gap-6",
+                  about.length && "mt-10 border-t border-white/10 pt-8",
+                  s.vision_text && !visionAbove && s.mission_text && "sm:grid-cols-2",
+                )}
+              >
+                {s.vision_text && !visionAbove ? (
                   <div>
                     <dt className="text-[14px] tracking-[1.2px] text-white/50 uppercase">Visión</dt>
                     <dd className="mt-2 text-[21px] leading-[28px] text-[#F1E5C6]">

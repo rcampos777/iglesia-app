@@ -31,7 +31,11 @@ pie con redes. Páginas: `/sitio/eventos` (+ detalle), `/sitio/albumes`
 Visión y Misión (`mission_text`). Si ningún miembro del equipo pastoral
 tiene cita, la visión (corta) ocupa el lugar de la cita bajo la portada
 y el texto del pie; antes era la misión, que se veía fuera de lugar por
-larga (reportado por el dueño, 2026-10-21) y un enlace "Lo que creemos" a `/sitio/nuestra-fe`, que
+larga (reportado por el dueño, 2026-10-21). Para no repetir: la
+foto de "Quiénes somos" ya no se usa también bajo la portada (ahí solo va
+la foto del pastor con cita); si la visión ya salió arriba, "Quiénes
+somos" muestra solo la Misión; y si la historia está vacía no se repite
+la frase de la portada y un enlace "Lo que creemos" a `/sitio/nuestra-fe`, que
 muestra visión, misión y los fundamentos numerados (un párrafo = un
 fundamento). El texto inicial viene de la hoja impresa "Nuestra fe" de la
 iglesia que envió el dueño; la migración solo llena campos vacíos. La

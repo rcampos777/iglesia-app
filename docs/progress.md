@@ -18,7 +18,10 @@
   Visión/Misión en "Quiénes somos".
 - Ajuste tras verlo en vivo: la misión (larga, con citas) salía como cita
   grande bajo la portada y se veía fuera de lugar; ahora ahí va "Nuestra
-  visión" (y en el pie). Ver `docs/site.md`.
+  visión" (y en el pie). Ver `docs/site.md`
+- Quitadas repeticiones en la portada (dueño, 2026-10-21): la misma foto
+  dos veces, la visión dos veces, la frase de la portada repetida en
+  "Quiénes somos" y dos enlaces a "Nuestra fe".
 
 ### 2026-10-18 — Registro central de personas (0054)
 
