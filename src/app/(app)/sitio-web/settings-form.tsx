@@ -124,9 +124,15 @@ export function SiteSettingsForm({
             hint: "Deja una línea en blanco entre párrafos. Si queda vacío, no se muestra.",
           })}
         </div>
-        <div className="md:col-span-2">{text("visionText", "Visión", { area: true, rows: 2 })}</div>
         <div className="md:col-span-2">
-          {text("missionText", "Misión (también se usa como cita y en el pie de página)", {
+          {text("visionText", "Visión", {
+            area: true,
+            rows: 2,
+            hint: "Frase corta: también sale destacada en la portada y en el pie de página.",
+          })}
+        </div>
+        <div className="md:col-span-2">
+          {text("missionText", "Misión", {
             area: true,
             rows: 2,
           })}

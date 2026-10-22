@@ -22,8 +22,10 @@ export function SiteFooter({ s }: { s: PublicSettings }) {
             />
             <span className="text-[17px] text-white">{s.hero_title}</span>
           </div>
-          {s.mission_text ? (
-            <p className="max-w-sm text-[15px] leading-relaxed">{s.mission_text}</p>
+          {s.vision_text || s.mission_text ? (
+            <p className="max-w-sm text-[15px] leading-relaxed">
+              {s.vision_text ?? s.mission_text}
+            </p>
           ) : null}
         </div>
         <nav aria-label="Pie de página" className="flex flex-col gap-2 text-[15px]">

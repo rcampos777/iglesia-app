@@ -59,7 +59,9 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
   const { settings: s, schedule, upcoming, announcements, albums, videos, ministries, team } = data;
   const heroImg = s.heroMedia ? siteMediaUrl(s.heroMedia.storage_path) : null;
   const featured = team.find((t) => t.media && t.bio) ?? null;
-  const quote = featured?.bio ?? s.mission_text;
+  // Sin cita del equipo pastoral, la visión (corta) ocupa ese lugar; la misión
+  // es larga y ya sale en "Quiénes somos".
+  const quote = featured?.bio ?? s.vision_text;
   const portrait = featured?.media ?? s.aboutMedia;
   const next = upcoming[0] ?? null;
   const video = videos[0] ?? null;
@@ -170,18 +172,36 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
                     />
                   </div>
                 ) : null}
-                <div className="mt-8 space-y-4">
-                  <QuoteMark />
-                  <blockquote className="max-w-[336px] text-[20px] leading-[27px] text-white/[0.77] md:max-w-md md:text-[24px] md:leading-[32px]">
-                    {quote}
-                  </blockquote>
-                  {featured ? (
+                {featured ? (
+                  <div className="mt-8 space-y-4">
+                    <QuoteMark />
+                    <blockquote className="max-w-[336px] text-[20px] leading-[27px] text-white/[0.77] md:max-w-md md:text-[24px] md:leading-[32px]">
+                      {quote}
+                    </blockquote>
                     <p className="hidden text-[14px] tracking-[1.2px] text-white/50 md:block">
                       <span className="font-medium">{featured.name}</span>
                       {featured.role_title ? ` / ${featured.role_title}` : ""}
                     </p>
-                  ) : null}
-                </div>
+                  </div>
+                ) : (
+                  <div className="mt-8">
+                    <p className="text-[14px] tracking-[1.2px] text-white/50 uppercase">
+                      Nuestra visión
+                    </p>
+                    <p className="mt-3 max-w-md text-[32px] leading-[38px] font-light tracking-[-0.8px] text-[#F1E5C6] md:text-[40px] md:leading-[46px]">
+                      {quote}
+                    </p>
+                    {s.beliefs_text ? (
+                      <Link
+                        href="/sitio/nuestra-fe"
+                        className="mt-5 inline-flex items-center gap-2 text-[17px] text-white/70 hover:text-white"
+                      >
+                        Nuestra fe
+                        <ArrowRight className="size-5" aria-hidden />
+                      </Link>
+                    ) : null}
+                  </div>
+                )}
               </div>
             ) : null}
             {next ? (

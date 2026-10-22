@@ -28,8 +28,10 @@ pie con redes. Páginas: `/sitio/eventos` (+ detalle), `/sitio/albumes`
 
 **Visión, misión y fundamentos de fe** (2026-10-21, `0055`):
 `site_settings.vision_text` y `beliefs_text`. En "Quiénes somos" se ven
-Visión y Misión (`mission_text`, que sigue siendo también la cita y el
-texto del pie) y un enlace "Lo que creemos" a `/sitio/nuestra-fe`, que
+Visión y Misión (`mission_text`). Si ningún miembro del equipo pastoral
+tiene cita, la visión (corta) ocupa el lugar de la cita bajo la portada
+y el texto del pie; antes era la misión, que se veía fuera de lugar por
+larga (reportado por el dueño, 2026-10-21) y un enlace "Lo que creemos" a `/sitio/nuestra-fe`, que
 muestra visión, misión y los fundamentos numerados (un párrafo = un
 fundamento). El texto inicial viene de la hoja impresa "Nuestra fe" de la
 iglesia que envió el dueño; la migración solo llena campos vacíos. La
