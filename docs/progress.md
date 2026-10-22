@@ -15,8 +15,9 @@
   mensaje propio y los errores de la base se registran en el log.
 - Verificado: `test:db` 129/129 (incluye "unir" donantes), lint,
   typecheck. `0057` aplicada en **desarrollo**.
-- Pendiente: aplicar `0057` en **producción** (dueño) y reintentar la
-  importación; la tanda fallida no guardó nada.
+- **Aplicado (2026-10-21)**: `0057` en **producción** (el dueño corrió
+  `db push`: "Finished"); código `286938b` publicado. Pendiente: que el
+  dueño confirme que la importación del archivo terminó.
 
 ### 2026-10-21 — Nueva actividad: "Invalid value" en la hora de inicio
 
