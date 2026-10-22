@@ -4,6 +4,20 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-21 — Importar donaciones fallaba con archivos grandes (0057)
+
+- El dueño no podía importar `Registro_Iglesia_Mensual_Anual_Detallado.xlsx`
+  (2,115 filas, 434 donantes): "No se pudo completar la operación". Causa:
+  `finance_import_promote` tardaba ≈15 s en la primera tanda (búsqueda de
+  donantes a crear con OR sin índice, por cada donante) y Supabase corta a
+  ~8 s. `0057` la reescribe en una sola pasada (≈0.1 s, medido con datos
+  sintéticos del mismo tamaño en el harness). El error 57014 ahora tiene
+  mensaje propio y los errores de la base se registran en el log.
+- Verificado: `test:db` 129/129 (incluye "unir" donantes), lint,
+  typecheck. `0057` aplicada en **desarrollo**.
+- Pendiente: aplicar `0057` en **producción** (dueño) y reintentar la
+  importación; la tanda fallida no guardó nada.
+
 ### 2026-10-21 — Nueva actividad: "Invalid value" en la hora de inicio
 
 - El dueño no podía crear "Family Fest": Safari mostraba "Invalid value" en

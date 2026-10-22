@@ -35,6 +35,13 @@ async function guard(): Promise<ActionResult<never> | null> {
 }
 
 function fail(error: { code?: string; message: string } | null): ActionResult<never> {
+  // 57014 = límite de tiempo de la base (Supabase corta a ~8 s).
+  if (error?.code === "57014") {
+    return actionError(
+      "La importación tardó demasiado y se detuvo sin guardar esta tanda. Intenta de nuevo; si se repite, avisa al administrador.",
+    );
+  }
+  if (error) console.error("[finanzas/importar]", error.code, error.message);
   return actionError(dbErrorMessage({ code: error?.code ?? "", message: error?.message ?? "" }));
 }
 

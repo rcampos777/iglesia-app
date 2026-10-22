@@ -213,6 +213,14 @@ Desde 2026-10-11. Decisión en `docs/decisions.md` (2026-10-11).
    este archivo, la fila queda "ya registrada" para importar igual u
    omitir. Las iguales dentro del mismo archivo sí se importan. Las cartas
    del período se marcan para revisión como en cualquier alta.
+   **Rendimiento (`0057`, 2026-10-21)**: con un archivo real (434
+   donantes, 2,115 filas) la primera tanda fallaba con "No se pudo
+   completar la operación": la búsqueda de donantes a crear revisaba todas
+   las filas por cada donante y pasaba el límite de ~8 s de Supabase
+   (≈15 s medido con datos sintéticos del mismo tamaño). Ahora es una
+   sola pasada (≈0.1 s). Si se vuelve a pasar del tiempo (código 57014),
+   la pantalla lo dice en lugar del mensaje genérico. La tanda que falla
+   no guarda nada (es una transacción), así que reintentar es seguro.
 6. Un lote sin nada importado se puede descartar. Subcategoría y
    Observaciones quedan en el staging (no hay campo en `donations`).
 
