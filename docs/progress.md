@@ -12,8 +12,13 @@
   `/sitio/nuestra-fe` (enlace en el menú y en el pie). Ver `docs/site.md`.
 - Verificado: lint, typecheck, build; `0055` aplicada en **desarrollo** y
   revisada en navegador (escritorio y 375 px, sin desbordes ni errores).
-- Pendiente: aplicar `0055` en **producción** (la ejecuta el dueño) y
-  publicar. Si en producción ya había una misión escrita, se respeta.
+- **Aplicado y publicado (2026-10-21)**: `0055` en **producción** (el dueño
+  corrió `db push`: "Remote database is up to date"); push de `f11eb15` y
+  `e2c6ac6` a `main`. En vivo: `/nuestra-fe` 200 con los 19 fundamentos,
+  Visión/Misión en "Quiénes somos".
+- Ajuste tras verlo en vivo: la misión (larga, con citas) salía como cita
+  grande bajo la portada y se veía fuera de lugar; ahora ahí va "Nuestra
+  visión" (y en el pie). Ver `docs/site.md`.
 
 ### 2026-10-18 — Registro central de personas (0054)
 
