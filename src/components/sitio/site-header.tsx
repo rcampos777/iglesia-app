@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 const LINKS = [
   { href: "/sitio", label: "Inicio" },
   { href: "/sitio#nosotros", label: "Nosotros" },
+  { href: "/sitio/nuestra-fe", label: "Nuestra fe" },
   { href: "/sitio/eventos", label: "Eventos" },
   { href: "/sitio/videos", label: "Predicaciones" },
   { href: "/sitio/albumes", label: "Álbumes" },

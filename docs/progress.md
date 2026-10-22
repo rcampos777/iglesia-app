@@ -4,6 +4,17 @@
 
 ## Estado general: MVP verificado de punta a punta ✅
 
+### 2026-10-21 — Visión, misión y "Nuestra fe" en el sitio (0055)
+
+- El dueño envió la hoja "Nuestra fe" (visión + 19 fundamentos). Nuevos
+  campos `vision_text` y `beliefs_text` en `site_settings`, editables en
+  Sitio web → General. Visión y Misión en "Quiénes somos"; página nueva
+  `/sitio/nuestra-fe` (enlace en el menú y en el pie). Ver `docs/site.md`.
+- Verificado: lint, typecheck, build; `0055` aplicada en **desarrollo** y
+  revisada en navegador (escritorio y 375 px, sin desbordes ni errores).
+- Pendiente: aplicar `0055` en **producción** (la ejecuta el dueño) y
+  publicar. Si en producción ya había una misión escrita, se respeta.
+
 ### 2026-10-18 — Registro central de personas (0054)
 
 Detalle en `docs/person-registry.md`; decisión del 2026-10-18.

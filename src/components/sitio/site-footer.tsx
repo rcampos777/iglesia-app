@@ -30,6 +30,11 @@ export function SiteFooter({ s }: { s: PublicSettings }) {
           <Link href="/sitio#nosotros" className="hover:text-white">
             Nosotros
           </Link>
+          {s.beliefs_text ? (
+            <Link href="/sitio/nuestra-fe" className="hover:text-white">
+              Nuestra fe
+            </Link>
+          ) : null}
           <Link href="/sitio/eventos" className="hover:text-white">
             Eventos
           </Link>

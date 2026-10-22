@@ -349,6 +349,35 @@ export function SiteHome({ data }: { data: SiteHomeData }) {
                 <p>{s.hero_subtitle}</p>
               ) : null}
             </div>
+            {s.vision_text || s.mission_text ? (
+              <dl className="mt-10 grid gap-6 border-t border-white/10 pt-8 sm:grid-cols-2">
+                {s.vision_text ? (
+                  <div>
+                    <dt className="text-[14px] tracking-[1.2px] text-white/50 uppercase">Visión</dt>
+                    <dd className="mt-2 text-[21px] leading-[28px] text-[#F1E5C6]">
+                      {s.vision_text}
+                    </dd>
+                  </div>
+                ) : null}
+                {s.mission_text ? (
+                  <div>
+                    <dt className="text-[14px] tracking-[1.2px] text-white/50 uppercase">Misión</dt>
+                    <dd className="mt-2 text-[18px] leading-[27px] text-white/[0.77]">
+                      {s.mission_text}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            ) : null}
+            {s.beliefs_text ? (
+              <Link
+                href="/sitio/nuestra-fe"
+                className="mt-8 inline-flex items-center gap-2 text-[17px] font-medium text-[#F1E5C6] hover:underline"
+              >
+                Lo que creemos
+                <ArrowRight className="size-5" aria-hidden />
+              </Link>
+            ) : null}
           </div>
           {s.aboutMedia ? (
             <div className="relative mt-10 aspect-[4/5] overflow-hidden rounded-[28px] md:mt-0">

@@ -394,6 +394,8 @@ export type SiteSettingsRow = {
   about_text: string | null;
   about_media_id: string | null;
   mission_text: string | null;
+  vision_text: string | null;
+  beliefs_text: string | null;
   address: string | null;
   phone: string | null;
   email: string | null;

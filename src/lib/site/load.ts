@@ -22,6 +22,8 @@ export const FALLBACK_SETTINGS: PublicSettings = {
   about_text: null,
   about_media_id: null,
   mission_text: null,
+  vision_text: null,
+  beliefs_text: null,
   address: null,
   phone: null,
   email: null,

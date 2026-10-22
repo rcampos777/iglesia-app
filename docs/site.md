@@ -24,7 +24,18 @@ cita del equipo pastoral o misión + tarjeta "Próximo"; predicación
 destacada + "Próximos" (eventos y cultos); anuncios; quiénes somos y
 ministerios; equipo pastoral; álbumes; horarios; cómo llegar (mapa);
 pie con redes. Páginas: `/sitio/eventos` (+ detalle), `/sitio/albumes`
-(+ álbum con visor de fotos), `/sitio/videos`.
+(+ álbum con visor de fotos), `/sitio/videos`, `/sitio/nuestra-fe`.
+
+**Visión, misión y fundamentos de fe** (2026-10-21, `0055`):
+`site_settings.vision_text` y `beliefs_text`. En "Quiénes somos" se ven
+Visión y Misión (`mission_text`, que sigue siendo también la cita y el
+texto del pie) y un enlace "Lo que creemos" a `/sitio/nuestra-fe`, que
+muestra visión, misión y los fundamentos numerados (un párrafo = un
+fundamento). El texto inicial viene de la hoja impresa "Nuestra fe" de la
+iglesia que envió el dueño; la migración solo llena campos vacíos. La
+misión no aparece como frase aparte en la hoja: se tomó del fundamento 13.
+Se corrigió la cita del fundamento 2 (la hoja dice "2 Corintios 3:14"; el
+texto trinitario es 13:14).
 
 **Horarios**: no se duplican. Salen de Asistencia → Programación de
 cultos (`public_service_schedule()`); si cambias un horario allí, el sitio
@@ -32,7 +43,8 @@ se actualiza solo.
 
 ## Cómo se edita (app → **Sitio web**)
 
-Pestañas: General (textos, fotos de portada y de "Quiénes somos", contacto,
+Pestañas: General (textos, fotos de portada y de "Quiénes somos", visión,
+misión, fundamentos de fe, contacto,
 redes, enlace del portal), Fotos (subir varias a la vez; se reducen solas a
 1920 px + miniatura 640 px en el navegador), Álbumes (crear, agregar fotos,
 ordenar, portada, publicar), Eventos y anuncios (evento con fecha de

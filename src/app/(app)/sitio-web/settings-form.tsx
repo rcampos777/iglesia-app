@@ -25,6 +25,8 @@ export function SiteSettingsForm({
     aboutText: settings.about_text ?? "",
     aboutMediaId: settings.about_media_id,
     missionText: settings.mission_text ?? "",
+    visionText: settings.vision_text ?? "",
+    beliefsText: settings.beliefs_text ?? "",
     address: settings.address ?? "",
     phone: settings.phone ?? "",
     email: settings.email ?? "",
@@ -116,16 +118,29 @@ export function SiteSettingsForm({
           onChange={(id) => setV((s) => ({ ...s, aboutMediaId: id }))}
         />
         <div className="md:col-span-2">
-          {text("aboutText", "Historia y visión", {
+          {text("aboutText", "Historia", {
             area: true,
             rows: 6,
             hint: "Deja una línea en blanco entre párrafos. Si queda vacío, no se muestra.",
           })}
         </div>
+        <div className="md:col-span-2">{text("visionText", "Visión", { area: true, rows: 2 })}</div>
         <div className="md:col-span-2">
-          {text("missionText", "Frase de misión (se usa como cita y en el pie de página)", {
+          {text("missionText", "Misión (también se usa como cita y en el pie de página)", {
             area: true,
             rows: 2,
+          })}
+        </div>
+      </fieldset>
+
+      <fieldset className={section}>
+        <legend className="sr-only">Lo que creemos</legend>
+        <h2 className="text-base font-semibold md:col-span-2">Lo que creemos</h2>
+        <div className="md:col-span-2">
+          {text("beliefsText", "Fundamentos de nuestra fe", {
+            area: true,
+            rows: 12,
+            hint: "Un fundamento por párrafo (deja una línea en blanco entre cada uno); el sitio los numera solo. Si queda vacío, la página no se muestra.",
           })}
         </div>
       </fieldset>
