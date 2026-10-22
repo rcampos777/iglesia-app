@@ -16,8 +16,8 @@
 - Verificado: `test:db` 129/129 (incluye "unir" donantes), lint,
   typecheck. `0057` aplicada en **desarrollo**.
 - **Aplicado (2026-10-21)**: `0057` en **producción** (el dueño corrió
-  `db push`: "Finished"); código `286938b` publicado. Pendiente: que el
-  dueño confirme que la importación del archivo terminó.
+  `db push`: "Finished"); código `286938b` publicado. El dueño confirmó que
+  la importación del archivo terminó bien.
 
 ### 2026-10-21 — Nueva actividad: "Invalid value" en la hora de inicio
 
